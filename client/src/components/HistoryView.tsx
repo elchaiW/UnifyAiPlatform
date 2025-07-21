@@ -57,7 +57,11 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function HistoryView() {
+interface HistoryViewProps {
+  onLoadConversation?: (conversationId: number) => void;
+}
+
+export default function HistoryView({ onLoadConversation }: HistoryViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterModel, setFilterModel] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -284,6 +288,17 @@ Classification Details:
                   </div>
 
                   <div className="flex items-center space-x-2 ml-4">
+                    {onLoadConversation && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onLoadConversation(item.id)}
+                        className="text-xs"
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Load Chat
+                      </Button>
+                    )}
                     {item.status === 'completed' && item.response && (
                       <>
                         <Dialog>

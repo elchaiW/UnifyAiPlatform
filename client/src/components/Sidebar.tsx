@@ -13,13 +13,16 @@ import {
   FileText,
   Clock,
   TrendingUp,
-  Activity
+  Activity,
+  Plus
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface SidebarProps {
   activeView: 'chat' | 'analytics' | 'history';
   onViewChange: (view: 'chat' | 'analytics' | 'history') => void;
+  onNewChat?: () => void;
+  onLoadConversation?: (conversationId: number) => void;
 }
 
 interface ProcessingStats {
@@ -44,7 +47,7 @@ const getModelColor = (model: string) => {
   }
 };
 
-export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadConversation }: SidebarProps) {
   const { data: history = [] } = useQuery<any[]>({
     queryKey: ["/api/requests/history"],
     refetchInterval: 5000,
@@ -152,27 +155,43 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
 
       <Separator />
 
-      {/* Recent Activity */}
+      {/* Recent Conversations */}
       <div className="flex-1 p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            Recent Activity
+            Recent Chats
           </h3>
           <Button
             variant="ghost"
             size="sm"
-            onClick={downloadHistory}
+            onClick={() => {
+              if (onNewChat) {
+                onNewChat();
+              } else {
+                onViewChange('chat');
+              }
+            }}
             className="h-6 px-2 text-xs"
           >
-            <Download className="h-3 w-3 mr-1" />
-            Export
+            <Plus className="h-3 w-3 mr-1" />
+            New
           </Button>
         </div>
         
         <ScrollArea className="h-full">
-          <div className="space-y-3">
+          <div className="space-y-2">
             {recentRequests.map((item) => (
-              <div key={item.id} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div 
+                key={item.id} 
+                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition-colors"
+                onClick={() => {
+                  if (onLoadConversation) {
+                    onLoadConversation(item.id);
+                  } else {
+                    onViewChange('chat');
+                  }
+                }}
+              >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     {item.fileName ? (
@@ -191,11 +210,11 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
                   </Badge>
                 </div>
                 
-                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                <p className="text-xs text-gray-700 dark:text-gray-200 mb-2 line-clamp-2">
                   {item.fileName || item.content.substring(0, 50) + '...'}
                 </p>
                 
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
                   <span>{item.selectedModel}</span>
                   <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
                 </div>
@@ -203,9 +222,10 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
             ))}
             
             {recentRequests.length === 0 && (
-              <div className="text-center py-8">
-                <History className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No recent activity</p>
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No conversations yet</p>
+                <p className="text-xs">Start a new chat to begin</p>
               </div>
             )}
           </div>

@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Send, Upload, Download, Eye, Loader2, Bot, User, FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
+import { Plus } from "lucide-react";
 
 interface Message {
   id: number;
@@ -49,7 +50,12 @@ const getModelIcon = (model: string) => {
   }
 };
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  conversationId?: number | null;
+  onNewChat?: () => void;
+}
+
+export default function ChatInterface({ conversationId, onNewChat }: ChatInterfaceProps = {}) {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
@@ -132,13 +138,30 @@ ${item.response}
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 flex-1 min-w-0">
       {/* Header */}
       <div className="border-b bg-white dark:bg-gray-800 px-4 lg:px-6 py-3">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">
-            Multi-AI Assistant
-          </h1>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Intelligent routing to Claude, ChatGPT, Gemini, and Grok
-          </p>
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">
+              Multi-AI Assistant
+            </h1>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Intelligent routing to Claude, ChatGPT, Gemini, and Grok
+            </p>
+          </div>
+          {onNewChat && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setMessage("");
+                setSelectedFile(null);
+                onNewChat();
+              }}
+              className="flex items-center space-x-1"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">New Chat</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -219,7 +242,7 @@ ${item.response}
                       {getModelIcon(msg.selectedModel || '')}
                     </div>
                     <div className="flex-1">
-                      <div className="bg-white dark:bg-gray-800 border p-4 rounded-2xl rounded-tl-md">
+                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 p-4 rounded-2xl rounded-tl-md">
                         {/* Classification Info */}
                         {msg.classification && (
                           <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -233,7 +256,7 @@ ${item.response}
                                 </Badge>
                               </div>
                             </div>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <p className="text-xs text-gray-700 dark:text-gray-300">
                               <strong>Reasoning:</strong> {msg.classification.reasoning}
                             </p>
                           </div>
@@ -249,9 +272,9 @@ ${item.response}
 
                         {msg.status === 'completed' && msg.response && (
                           <div className="prose prose-sm max-w-none dark:prose-invert">
-                            <pre className="whitespace-pre-wrap font-sans text-sm text-gray-900 dark:text-gray-100">
+                            <div className="whitespace-pre-wrap font-sans text-sm text-gray-900 dark:text-gray-100 leading-relaxed">
                               {msg.response}
-                            </pre>
+                            </div>
                           </div>
                         )}
 
