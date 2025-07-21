@@ -50,15 +50,30 @@ build:
       - npm run build
 ```
 
-## 🚀 **Next Steps:**
-1. **Commit and push** the updated files:
-   ```bash
-   git add .
-   git commit -m "Fix App Runner build configuration"
-   git push origin replit-agent
-   ```
+## 🚀 **UPDATED SOLUTION: Use Console Configuration**
 
-2. **In AWS App Runner**: Trigger a new deployment
+The YAML approach kept failing. **Better solution**:
+
+### **Step 1: Remove YAML file and use console**
+```bash
+git rm apprunner.yaml
+git add .
+git commit -m "Remove apprunner.yaml - use console configuration"
+git push origin replit-agent
+```
+
+### **Step 2: Configure in AWS Console**
+Go to App Runner → **Actions** → **Edit configuration**:
+
+**Build settings:**
+- Build command: `npm install && npm run build`
+- Start command: `npm start`
+- Runtime: Node.js 18
+
+**Environment variables:**
+- Add all your API keys (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.)
+
+This console approach works better than YAML for complex builds!
 
 Your app should now build successfully! The key issue was that TypeScript, Vite, and esbuild are needed for the build process but were excluded when using `--only=production`.
 
