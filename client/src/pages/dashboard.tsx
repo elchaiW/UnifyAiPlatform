@@ -21,9 +21,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
-      {renderView()}
+      <div className="flex-1 min-w-0">
+        {renderView()}
+      </div>
     </div>
   );
 }
