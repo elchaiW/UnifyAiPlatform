@@ -144,3 +144,19 @@ Preferred communication style: Simple, everyday language.
 - Configuration files in root directory
 
 The application implements a clean separation between frontend and backend, with shared TypeScript interfaces ensuring type safety across the full stack. The intelligent routing system provides users with optimal AI model selection while maintaining detailed analytics for performance optimization.
+
+## Recent Changes: Latest modifications with dates
+
+### Delete Functionality Added (January 21, 2025)
+- **Individual Message Deletion**: Users can delete specific chat messages
+- **Clear All History**: Button to delete entire chat history with confirmation
+- **API Endpoints**: Added DELETE routes for single requests and bulk deletion
+- **UI Integration**: Red delete buttons with confirmation dialogs
+- **Analytics Cleanup**: Automatic deletion of related analytics when requests are deleted
+
+### AWS Deployment Ready (January 21, 2025)
+- **Cloud-Ready Architecture**: Application structured for AWS deployment
+- **Multiple Deployment Options**: App Runner, EC2, Elastic Beanstalk support
+- **Environment Variable Configuration**: All secrets properly externalized
+- **Production Build Process**: Optimized build pipeline for cloud deployment
+- **Cost-Effective Options**: $32-45/month estimated AWS hosting costs

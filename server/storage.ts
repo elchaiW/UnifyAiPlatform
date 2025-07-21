@@ -161,11 +161,11 @@ export class MemStorage implements IStorage {
   async deleteRequest(id: number): Promise<void> {
     this.requests.delete(id);
     // Also delete related analytics
-    for (const [analyticsId, analytics] of this.analytics.entries()) {
-      if (analytics.requestId === id) {
-        this.analytics.delete(analyticsId);
-      }
-    }
+    const analyticsToDelete = Array.from(this.analytics.entries())
+      .filter(([_, analytics]) => analytics.requestId === id)
+      .map(([analyticsId, _]) => analyticsId);
+    
+    analyticsToDelete.forEach(analyticsId => this.analytics.delete(analyticsId));
   }
 
   async deleteAllUserRequests(userId: number): Promise<void> {
@@ -175,24 +175,22 @@ export class MemStorage implements IStorage {
       .map(req => req.id);
     
     // Delete all requests
-    for (const requestId of userRequestIds) {
-      this.requests.delete(requestId);
-    }
+    userRequestIds.forEach(requestId => this.requests.delete(requestId));
     
     // Delete all related analytics
-    for (const [analyticsId, analytics] of this.analytics.entries()) {
-      if (userRequestIds.includes(analytics.requestId)) {
-        this.analytics.delete(analyticsId);
-      }
-    }
+    const analyticsToDelete = Array.from(this.analytics.entries())
+      .filter(([_, analytics]) => userRequestIds.includes(analytics.requestId))
+      .map(([analyticsId, _]) => analyticsId);
+    
+    analyticsToDelete.forEach(analyticsId => this.analytics.delete(analyticsId));
   }
 
   async deleteAllUserAnalytics(userId: number): Promise<void> {
-    for (const [analyticsId, analytics] of this.analytics.entries()) {
-      if (analytics.userId === userId) {
-        this.analytics.delete(analyticsId);
-      }
-    }
+    const analyticsToDelete = Array.from(this.analytics.entries())
+      .filter(([_, analytics]) => analytics.userId === userId)
+      .map(([analyticsId, _]) => analyticsId);
+    
+    analyticsToDelete.forEach(analyticsId => this.analytics.delete(analyticsId));
   }
 }
 

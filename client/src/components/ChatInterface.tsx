@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Send, Upload, Download, Eye, Loader2, Bot, User, FileText } from "lucide-react";
+import { Send, Upload, Download, Eye, Loader2, Bot, User, FileText, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
 import { Plus } from "lucide-react";
@@ -122,6 +122,22 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
     },
   });
 
+  const deleteAllMutation = useMutation({
+    mutationFn: () => fetch("/api/requests", { method: "DELETE" }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats"] });
+    },
+  });
+
+  const deleteRequestMutation = useMutation({
+    mutationFn: (id: number) => fetch(`/api/requests/${id}`, { method: "DELETE" }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats"] });
+    },
+  });
+
   const handleSendMessage = () => {
     if (!message.trim() && !selectedFile) return;
 
@@ -197,21 +213,39 @@ ${item.response}
               Intelligent routing to Claude, ChatGPT, Gemini, and Grok
             </p>
           </div>
-          {onNewChat && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setMessage("");
-                setSelectedFile(null);
-                onNewChat();
-              }}
-              className="flex items-center space-x-1"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Chat</span>
-            </Button>
-          )}
+          <div className="flex items-center space-x-2">
+            {messages.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete all chat history?")) {
+                    deleteAllMutation.mutate();
+                  }
+                }}
+                className="flex items-center space-x-1 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                disabled={deleteAllMutation.isPending}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Clear All</span>
+              </Button>
+            )}
+            {onNewChat && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setMessage("");
+                  setSelectedFile(null);
+                  onNewChat();
+                }}
+                className="flex items-center space-x-1"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">New Chat</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -388,6 +422,20 @@ ${item.response}
                             >
                               <Download className="h-3 w-3 mr-1" />
                               Download
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 text-xs text-red-600 hover:text-red-700"
+                              onClick={() => {
+                                if (confirm("Are you sure you want to delete this message?")) {
+                                  deleteRequestMutation.mutate(msg.id);
+                                }
+                              }}
+                              disabled={deleteRequestMutation.isPending}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Delete
                             </Button>
                             <span className="text-xs text-gray-500">
                               {msg.processingTime}s

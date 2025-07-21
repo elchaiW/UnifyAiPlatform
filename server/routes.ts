@@ -353,6 +353,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete single request
+  app.delete("/api/requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteRequest(id);
+      res.json({ success: true, message: "Request deleted successfully" });
+    } catch (error) {
+      console.error('Delete request error:', error);
+      res.status(500).json({ error: "Failed to delete request" });
+    }
+  });
+
+  // Delete all user requests
+  app.delete("/api/requests", async (req, res) => {
+    try {
+      await storage.deleteAllUserRequests(demoUser.id);
+      res.json({ success: true, message: "All requests deleted successfully" });
+    } catch (error) {
+      console.error('Delete all requests error:', error);
+      res.status(500).json({ error: "Failed to delete all requests" });
+    }
+  });
+
+  // Clear all analytics
+  app.delete("/api/analytics", async (req, res) => {
+    try {
+      await storage.deleteAllUserAnalytics(demoUser.id);
+      res.json({ success: true, message: "All analytics cleared successfully" });
+    } catch (error) {
+      console.error('Clear analytics error:', error);
+      res.status(500).json({ error: "Failed to clear analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
