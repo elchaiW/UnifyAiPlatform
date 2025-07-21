@@ -1,0 +1,27 @@
+# Alternative buildspec for AWS CodeBuild/App Runner
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing Node.js dependencies..."
+      - npm ci --only=production
+      
+  build:
+    commands:
+      - echo "Building the application..."
+      - npm run build
+      - echo "Build completed successfully"
+      - ls -la dist/
+      
+  post_build:
+    commands:
+      - echo "Build phase completed"
+
+artifacts:
+  files:
+    - '**/*'
+    - dist/**/*
+  base-directory: '.'
