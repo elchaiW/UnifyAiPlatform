@@ -19,6 +19,15 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for AWS monitoring
+  app.get("/health", (req, res) => {
+    res.json({ 
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      service: "multi-ai-platform"
+    });
+  });
+
   // Demo user for development - in production this would use proper authentication
   const demoUser = await storage.createUser({
     username: "demo",
