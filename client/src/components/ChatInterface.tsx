@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -58,12 +58,44 @@ interface ChatInterfaceProps {
 export default function ChatInterface({ conversationId, onNewChat }: ChatInterfaceProps = {}) {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
   const { data: messages = [], isLoading } = useQuery<Message[]>({
     queryKey: ["/api/requests/history"],
     refetchInterval: 3000,
   });
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const file = files[0];
+    
+    if (file && file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+      setSelectedFile(file);
+    } else {
+      alert('Please upload a text file (.txt, .md)');
+    }
+  };
 
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
@@ -76,7 +108,7 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      setMessage("");
+      setMessage(""); // Clear input field after sending
     },
   });
 
@@ -85,7 +117,8 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
       fetch("/api/requests/document", { method: "POST", body: formData }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      setSelectedFile(null);
+      setSelectedFile(null); // Clear file after upload
+      setMessage(""); // Clear message field too
     },
   });
 
@@ -135,7 +168,24 @@ ${item.response}
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 flex-1 min-w-0">
+    <div 
+      className={`flex flex-col h-screen bg-gray-50 dark:bg-gray-900 flex-1 min-w-0 relative ${
+        isDragOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+      }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+            <Upload className="h-12 w-12 text-blue-500 mx-auto mb-2" />
+            <p className="text-lg font-semibold text-gray-900 dark:text-white">Drop your file here</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Supports .txt and .md files</p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="border-b bg-white dark:bg-gray-800 px-4 lg:px-6 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -206,8 +256,8 @@ ${item.response}
             </div>
           )}
 
-          {/* Messages */}
-          {messages.map((msg) => (
+          {/* Messages - Show newest messages at bottom */}
+          {messages.slice().reverse().map((msg) => (
             <div key={msg.id} className="space-y-4">
               {/* User Message */}
               <div className="flex justify-end">
@@ -371,6 +421,9 @@ ${item.response}
               </div>
             </div>
           )}
+
+          {/* Scroll anchor for auto-scroll */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
