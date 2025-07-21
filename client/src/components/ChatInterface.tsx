@@ -131,34 +131,34 @@ ${item.response}
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="border-b bg-white dark:bg-gray-800 px-6 py-4">
+      <div className="border-b bg-white dark:bg-gray-800 px-6 py-3">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Multi-AI Assistant
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
             Intelligent routing to Claude, ChatGPT, Gemini, and Grok
           </p>
         </div>
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 px-6">
+      <div className="flex-1 overflow-y-auto px-6">
         <div className="max-w-4xl mx-auto py-6 space-y-6">
           {/* Welcome Message */}
           {messages.length === 0 && !isLoading && (
-            <div className="text-center py-12">
+            <div className="text-center py-8">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Bot className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Welcome to Multi-AI Assistant
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
                 Send a message or upload a document, and I'll automatically route it to the best AI model for your needs.
               </p>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6 max-w-2xl mx-auto">
                 <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2">C</div>
                   <p className="text-xs font-medium text-gray-900 dark:text-white">Claude</p>
@@ -349,15 +349,15 @@ ${item.response}
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Input Area */}
-      <div className="border-t bg-white dark:bg-gray-800 px-6 py-4">
+      {/* Input Area - Positioned prominently */}
+      <div className="border-t bg-white dark:bg-gray-800 px-6 py-6">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-end space-x-3">
-            <div className="flex-1">
-              {selectedFile && (
-                <div className="mb-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
+          <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm focus-within:shadow-md focus-within:border-blue-500 transition-all">
+            {selectedFile && (
+              <div className="p-3 border-b border-gray-200 dark:border-gray-600">
+                <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
                   <div className="flex items-center space-x-2">
                     <FileText className="h-4 w-4 text-blue-600" />
                     <span className="text-sm text-blue-900 dark:text-blue-100">{selectedFile.name}</span>
@@ -366,50 +366,60 @@ ${item.response}
                     variant="ghost" 
                     size="sm" 
                     onClick={() => setSelectedFile(null)}
-                    className="h-6 w-6 p-0 text-blue-600"
+                    className="h-6 w-6 p-0 text-blue-600 hover:bg-blue-100"
                   >
                     ×
                   </Button>
                 </div>
-              )}
-              <Textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={selectedFile ? "Add a message about your file..." : "Send a message or upload a document..."}
-                className="min-h-[60px] max-h-[200px] resize-none border-gray-300 dark:border-gray-600"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                accept=".txt,.pdf,.docx,.md"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => document.getElementById('file-upload')?.click()}
-                className="h-10 w-10 p-0"
-              >
-                <Upload className="h-5 w-5" />
-              </Button>
-              <Button
-                onClick={handleSendMessage}
-                disabled={!message.trim() && !selectedFile}
-                className="h-10 w-10 p-0"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
+              </div>
+            )}
+            <div className="flex items-end space-x-3 p-3">
+              <div className="flex-1">
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder={selectedFile ? "Add a message about your file..." : "Send a message or upload a document..."}
+                  className="min-h-[60px] max-h-[200px] resize-none border-0 focus:ring-0 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex items-center space-x-2 pb-2">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  accept=".txt,.pdf,.docx,.md"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  className="h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  title="Upload file"
+                >
+                  <Upload className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                </Button>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!message.trim() && !selectedFile}
+                  className="h-10 w-10 p-0 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                  title="Send message"
+                >
+                  <Send className="h-5 w-5 text-white" />
+                </Button>
+              </div>
             </div>
           </div>
+          
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+            AI will automatically select the best model: Claude, ChatGPT, Gemini, or Grok
+          </p>
         </div>
       </div>
     </div>
