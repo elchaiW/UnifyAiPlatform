@@ -3,19 +3,26 @@
 ## The Issue
 Your deployment failed because App Runner was trying to install only production dependencies, but the build process requires dev dependencies (like TypeScript, Vite, etc.).
 
-## ✅ **Quick Fix - Two Options:**
+## ✅ **REAL Problem Found & Fixed:**
 
-### **Option 1: Use Console Configuration (Recommended)**
-**Delete the `apprunner.yaml` file and configure directly in AWS console:**
+### **Root Cause**: Build tools (TypeScript, Vite, esbuild) are in `devDependencies` but AWS only installs production dependencies!
 
-1. **Go back to your App Runner service**
-2. **Actions** → **Edit configuration** 
-3. **Build settings**:
-   ```bash
-   Build command: npm ci && npm run build
-   Start command: npm start
-   Runtime: Node.js 18
-   ```
+### **Fixed Solution**: Updated `apprunner.yaml` to install dev dependencies during build, then clean them up.
+
+**New Build Process**:
+```bash
+1. Install ALL dependencies (including dev): npm ci --include=dev
+2. Build the application: npm run build  
+3. Clean up dev dependencies: npm prune --omit=dev
+4. Start production app: node dist/index.js
+```
+
+### **Alternative: Console Configuration**
+If you prefer, delete `apprunner.yaml` and use console:
+
+1. **Build command**: `npm ci --include=dev && npm run build && npm prune --omit=dev`
+2. **Start command**: `npm start`
+3. **Runtime**: Node.js 18
 4. **Environment variables**:
    ```bash
    NODE_ENV=production
