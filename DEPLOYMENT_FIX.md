@@ -48,7 +48,7 @@ build:
    ```bash
    git add .
    git commit -m "Fix App Runner build configuration"
-   git push origin main
+   git push origin replit-agent
    ```
 
 2. **In AWS App Runner**: Trigger a new deployment
