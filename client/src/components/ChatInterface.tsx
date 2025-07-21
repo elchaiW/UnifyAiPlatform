@@ -108,7 +108,6 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      setMessage(""); // Clear input field after sending
     },
   });
 
@@ -146,7 +145,9 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
       formData.append("document", selectedFile);
       uploadFileMutation.mutate(formData);
     } else {
-      sendMessageMutation.mutate({ content: message });
+      const messageToSend = message; // Store the message before clearing
+      setMessage(""); // Clear input field immediately
+      sendMessageMutation.mutate({ content: messageToSend });
     }
   };
 
