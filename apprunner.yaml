@@ -3,14 +3,16 @@ runtime: nodejs18
 build:
   commands:
     build:
-      - echo "Installing dependencies..."
-      - npm ci
+      - echo "Installing ALL dependencies including devDependencies..."
+      - npm ci --include=dev
       - echo "Building application..."
       - npm run build
       - echo "Build completed successfully"
     post_build:
       - echo "Verifying build..."
       - ls -la dist/
+      - echo "Cleaning up dev dependencies for production..."
+      - npm prune --omit=dev
 run:
   runtime-version: 18
   command: node dist/index.js
