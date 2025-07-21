@@ -244,8 +244,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get analytics data
-  app.get("/api/analytics", async (req, res) => {
+  // Get analytics stats
+  app.get("/api/analytics/stats", async (req, res) => {
     try {
       const [
         totalRequests,
@@ -259,16 +259,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getModelUsageStats(demoUser.id)
       ]);
 
+      // Convert modelUsageStats array to object format
+      const modelUsageMap = { claude: 0, chatgpt: 0, gemini: 0, grok: 0 };
+      if (Array.isArray(modelUsageStats)) {
+        modelUsageStats.forEach(stat => {
+          if (stat.model && stat.count) {
+            modelUsageMap[stat.model as keyof typeof modelUsageMap] = stat.count;
+          }
+        });
+      }
+
       res.json({
         totalRequests,
         successRate,
-        averageResponseTime,
-        modelUsageStats,
-        thisMonth: Math.floor(totalRequests * 0.3), // Mock calculation
+        avgProcessingTime: averageResponseTime,
+        modelUsage: modelUsageMap
       });
     } catch (error) {
-      console.error('Analytics fetch error:', error);
-      res.status(500).json({ error: "Failed to fetch analytics" });
+      console.error('Analytics stats fetch error:', error);
+      res.status(500).json({ error: "Failed to fetch analytics stats" });
+    }
+  });
+
+  // Get detailed analytics
+  app.get("/api/analytics/detailed", async (req, res) => {
+    try {
+      const requests = await storage.getUserRequests(demoUser.id, 1000);
+      const analytics = await storage.getUserAnalytics(demoUser.id);
+      
+      // Calculate model usage
+      const modelUsage = { claude: 0, chatgpt: 0, gemini: 0, grok: 0 };
+      const categoryBreakdown = { legal: 0, marketing: 0, coding: 0, general: 0 };
+      const processingTimes: { [key: string]: { total: number, count: number } } = {};
+      
+      requests.forEach(req => {
+        if (req.selectedModel) {
+          modelUsage[req.selectedModel as keyof typeof modelUsage] = 
+            (modelUsage[req.selectedModel as keyof typeof modelUsage] || 0) + 1;
+        }
+        
+        if (req.category) {
+          categoryBreakdown[req.category as keyof typeof categoryBreakdown] = 
+            (categoryBreakdown[req.category as keyof typeof categoryBreakdown] || 0) + 1;
+        }
+        
+        if (req.selectedModel && req.processingTime) {
+          if (!processingTimes[req.selectedModel]) {
+            processingTimes[req.selectedModel] = { total: 0, count: 0 };
+          }
+          processingTimes[req.selectedModel].total += parseFloat(req.processingTime);
+          processingTimes[req.selectedModel].count += 1;
+        }
+      });
+      
+      const processingTimeStats = Object.entries(processingTimes).map(([model, data]) => ({
+        model,
+        avgTime: data.count > 0 ? data.total / data.count : 0,
+        requestCount: data.count
+      }));
+      
+      const successfulRequests = requests.filter(r => r.status === 'completed').length;
+      const successRate = requests.length > 0 ? successfulRequests / requests.length : 0;
+      const avgTime = processingTimeStats.reduce((acc, p) => acc + p.avgTime, 0) / Math.max(processingTimeStats.length, 1);
+
+      res.json({
+        totalRequests: requests.length,
+        successRate,
+        avgProcessingTime: avgTime,
+        modelUsage,
+        categoryBreakdown,
+        processingTimes: processingTimeStats
+      });
+    } catch (error) {
+      console.error('Detailed analytics fetch error:', error);
+      res.status(500).json({ error: "Failed to fetch detailed analytics" });
     }
   });
 
