@@ -126,7 +126,7 @@ ${analytics.processingTimes.map(p =>
   const totalModelRequests = Object.values(analytics.modelUsage).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
+    <div className="flex-1 p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
