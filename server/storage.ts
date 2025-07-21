@@ -11,6 +11,8 @@ export interface IStorage {
   getRequest(id: number): Promise<AIRequest | undefined>;
   getUserRequests(userId: number, limit?: number): Promise<AIRequest[]>;
   updateRequestStatus(id: number, status: string, response?: string, processingTime?: number): Promise<void>;
+  deleteRequest(id: number): Promise<void>;
+  deleteAllUserRequests(userId: number): Promise<void>;
   
   // Analytics methods
   createAnalytics(analytics: InsertAnalytics): Promise<Analytics>;
@@ -19,6 +21,7 @@ export interface IStorage {
   getTotalRequests(userId: number): Promise<number>;
   getSuccessRate(userId: number): Promise<number>;
   getAverageResponseTime(userId: number): Promise<number>;
+  deleteAllUserAnalytics(userId: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -153,6 +156,43 @@ export class MemStorage implements IStorage {
     const totalTime = userAnalytics.reduce((sum, analytics) => 
       sum + parseFloat(analytics.responseTime), 0);
     return parseFloat((totalTime / userAnalytics.length).toFixed(2));
+  }
+
+  async deleteRequest(id: number): Promise<void> {
+    this.requests.delete(id);
+    // Also delete related analytics
+    for (const [analyticsId, analytics] of this.analytics.entries()) {
+      if (analytics.requestId === id) {
+        this.analytics.delete(analyticsId);
+      }
+    }
+  }
+
+  async deleteAllUserRequests(userId: number): Promise<void> {
+    // Get all request IDs for this user
+    const userRequestIds = Array.from(this.requests.values())
+      .filter(req => req.userId === userId)
+      .map(req => req.id);
+    
+    // Delete all requests
+    for (const requestId of userRequestIds) {
+      this.requests.delete(requestId);
+    }
+    
+    // Delete all related analytics
+    for (const [analyticsId, analytics] of this.analytics.entries()) {
+      if (userRequestIds.includes(analytics.requestId)) {
+        this.analytics.delete(analyticsId);
+      }
+    }
+  }
+
+  async deleteAllUserAnalytics(userId: number): Promise<void> {
+    for (const [analyticsId, analytics] of this.analytics.entries()) {
+      if (analytics.userId === userId) {
+        this.analytics.delete(analyticsId);
+      }
+    }
   }
 }
 
