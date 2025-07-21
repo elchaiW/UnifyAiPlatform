@@ -88,7 +88,7 @@ export default function ChatInterface() {
 
     if (selectedFile) {
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      formData.append("document", selectedFile);
       uploadFileMutation.mutate(formData);
     } else {
       sendMessageMutation.mutate({ content: message });
