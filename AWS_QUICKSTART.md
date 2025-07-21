@@ -15,7 +15,7 @@ Your Multi-AI Platform is **100% ready for AWS deployment!** Here's the fastest 
 ```bash
 git add .
 git commit -m "Deploy to AWS App Runner"
-git push origin main
+git push origin replit-agent
 ```
 
 ### Step 2: Deploy with AWS App Runner
