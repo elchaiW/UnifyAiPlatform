@@ -10,7 +10,64 @@ export interface ClassificationResult {
   reasoning: string;
 }
 
+// Fallback classification based on keywords when OpenAI quota is exceeded
+function fallbackClassification(content: string): ClassificationResult {
+  const lowerContent = content.toLowerCase();
+  
+  // Marketing keywords
+  const marketingKeywords = ['marketing', 'brand', 'campaign', 'social media', 'strategy', 'gen z', 'consumer', 'fashion', 'influencer', 'positioning', 'launch', 'sustainable'];
+  
+  // Legal keywords
+  const legalKeywords = ['contract', 'legal', 'compliance', 'regulatory', 'terms', 'agreement', 'policy', 'law', 'regulation'];
+  
+  // Coding keywords
+  const codingKeywords = ['code', 'debug', 'function', 'javascript', 'python', 'programming', 'syntax', 'error', 'development'];
+  
+  const marketingScore = marketingKeywords.filter(keyword => lowerContent.includes(keyword)).length;
+  const legalScore = legalKeywords.filter(keyword => lowerContent.includes(keyword)).length;
+  const codingScore = codingKeywords.filter(keyword => lowerContent.includes(keyword)).length;
+  
+  if (marketingScore > 0 && marketingScore >= legalScore && marketingScore >= codingScore) {
+    return {
+      category: 'marketing',
+      model: 'gemini',
+      confidence: Math.min(0.9, 0.5 + (marketingScore * 0.1)),
+      reasoning: `Detected marketing content with ${marketingScore} marketing-related keywords`
+    };
+  }
+  
+  if (legalScore > 0 && legalScore >= codingScore) {
+    return {
+      category: 'legal',
+      model: 'claude',
+      confidence: Math.min(0.9, 0.5 + (legalScore * 0.1)),
+      reasoning: `Detected legal content with ${legalScore} legal-related keywords`
+    };
+  }
+  
+  if (codingScore > 0) {
+    return {
+      category: 'coding',
+      model: 'grok',
+      confidence: Math.min(0.9, 0.5 + (codingScore * 0.1)),
+      reasoning: `Detected coding content with ${codingScore} programming-related keywords`
+    };
+  }
+  
+  return {
+    category: 'general',
+    model: 'chatgpt',
+    confidence: 0.5,
+    reasoning: 'No specific category detected, using general classification'
+  };
+}
+
 export async function classifyRequest(content: string): Promise<ClassificationResult> {
+  // Use fallback classification for now to test all AI models while OpenAI quota is exceeded
+  console.log('Using fallback classification due to OpenAI quota limits');
+  return fallbackClassification(content);
+  
+  /* Original OpenAI classification (disabled due to quota limits)
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -56,12 +113,7 @@ EXAMPLES:
     };
   } catch (error) {
     console.error('Classification error:', error);
-    // Fallback to ChatGPT for general queries
-    return {
-      category: 'general',
-      model: 'chatgpt',
-      confidence: 0.5,
-      reasoning: 'Classification failed, defaulting to general category'
-    };
+    return fallbackClassification(content);
   }
+  */
 }
