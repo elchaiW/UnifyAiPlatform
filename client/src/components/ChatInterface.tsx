@@ -27,6 +27,9 @@ interface Message {
     model: string;
     confidence: number;
     reasoning: string;
+    documentType?: string;
+    keyTopics?: string[];
+    complexity?: 'low' | 'medium' | 'high';
   };
 }
 
@@ -328,7 +331,7 @@ ${item.response}
                     </div>
                     <div className="flex-1">
                       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 p-4 rounded-2xl rounded-tl-md">
-                        {/* Classification Info */}
+                        {/* Enhanced Classification Info */}
                         {msg.classification && (
                           <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
@@ -339,11 +342,28 @@ ${item.response}
                                 <Badge variant="outline" className="text-xs">
                                   {Math.round(msg.classification.confidence * 100)}% confidence
                                 </Badge>
+                                {msg.classification.documentType && (
+                                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                                    {msg.classification.documentType}
+                                  </Badge>
+                                )}
                               </div>
                             </div>
-                            <p className="text-xs text-gray-700 dark:text-gray-300">
-                              <strong>Reasoning:</strong> {msg.classification.reasoning}
+                            <p className="text-xs text-gray-700 dark:text-gray-300 mb-2">
+                              <strong>Analysis:</strong> {msg.classification.reasoning}
                             </p>
+                            {msg.classification.keyTopics && msg.classification.keyTopics.length > 0 && (
+                              <div className="text-xs">
+                                <strong className="text-gray-600 dark:text-gray-400">Key Topics:</strong>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {msg.classification.keyTopics.slice(0, 5).map((topic: string, idx: number) => (
+                                    <span key={idx} className="inline-block bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full text-xs">
+                                      {topic}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -391,12 +411,30 @@ ${item.response}
                                 <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
                                   <div className="space-y-4">
                                     <div>
-                                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Classification:</h4>
-                                      <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Document Analysis:</h4>
+                                      <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-2">
                                         <p><strong>Category:</strong> {msg.category}</p>
-                                        <p><strong>Model:</strong> {msg.selectedModel}</p>
+                                        <p><strong>Model Selected:</strong> {msg.selectedModel}</p>
                                         <p><strong>Confidence:</strong> {msg.classification ? Math.round(msg.classification.confidence * 100) : 'N/A'}%</p>
                                         <p><strong>Processing Time:</strong> {msg.processingTime}s</p>
+                                        {msg.classification?.documentType && (
+                                          <p><strong>Document Type:</strong> {msg.classification.documentType}</p>
+                                        )}
+                                        {msg.classification?.complexity && (
+                                          <p><strong>Complexity:</strong> {msg.classification.complexity}</p>
+                                        )}
+                                        {msg.classification?.keyTopics && msg.classification.keyTopics.length > 0 && (
+                                          <div>
+                                            <strong>Key Topics:</strong>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                              {msg.classification.keyTopics.map((topic: string, idx: number) => (
+                                                <span key={idx} className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                                  {topic}
+                                                </span>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                     <div>

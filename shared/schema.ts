@@ -21,6 +21,7 @@ export const aiRequests = pgTable("ai_requests", {
   status: text("status").notNull().default('pending'), // 'pending', 'processing', 'completed', 'failed'
   response: text("response"),
   processingTime: decimal("processing_time", { precision: 10, scale: 3 }),
+  classification: jsonb("classification"), // Enhanced classification data from Claude analysis
   createdAt: timestamp("created_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
 });
