@@ -35,24 +35,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     password: "demo123"
   });
 
-  // Submit prompt for processing
-  app.post("/api/requests/prompt", async (req, res) => {
+  // Submit prompt for processing (unified endpoint)
+  app.post("/api/requests", async (req, res) => {
     try {
-      const { content } = req.body;
+      const { content, message } = req.body;
+      const messageContent = content || message;
       
-      if (!content || typeof content !== 'string' || content.trim().length === 0) {
+      if (!messageContent || typeof messageContent !== 'string' || messageContent.trim().length === 0) {
         return res.status(400).json({ error: "Content is required" });
       }
 
       // Classify the request
       const startTime = Date.now();
-      const classification = await classifyRequest(content);
+      const classification = await classifyRequest(messageContent);
       
       // Create request record
       const request = await storage.createRequest({
         userId: demoUser.id,
         type: 'prompt',
-        content,
+        content: messageContent,
         category: classification.category,
         selectedModel: classification.model,
         fileName: null,
@@ -66,16 +67,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         switch (classification.model) {
           case 'claude':
-            response = await processWithClaude(content);
+            response = await processWithClaude(messageContent);
             break;
           case 'chatgpt':
-            response = await processWithChatGPT(content);
+            response = await processWithChatGPT(messageContent);
             break;
           case 'gemini':
-            response = await processWithGemini(content);
+            response = await processWithGemini(messageContent);
             break;
           case 'grok':
-            response = await processWithGrok(content);
+            response = await processWithGrok(messageContent);
             break;
           default:
             throw new Error(`Unknown model: ${classification.model}`);

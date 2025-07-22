@@ -105,7 +105,7 @@ export default function ChatInterface() {
   // Upload file mutation
   const uploadFileMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/requests/document', {
         method: 'POST',
         body: formData,
       });

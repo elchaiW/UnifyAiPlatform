@@ -184,3 +184,11 @@ The application implements a clean separation between frontend and backend, with
 - **Touch-Optimized**: 44px minimum touch targets for better accessibility
 - **Safe Area Support**: Proper handling of mobile device notches and safe areas
 - **iOS Input Fix**: 16px font size to prevent unwanted zoom on text inputs
+
+### ChatGPT-Style Mobile UI & API Fix (January 22, 2025)
+- **ChatGPT-Style Navigation**: Hamburger menu with centered app name for mobile
+- **Slide-Out Sidebar**: Smooth mobile navigation with overlay and transitions
+- **Fixed Message Processing**: Resolved API routing mismatch between frontend and backend
+- **Unified API Endpoints**: Combined `/api/requests/prompt` and `/api/requests` for consistency
+- **Enhanced Input Area**: Fixed placeholder text cutoff with proper 44px height
+- **Desktop Spacing Fix**: Consistent header spacing across all tabs and components
