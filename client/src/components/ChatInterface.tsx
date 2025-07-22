@@ -90,7 +90,7 @@ export default function ChatInterface() {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
       setMessage("");
       if (textareaRef.current) {
-        textareaRef.current.style.height = '44px';
+        textareaRef.current.style.height = '48px';
       }
     },
     onError: (error) => {
@@ -183,7 +183,7 @@ export default function ChatInterface() {
     
     // Auto-resize textarea
     const textarea = e.target;
-    textarea.style.height = '44px';
+    textarea.style.height = '48px';
     const scrollHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = scrollHeight + 'px';
   };
@@ -453,8 +453,8 @@ Classification Details:
                   value={message}
                   onChange={handleInputChange}
                   placeholder="Message Multi-AI Assistant..."
-                  className="w-full resize-none border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none min-h-[44px] max-h-[120px] py-3 leading-tight"
-                  style={{ height: '44px', fontSize: '16px' }} // 16px prevents zoom on iOS
+                  className="w-full resize-none border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none min-h-[48px] max-h-[120px] py-3 leading-tight"
+                  style={{ height: '48px', fontSize: '16px', lineHeight: '1.2' }} // 16px prevents zoom on iOS, increased height for better placeholder visibility
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
