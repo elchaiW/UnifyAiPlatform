@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import TypingAnimation from './TypingAnimation';
 
 interface Message {
   id: number;
@@ -88,10 +89,7 @@ export default function ChatInterface() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      setMessage("");
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '48px';
-      }
+      // Message already cleared in handleSubmit for immediate feedback
     },
     onError: (error) => {
       toast({
@@ -114,10 +112,7 @@ export default function ChatInterface() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      setSelectedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      // File already cleared in handleSubmit for immediate feedback
     },
     onError: (error) => {
       toast({
@@ -158,8 +153,13 @@ export default function ChatInterface() {
       const formData = new FormData();
       formData.append('file', selectedFile);
       uploadFileMutation.mutate(formData);
+      setSelectedFile(null); // Clear immediately
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } else if (message.trim()) {
-      sendMessageMutation.mutate(message);
+      const messageToSend = message;
+      setMessage(""); // Clear immediately
+      if (textareaRef.current) textareaRef.current.style.height = '48px';
+      sendMessageMutation.mutate(messageToSend);
     }
   };
 
@@ -228,7 +228,7 @@ Classification Details:
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900">
       {/* ChatGPT-style Messages Area */}
-      <div className="flex-1 overflow-y-auto pt-6">
+      <div className="flex-1 overflow-y-auto pt-8 pb-4 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
@@ -297,7 +297,7 @@ Classification Details:
           )}
 
           {/* ChatGPT-style Messages */}
-          <div className="px-4 space-y-6 pb-6">
+          <div className="px-4 space-y-6 pb-6 pt-4">
             {messages.slice().reverse().map((msg) => (
               <div key={msg.id} className="space-y-4">
                 {/* User Message - ChatGPT style */}
@@ -400,22 +400,9 @@ Classification Details:
             ))}
           </div>
 
-          {/* Loading State */}
+          {/* Loading State with ChatGPT-style typing animation */}
           {(sendMessageMutation.isPending || uploadFileMutation.isPending) && (
-            <div className="px-4 space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-                  <Loader2 className="h-4 w-4 animate-spin text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="bg-transparent">
-                    <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                      <span>Analyzing and routing to best AI model...</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TypingAnimation text="Analyzing your message and routing to the best AI model..." />
           )}
 
           {/* Scroll anchor for auto-scroll */}
