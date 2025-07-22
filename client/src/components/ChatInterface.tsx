@@ -206,8 +206,8 @@ ${item.response}
           </div>
         </div>
       )}
-      {/* Header */}
-      <div className="border-b bg-white dark:bg-gray-800 px-4 lg:px-6 py-3">
+      {/* Header - Hidden on mobile, shown on desktop */}
+      <div className="hidden lg:block border-b bg-white dark:bg-gray-800 px-4 lg:px-6 py-4 mt-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">
@@ -514,8 +514,8 @@ ${item.response}
         </div>
       </div>
 
-      {/* Input Area - Positioned prominently */}
-      <div className="border-t bg-white dark:bg-gray-800 px-4 lg:px-6 py-4 lg:py-6">
+      {/* Input Area - Mobile Friendly */}
+      <div className="border-t bg-white dark:bg-gray-800 px-3 lg:px-6 py-3 lg:py-6 safe-area-pb">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm focus-within:shadow-md focus-within:border-blue-500 transition-all">
             {selectedFile && (
@@ -536,13 +536,13 @@ ${item.response}
                 </div>
               </div>
             )}
-            <div className="flex items-end space-x-3 p-3">
+            <div className="flex items-end space-x-2 lg:space-x-3 p-2 lg:p-3">
               <div className="flex-1">
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder={selectedFile ? "Add a message about your file..." : "Send a message or upload a document..."}
-                  className="min-h-[60px] max-h-[200px] resize-none border-0 focus:ring-0 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  className="min-h-[50px] lg:min-h-[60px] max-h-[150px] lg:max-h-[200px] resize-none border-0 focus:ring-0 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 text-sm lg:text-base"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -551,7 +551,7 @@ ${item.response}
                   }}
                 />
               </div>
-              <div className="flex items-center space-x-2 pb-2">
+              <div className="flex items-center space-x-1 lg:space-x-2 pb-1 lg:pb-2">
                 <input
                   type="file"
                   id="file-upload"
@@ -563,18 +563,18 @@ ${item.response}
                   variant="ghost"
                   size="sm"
                   onClick={() => document.getElementById('file-upload')?.click()}
-                  className="h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  className="h-8 w-8 lg:h-10 lg:w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-600 shrink-0"
                   title="Upload file"
                 >
-                  <Upload className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  <Upload className="h-4 w-4 lg:h-5 lg:w-5 text-gray-600 dark:text-gray-400" />
                 </Button>
                 <Button
                   onClick={handleSendMessage}
                   disabled={!message.trim() && !selectedFile}
-                  className="h-10 w-10 p-0 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                  className="h-8 w-8 lg:h-10 lg:w-10 p-0 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 shrink-0"
                   title="Send message"
                 >
-                  <Send className="h-5 w-5 text-white" />
+                  <Send className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
                 </Button>
               </div>
             </div>
