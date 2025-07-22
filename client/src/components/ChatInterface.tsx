@@ -90,7 +90,7 @@ export default function ChatInterface() {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
       setMessage("");
       if (textareaRef.current) {
-        textareaRef.current.style.height = '24px';
+        textareaRef.current.style.height = '44px';
       }
     },
     onError: (error) => {
@@ -183,7 +183,7 @@ export default function ChatInterface() {
     
     // Auto-resize textarea
     const textarea = e.target;
-    textarea.style.height = '24px';
+    textarea.style.height = '44px';
     const scrollHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = scrollHeight + 'px';
   };
@@ -446,15 +446,15 @@ Classification Details:
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex items-end space-x-3 p-4">
-              <div className="flex-1 min-w-0">
+            <form onSubmit={handleSubmit} className="flex items-end space-x-3 p-3">
+              <div className="flex-1 min-w-0 flex-shrink">
                 <textarea
                   ref={textareaRef}
                   value={message}
                   onChange={handleInputChange}
                   placeholder="Message Multi-AI Assistant..."
-                  className="w-full resize-none border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none min-h-[24px] max-h-[120px] py-2"
-                  style={{ height: '24px' }}
+                  className="w-full resize-none border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none min-h-[44px] max-h-[120px] py-3 leading-tight"
+                  style={{ height: '44px', fontSize: '16px' }} // 16px prevents zoom on iOS
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -465,7 +465,7 @@ Classification Details:
               </div>
               
               {/* File Upload & Send Buttons */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-end space-x-2 flex-shrink-0">
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -479,17 +479,17 @@ Classification Details:
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-8 w-8 p-0"
+                  className="h-10 w-10 p-0 flex-shrink-0 mb-1"
                   disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
-                  <Paperclip className="h-4 w-4" />
+                  <Paperclip className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 </Button>
                 
                 <Button
                   type="submit"
                   size="sm"
                   disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                  className="h-8 w-8 p-0 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="h-10 w-10 p-0 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 flex-shrink-0 mb-1"
                 >
                   {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
