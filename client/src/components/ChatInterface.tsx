@@ -228,7 +228,7 @@ Classification Details:
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900">
       {/* ChatGPT-style Messages Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-2">
         <div className="max-w-3xl mx-auto">
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
