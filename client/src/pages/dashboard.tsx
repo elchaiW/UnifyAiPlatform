@@ -46,39 +46,56 @@ export default function Dashboard() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile Navigation Bar with proper spacing */}
-        <div className="lg:hidden bg-white dark:bg-gray-800 border-b px-4 py-4 pt-8 safe-area-pt">
+        {/* ChatGPT-style Mobile Navigation */}
+        <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 mt-2">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Multi-AI Assistant
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                AI-powered document analysis
-              </p>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">AI</span>
+              </div>
+              <div>
+                <h1 className="text-base font-medium text-gray-900 dark:text-white">
+                  Multi-AI Assistant
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Intelligent AI Routing
+                </p>
+              </div>
             </div>
-            <div className="flex space-x-1">
+            <div className="flex items-center space-x-1">
               <Button
-                variant={activeView === 'chat' ? 'default' : 'outline'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setActiveView('chat')}
-                className="px-2 py-1 text-xs h-8 min-w-[44px]"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+                  activeView === 'chat' 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white' 
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
               >
                 Chat
               </Button>
               <Button
-                variant={activeView === 'analytics' ? 'default' : 'outline'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setActiveView('analytics')}
-                className="px-2 py-1 text-xs h-8 min-w-[44px]"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+                  activeView === 'analytics' 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white' 
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
               >
                 Stats
               </Button>
               <Button
-                variant={activeView === 'history' ? 'default' : 'outline'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setActiveView('history')}
-                className="px-2 py-1 text-xs h-8 min-w-[44px]"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+                  activeView === 'history' 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white' 
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
               >
                 History
               </Button>
