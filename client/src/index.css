@@ -149,7 +149,12 @@
   }
   
   .safe-area-pt {
-    padding-top: env(safe-area-inset-top, 0.5rem);
+    padding-top: env(safe-area-inset-top, 1rem);
+  }
+  
+  /* Mobile message spacing fix */
+  .mobile-messages-top {
+    padding-top: max(2rem, env(safe-area-inset-top, 0) + 1rem);
   }
   
   /* Ensure proper touch targets */
