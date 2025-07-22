@@ -126,31 +126,31 @@ ${analytics.processingTimes.map(p =>
   const totalModelRequests = Object.values(analytics.modelUsage).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex-1 p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+    <div className="flex-1 p-3 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto pt-6 lg:pt-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Header - Mobile responsive */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <h1 className="text-xl lg:text-3xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
+            <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 mt-1 lg:mt-2">
               Performance insights and usage statistics
             </p>
           </div>
-          <Button onClick={downloadAnalytics} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={downloadAnalytics} className="bg-blue-600 hover:bg-blue-700 w-full lg:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>
         </div>
 
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
+        {/* Overview Cards - Mobile responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
+          <Card className="p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Requests</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.totalRequests}</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600 dark:text-gray-400">Total Requests</p>
+                <p className="text-xl lg:text-3xl font-bold text-gray-900 dark:text-white">{analytics.totalRequests}</p>
               </div>
-              <Activity className="h-8 w-8 text-blue-500" />
+              <Activity className="h-6 w-6 lg:h-8 lg:w-8 text-blue-500" />
             </div>
           </Card>
 
