@@ -253,84 +253,85 @@ ${item.response}
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 lg:px-6">
-        <div className="max-w-4xl mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
-          {/* Welcome Message */}
+      {/* Messages Area with proper mobile spacing */}
+      <div className="flex-1 overflow-y-auto px-3 lg:px-6">
+        <div className="max-w-4xl mx-auto py-6 lg:py-8 space-y-4 lg:space-y-6">
+          {/* Welcome Message - Mobile optimized */}
           {messages.length === 0 && !isLoading && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <Bot className="h-8 w-8 text-white" />
+            <div className="text-center py-8 lg:py-12 px-2">
+              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-4 lg:mb-6 flex items-center justify-center">
+                <Bot className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white mb-3 lg:mb-4">
                 Welcome to Multi-AI Assistant
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+              <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6 lg:mb-8 px-4">
                 Send a message or upload a document, and I'll automatically route it to the best AI model for your needs.
               </p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6 max-w-2xl mx-auto">
-                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2">C</div>
+              {/* Mobile-optimized AI model cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 mt-6 lg:mt-8 max-w-2xl mx-auto px-2">
+                <div className="bg-white dark:bg-gray-800 p-2 lg:p-3 rounded-lg border shadow-sm">
+                  <div className="w-6 h-6 lg:w-8 lg:h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs lg:text-sm font-bold mb-1 lg:mb-2 mx-auto">C</div>
                   <p className="text-xs font-medium text-gray-900 dark:text-white">Claude</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Legal & Compliance</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Legal</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2">G</div>
+                <div className="bg-white dark:bg-gray-800 p-2 lg:p-3 rounded-lg border shadow-sm">
+                  <div className="w-6 h-6 lg:w-8 lg:h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs lg:text-sm font-bold mb-1 lg:mb-2 mx-auto">G</div>
                   <p className="text-xs font-medium text-gray-900 dark:text-white">ChatGPT</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">General Knowledge</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">General</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
-                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2">G</div>
+                <div className="bg-white dark:bg-gray-800 p-2 lg:p-3 rounded-lg border shadow-sm">
+                  <div className="w-6 h-6 lg:w-8 lg:h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs lg:text-sm font-bold mb-1 lg:mb-2 mx-auto">G</div>
                   <p className="text-xs font-medium text-gray-900 dark:text-white">Gemini</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Marketing Strategy</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Marketing</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2">X</div>
+                <div className="bg-white dark:bg-gray-800 p-2 lg:p-3 rounded-lg border shadow-sm">
+                  <div className="w-6 h-6 lg:w-8 lg:h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs lg:text-sm font-bold mb-1 lg:mb-2 mx-auto">X</div>
                   <p className="text-xs font-medium text-gray-900 dark:text-white">Grok</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Coding & Tech</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Coding</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Messages - Show newest messages at bottom */}
+          {/* Messages - Mobile optimized layout */}
           {messages.slice().reverse().map((msg) => (
-            <div key={msg.id} className="space-y-4">
-              {/* User Message */}
+            <div key={msg.id} className="space-y-3 lg:space-y-4">
+              {/* User Message - Mobile responsive */}
               <div className="flex justify-end">
-                <div className="max-w-3xl">
-                  <div className="flex items-start space-x-3">
+                <div className="max-w-[85%] lg:max-w-3xl">
+                  <div className="flex items-start space-x-2 lg:space-x-3">
                     <div className="flex-1">
-                      <div className="bg-blue-500 text-white p-4 rounded-2xl rounded-tr-md">
+                      <div className="bg-blue-500 text-white p-3 lg:p-4 rounded-2xl rounded-tr-md">
                         {msg.fileName && (
                           <div className="flex items-center space-x-2 mb-2 text-blue-100">
-                            <FileText className="h-4 w-4" />
-                            <span className="text-sm">{msg.fileName}</span>
+                            <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
+                            <span className="text-xs lg:text-sm">{msg.fileName}</span>
                           </div>
                         )}
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                        <p className="whitespace-pre-wrap text-sm lg:text-base">{msg.content}</p>
                       </div>
                       <p className="text-xs text-gray-500 mt-1 text-right">
                         {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
                       </p>
                     </div>
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                      <User className="h-4 w-4" />
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+                      <User className="h-3 w-3 lg:h-4 lg:w-4" />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* AI Response */}
+              {/* AI Response - Mobile optimized */}
               <div className="flex justify-start">
-                <div className="max-w-3xl w-full">
-                  <div className="flex items-start space-x-3">
-                    <div className={`w-8 h-8 ${getModelColor(msg.selectedModel || '')} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
+                <div className="max-w-[90%] lg:max-w-3xl w-full">
+                  <div className="flex items-start space-x-2 lg:space-x-3">
+                    <div className={`w-6 h-6 lg:w-8 lg:h-8 ${getModelColor(msg.selectedModel || '')} rounded-full flex items-center justify-center text-white text-xs lg:text-sm font-bold shrink-0`}>
                       {getModelIcon(msg.selectedModel || '')}
                     </div>
-                    <div className="flex-1">
-                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 p-4 rounded-2xl rounded-tl-md">
+                    <div className="flex-1 min-w-0">
+                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 p-3 lg:p-4 rounded-2xl rounded-tl-md">
                         {/* Enhanced Classification Info */}
                         {msg.classification && (
                           <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">

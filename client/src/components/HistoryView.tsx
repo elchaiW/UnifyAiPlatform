@@ -158,25 +158,25 @@ Classification Details:
   }
 
   return (
-    <div className="flex-1 p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+    <div className="flex-1 p-3 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto pt-6 lg:pt-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Header - Mobile responsive */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Processing History</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <h1 className="text-xl lg:text-3xl font-bold text-gray-900 dark:text-white">Processing History</h1>
+            <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 mt-1 lg:mt-2">
               View and manage all your AI processing requests
             </p>
           </div>
-          <Button onClick={downloadAllHistory} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={downloadAllHistory} className="bg-blue-600 hover:bg-blue-700 w-full lg:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export All ({filteredHistory.length})
           </Button>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        {/* Filters - Mobile responsive */}
+        <Card className="p-3 lg:p-6 mb-4 lg:mb-6">
+          <div className="flex flex-col gap-3 lg:gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -189,11 +189,11 @@ Classification Details:
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col lg:flex-row gap-2">
               <select 
                 value={filterModel}
                 onChange={(e) => setFilterModel(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm lg:text-base"
               >
                 <option value="all">All Models</option>
                 <option value="claude">Claude</option>
@@ -205,7 +205,7 @@ Classification Details:
               <select 
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm lg:text-base"
               >
                 <option value="all">All Status</option>
                 <option value="completed">Completed</option>
@@ -233,15 +233,15 @@ Classification Details:
             </Card>
           ) : (
             filteredHistory.map((item) => (
-              <Card key={item.id} className="p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
+              <Card key={item.id} className="p-3 lg:p-6 hover:shadow-md transition-shadow">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3 lg:gap-0">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-3">
+                    <div className="flex items-center space-x-2 lg:space-x-3 mb-2 lg:mb-3">
                       <div className="flex items-center space-x-2">
                         {item.type === 'document' ? (
-                          <FileText className="h-5 w-5 text-gray-500" />
+                          <FileText className="h-4 w-4 lg:h-5 lg:w-5 text-gray-500" />
                         ) : (
-                          <MessageSquare className="h-5 w-5 text-gray-500" />
+                          <MessageSquare className="h-4 w-4 lg:h-5 lg:w-5 text-gray-500" />
                         )}
                         <div className={`w-3 h-3 ${getModelColor(item.selectedModel)} rounded-full`} />
                       </div>

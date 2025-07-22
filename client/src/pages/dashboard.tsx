@@ -46,18 +46,23 @@ export default function Dashboard() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile Navigation Bar */}
-        <div className="lg:hidden bg-white dark:bg-gray-800 border-b px-4 py-3">
+        {/* Mobile Navigation Bar with proper spacing */}
+        <div className="lg:hidden bg-white dark:bg-gray-800 border-b px-4 py-4 pt-8 safe-area-pt">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Multi-AI Assistant
-            </h1>
-            <div className="flex space-x-2">
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Multi-AI Assistant
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                AI-powered document analysis
+              </p>
+            </div>
+            <div className="flex space-x-1">
               <Button
                 variant={activeView === 'chat' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveView('chat')}
-                className="px-3"
+                className="px-2 py-1 text-xs h-8 min-w-[44px]"
               >
                 Chat
               </Button>
@@ -65,7 +70,7 @@ export default function Dashboard() {
                 variant={activeView === 'analytics' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveView('analytics')}
-                className="px-3"
+                className="px-2 py-1 text-xs h-8 min-w-[44px]"
               >
                 Stats
               </Button>
@@ -73,7 +78,7 @@ export default function Dashboard() {
                 variant={activeView === 'history' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveView('history')}
-                className="px-3"
+                className="px-2 py-1 text-xs h-8 min-w-[44px]"
               >
                 History
               </Button>
