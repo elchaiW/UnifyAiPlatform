@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { formatPlainTextResponse } from "../utils/textFormatter.js";
 
 /*
 Follow these instructions when using this blueprint:
@@ -17,7 +18,7 @@ export async function processWithChatGPT(content: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: "You are a knowledgeable AI assistant specializing in content creation, summaries, and general knowledge. Provide comprehensive, well-structured responses."
+          content: "You are a knowledgeable AI assistant specializing in content creation, summaries, and general knowledge. Provide comprehensive, well-structured responses in plain text format without markdown formatting, asterisks, or special symbols. Use clear, readable text with proper paragraphs."
         },
         {
           role: "user",
@@ -28,7 +29,8 @@ export async function processWithChatGPT(content: string): Promise<string> {
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content || 'Error processing response';
+    const responseContent = response.choices[0].message.content || 'Error processing response';
+    return formatPlainTextResponse(responseContent);
   } catch (error) {
     console.error('ChatGPT processing error:', error);
     throw new Error(`ChatGPT processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -42,7 +44,7 @@ export async function summarizeContent(content: string, fileName?: string): Prom
       messages: [
         {
           role: "system",
-          content: "You are an expert at creating clear, concise summaries. Provide structured summaries with key points, main themes, and actionable insights."
+          content: "You are an expert at creating clear, concise summaries. Provide structured summaries with key points, main themes, and actionable insights in plain text format without markdown formatting, asterisks, or special symbols. Use clear, readable text with proper paragraphs."
         },
         {
           role: "user",
@@ -62,7 +64,8 @@ Provide:
       temperature: 0.3,
     });
 
-    return response.choices[0].message.content || 'Error creating summary';
+    const summaryContent = response.choices[0].message.content || 'Error creating summary';
+    return formatPlainTextResponse(summaryContent);
   } catch (error) {
     console.error('ChatGPT summarization error:', error);
     throw new Error(`ChatGPT summarization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

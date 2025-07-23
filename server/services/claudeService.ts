@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { formatPlainTextResponse } from "../utils/textFormatter.js";
 
 /*
 <important_code_snippet_instructions>
@@ -31,14 +32,15 @@ export async function processWithClaude(content: string): Promise<string> {
 
 Content: ${content}
 
-Please provide a detailed, structured analysis.`
+Please provide a detailed, structured analysis in plain text format without markdown formatting, asterisks, or special symbols. Use clear, readable text with proper paragraphs.`
         }
       ],
       // "claude-sonnet-4-20250514"
       model: DEFAULT_MODEL_STR,
     });
 
-    return message.content[0].type === 'text' ? message.content[0].text : 'Error processing response';
+    const responseContent = message.content[0].type === 'text' ? message.content[0].text : 'Error processing response';
+    return formatPlainTextResponse(responseContent);
   } catch (error) {
     console.error('Claude processing error:', error);
     throw new Error(`Claude processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
