@@ -17,6 +17,7 @@ import {
   Plus
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface SidebarProps {
   activeView: 'chat' | 'analytics' | 'history';
@@ -230,6 +231,14 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
             )}
           </div>
         </ScrollArea>
+      </div>
+      
+      {/* Theme Toggle at bottom of sidebar */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Theme</span>
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );
