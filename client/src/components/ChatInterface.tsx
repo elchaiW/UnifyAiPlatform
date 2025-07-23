@@ -43,10 +43,10 @@ interface Message {
 
 const getModelImage = (model: string) => {
   switch (model.toLowerCase()) {
-    case 'claude': return '/attached_assets/claude_1753267642765.webp';
-    case 'chatgpt': return '/attached_assets/gpt 4_1753267647870.webp';
-    case 'gemini': return '/attached_assets/gemini_1753267704107.png';
-    case 'grok': return '/attached_assets/grok_1753267645602.png';
+    case 'claude': return '/attached_assets/claude_1753267938951.webp';
+    case 'chatgpt': return '/attached_assets/Chatgpt_1753267928029.webp';
+    case 'gemini': return '/attached_assets/gemini_1753267772227.png';
+    case 'grok': return '/attached_assets/grok_1753267912240.png';
     default: return null;
   }
 };
@@ -239,7 +239,7 @@ Classification Details:
                   <div className="flex flex-col items-center text-center space-y-2">
                     <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
-                        src="/attached_assets/claude_1753267642765.webp" 
+                        src="/attached_assets/claude_1753267938951.webp" 
                         alt="Claude" 
                         className="w-full h-full object-cover"
                       />
@@ -255,7 +255,7 @@ Classification Details:
                   <div className="flex flex-col items-center text-center space-y-2">
                     <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
-                        src="/attached_assets/gpt 4_1753267647870.webp" 
+                        src="/attached_assets/Chatgpt_1753267928029.webp" 
                         alt="ChatGPT" 
                         className="w-full h-full object-cover"
                       />
@@ -271,7 +271,7 @@ Classification Details:
                   <div className="flex flex-col items-center text-center space-y-2">
                     <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
-                        src="/attached_assets/gemini_1753267704107.png" 
+                        src="/attached_assets/gemini_1753267772227.png" 
                         alt="Gemini" 
                         className="w-full h-full object-cover"
                       />
@@ -287,7 +287,7 @@ Classification Details:
                   <div className="flex flex-col items-center text-center space-y-2">
                     <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
-                        src="/attached_assets/grok_1753267645602.png" 
+                        src="/attached_assets/grok_1753267912240.png" 
                         alt="Grok" 
                         className="w-full h-full object-cover"
                       />
