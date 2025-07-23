@@ -132,7 +132,7 @@ export default function Dashboard() {
               </h1>
             </div>
 
-            <div className="flex items-center">
+            <div className="flex items-center justify-center min-w-[36px]">
               <ThemeToggle />
             </div>
           </div>
