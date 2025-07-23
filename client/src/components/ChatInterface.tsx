@@ -233,62 +233,62 @@ Classification Details:
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-6 flex items-center justify-center shadow-lg">
-                <Bot className="h-8 w-8 text-white" />
+              <div className="w-12 h-12 bg-blue-600 rounded-lg mb-6 flex items-center justify-center">
+                <Bot className="h-6 w-6 text-white" />
               </div>
-              <h2 className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white mb-4 text-center">
-                How can I help you today?
+              <h2 className="text-3xl font-medium text-gray-900 dark:text-white mb-3 text-center">
+                Ask anything
               </h2>
-              <p className="text-base text-gray-600 dark:text-gray-400 mb-8 text-center max-w-md">
-                I'll automatically route your message to the best AI model for optimal results.
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-12 text-center max-w-lg">
+                Your intelligent AI assistant that automatically routes to the best model
               </p>
               
-              {/* ChatGPT-style suggestion cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl mb-8">
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">C</span>
+              {/* Perplexity-style suggestion cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full max-w-4xl mb-8">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <span className="text-white text-sm font-medium">C</span>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">Claude</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Legal documents & compliance analysis</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Legal & Analysis</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">G</span>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <span className="text-white text-sm font-medium">G</span>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">ChatGPT</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">General questions & content creation</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">G</span>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <span className="text-white text-sm font-medium">G</span>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">Gemini</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Marketing strategies & business plans</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">X</span>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <span className="text-white text-sm font-medium">X</span>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">Grok</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Code debugging & technical analysis</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
                     </div>
                   </div>
                 </div>
@@ -296,8 +296,8 @@ Classification Details:
             </div>
           )}
 
-          {/* ChatGPT-style Messages */}
-          <div className="px-4 space-y-6 pb-6 pt-4">
+          {/* Perplexity-style Messages */}
+          <div className="px-6 space-y-8 pb-6 pt-4">
             {messages.slice().reverse().map((msg) => (
               <div key={msg.id} className="space-y-4">
                 {/* User Message - ChatGPT style */}
@@ -433,15 +433,15 @@ Classification Details:
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex items-end space-x-3 p-3">
-              <div className="flex-1 min-w-0 flex-shrink">
+            <form onSubmit={handleSubmit} className="flex items-end space-x-4 p-4">
+              <div className="flex-1 relative">
                 <textarea
                   ref={textareaRef}
                   value={message}
                   onChange={handleInputChange}
-                  placeholder="Message Multi-AI Assistant..."
-                  className="w-full resize-none border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none min-h-[48px] max-h-[120px] py-3 leading-tight"
-                  style={{ height: '48px', fontSize: '16px', lineHeight: '1.2' }} // 16px prevents zoom on iOS, increased height for better placeholder visibility
+                  placeholder="Ask anything..."
+                  className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-20 text-sm placeholder-gray-400 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[52px] max-h-32 leading-relaxed transition-all"
+                  style={{ height: '52px', fontSize: '16px' }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -449,41 +449,41 @@ Classification Details:
                     }
                   }}
                 />
-              </div>
-              
-              {/* File Upload & Send Buttons */}
-              <div className="flex items-end space-x-2 flex-shrink-0">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  accept=".txt,.docx,.pdf"
-                  className="hidden"
-                />
                 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-10 w-10 p-0 flex-shrink-0 mb-1"
-                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                >
-                  <Paperclip className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                </Button>
-                
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                  className="h-10 w-10 p-0 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 flex-shrink-0 mb-1"
-                >
-                  {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
+                {/* Inline action buttons */}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    accept=".txt,.docx,.pdf"
+                    className="hidden"
+                  />
+                  
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                  >
+                    <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  </Button>
+                  
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    className="h-8 w-8 p-0 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
+                  >
+                    {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Send className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>
