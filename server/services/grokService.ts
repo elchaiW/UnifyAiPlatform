@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { formatPlainTextResponse } from "../utils/textFormatter.js";
 
 const openai = new OpenAI({ baseURL: "https://api.x.ai/v1", apiKey: process.env.XAI_API_KEY });
 
@@ -9,7 +10,7 @@ export async function processWithGrok(content: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: "You are a senior software engineer and technical expert. Provide detailed technical analysis, code reviews, debugging assistance, and programming solutions. Focus on best practices, security, performance, and maintainability."
+          content: "You are a senior software engineer and technical expert. Provide detailed technical analysis, code reviews, debugging assistance, and programming solutions. Focus on best practices, security, performance, and maintainability. Provide responses in plain text format without markdown formatting, asterisks, or special symbols. Use clear, readable text with proper paragraphs."
         },
         {
           role: "user",
@@ -20,7 +21,8 @@ export async function processWithGrok(content: string): Promise<string> {
       temperature: 0.1,
     });
 
-    return response.choices[0].message.content || 'Error processing response';
+    const responseContent = response.choices[0].message.content || 'Error processing response';
+    return formatPlainTextResponse(responseContent);
   } catch (error) {
     console.error('Grok processing error:', error);
     throw new Error(`Grok processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

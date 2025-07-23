@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { formatPlainTextResponse } from "../utils/textFormatter.js";
 
 // DON'T DELETE THIS COMMENT
 // Follow these instructions when using this blueprint:
@@ -20,10 +21,11 @@ export async function processWithGemini(content: string): Promise<string> {
 
 Request: ${content}
 
-Please provide detailed, actionable recommendations.`,
+Please provide detailed, actionable recommendations in plain text format without markdown formatting, asterisks, or special symbols. Use clear, readable text with proper paragraphs.`,
     });
 
-    return response.text || "Error processing response";
+    const responseContent = response.text || "Error processing response";
+    return formatPlainTextResponse(responseContent);
   } catch (error) {
     console.error('Gemini processing error:', error);
     throw new Error(`Gemini processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
