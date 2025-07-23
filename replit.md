@@ -199,3 +199,11 @@ The application implements a clean separation between frontend and backend, with
 - **Improved Mobile Spacing**: Fixed top message spacing with proper safe area handling
 - **Enhanced Loading States**: Replaced static loading with interactive typing animation
 - **Better Visual Feedback**: Immediate UI feedback for all user interactions
+
+### Perplexity-Style UI Redesign (January 22, 2025)
+- **Modern Color Palette**: Updated to clean blue/gray scheme matching Perplexity's aesthetic
+- **Inter Font Integration**: Added Google Fonts Inter with proper letter spacing and font features
+- **Refined Typography**: Medium font weights, improved spacing, and better text hierarchy
+- **Clean Input Design**: Perplexity-style rounded input with inline action buttons
+- **Minimalist Cards**: Updated suggestion cards with centered icons and subtle hover effects
+- **Professional Layout**: Increased padding, improved spacing, and cleaner visual hierarchy
