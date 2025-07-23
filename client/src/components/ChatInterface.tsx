@@ -427,7 +427,7 @@ Classification Details:
       </div>
 
       {/* ChatGPT-style Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 sm:px-4 py-3 sm:py-4 safe-area-pb">
+      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-4 safe-area-pb">
         <div className="max-w-3xl mx-auto">
           <div className="relative bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm focus-within:shadow-md transition-all">
             {selectedFile && (
@@ -449,15 +449,15 @@ Classification Details:
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex items-end space-x-2 sm:space-x-4 p-3 sm:p-4">
+            <form onSubmit={handleSubmit} className="flex items-end space-x-4 p-4">
               <div className="flex-1 relative">
                 <textarea
                   ref={textareaRef}
                   value={message}
                   onChange={handleInputChange}
                   placeholder="Ask anything..."
-                  className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-16 sm:pr-20 text-sm placeholder-gray-400 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[48px] sm:min-h-[52px] max-h-32 leading-relaxed transition-all"
-                  style={{ height: '48px', fontSize: '16px' }}
+                  className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-20 text-sm placeholder-gray-400 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[52px] max-h-32 leading-relaxed transition-all"
+                  style={{ height: '52px', fontSize: '16px' }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -467,7 +467,7 @@ Classification Details:
                 />
                 
                 {/* Inline action buttons */}
-                <div className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 flex items-center space-x-0.5 sm:space-x-1">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -491,7 +491,7 @@ Classification Details:
                     type="submit"
                     size="sm"
                     disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-8 w-8 p-0 bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 rounded-lg shadow-sm"
+                    className="h-8 w-8 p-0 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
                   >
                     {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
