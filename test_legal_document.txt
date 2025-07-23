@@ -1,0 +1,35 @@
+PRIVACY POLICY AND TERMS OF SERVICE
+XYZ Company
+
+PRIVACY POLICY
+
+1. INFORMATION COLLECTION
+We collect personal information including names, email addresses, phone numbers, payment details, device information, IP addresses, browsing history, and location data. We also collect information from third-party sources including social media platforms and data brokers.
+
+2. USE OF INFORMATION
+Personal information may be used for any business purposes including marketing, advertising, analytics, profiling, and sharing with business partners. We reserve the right to use personal information in ways not specified in this policy.
+
+3. DATA SHARING
+We may share personal information with affiliates, partners, service providers, government agencies, and any third parties at our discretion. User consent is not required for data sharing.
+
+4. DATA RETENTION
+Personal information will be retained indefinitely unless users specifically request deletion, which may take up to 180 days to process.
+
+5. USER RIGHTS
+Users have limited rights regarding their personal information. Requests for data access or deletion may be denied at company discretion.
+
+TERMS OF SERVICE
+
+1. USER OBLIGATIONS
+Users must provide accurate information and are responsible for all activity on their accounts. Users grant the company unlimited rights to their content and agree to indemnify the company for any legal issues.
+
+2. SERVICE AVAILABILITY
+The company makes no guarantees about service availability and may terminate accounts without notice or refund.
+
+3. LIABILITY
+The company is not liable for any damages, losses, or issues resulting from service use, including data breaches or financial losses.
+
+4. DISPUTE RESOLUTION
+All disputes must be resolved through binding arbitration. Users waive their right to participate in class action lawsuits.
+
+This document contains multiple potential legal compliance issues that should be identified by Claude's legal analysis capabilities.
