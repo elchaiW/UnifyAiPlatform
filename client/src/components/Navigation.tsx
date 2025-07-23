@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Home, Settings } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -45,11 +46,12 @@ export default function Navigation() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button className="bg-gradient-to-r from-secondary to-accent hover:from-secondary/90 hover:to-accent/90 shadow-lg">
+            <ThemeToggle />
+            <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-white">
               Get Started
             </Button>
-            <div className="w-8 h-8 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
-              <Settings className="w-4 h-4 text-gray-600" />
+            <div className="w-8 h-8 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-full flex items-center justify-center">
+              <Settings className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </div>
           </div>
         </div>

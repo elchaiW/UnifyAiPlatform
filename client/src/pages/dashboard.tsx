@@ -5,6 +5,7 @@ import AnalyticsView from "@/components/AnalyticsView";
 import HistoryView from "@/components/HistoryView";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, BarChart3, History } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type View = 'chat' | 'analytics' | 'history';
 
@@ -131,7 +132,9 @@ export default function Dashboard() {
               </h1>
             </div>
 
-            <div className="w-10"> {/* Spacer for centering */}</div>
+            <div className="flex items-center">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
         

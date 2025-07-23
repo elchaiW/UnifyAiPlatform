@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Analytics from "@/pages/analytics";
 import NotFound from "@/pages/not-found";
+import { useEffect } from 'react';
 
 function Router() {
   return (
@@ -18,6 +19,22 @@ function Router() {
 }
 
 function App() {
+  // Initialize dark mode as default
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const initialTheme = savedTheme || 'dark';
+    
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    if (!savedTheme) {
+      localStorage.setItem('theme', 'dark');
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
