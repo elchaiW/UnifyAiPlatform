@@ -41,23 +41,13 @@ interface Message {
   };
 }
 
-const getModelColor = (model: string) => {
-  switch (model) {
-    case 'claude': return 'bg-blue-500';
-    case 'chatgpt': return 'bg-green-500';
-    case 'gemini': return 'bg-purple-500';
-    case 'grok': return 'bg-orange-500';
-    default: return 'bg-gray-500';
-  }
-};
-
-const getModelIcon = (model: string) => {
-  switch (model) {
-    case 'claude': return 'C';
-    case 'chatgpt': return 'G';
-    case 'gemini': return 'G';
-    case 'grok': return 'X';
-    default: return '?';
+const getModelImage = (model: string) => {
+  switch (model.toLowerCase()) {
+    case 'claude': return '/attached_assets/claude_1753267642765.webp';
+    case 'chatgpt': return '/attached_assets/gpt 4_1753267647870.webp';
+    case 'gemini': return '/attached_assets/gemini_1753267704107.png';
+    case 'grok': return '/attached_assets/grok_1753267645602.png';
+    default: return null;
   }
 };
 
@@ -247,8 +237,12 @@ Classification Details:
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full max-w-4xl mb-8">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <span className="text-white text-sm font-medium">C</span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/claude_1753267642765.webp" 
+                        alt="Claude" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">Claude</p>
@@ -259,8 +253,12 @@ Classification Details:
                 
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-2">
-                    <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <span className="text-white text-sm font-medium">G</span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/gpt 4_1753267647870.webp" 
+                        alt="ChatGPT" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">ChatGPT</p>
@@ -271,8 +269,12 @@ Classification Details:
                 
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-2">
-                    <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <span className="text-white text-sm font-medium">G</span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/gemini_1753267704107.png" 
+                        alt="Gemini" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">Gemini</p>
@@ -283,8 +285,12 @@ Classification Details:
                 
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-2">
-                    <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <span className="text-white text-sm font-medium">X</span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/grok_1753267645602.png" 
+                        alt="Grok" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">Grok</p>
@@ -315,10 +321,20 @@ Classification Details:
                   </div>
                 </div>
 
-                {/* AI Response - ChatGPT style */}
+                {/* AI Response - with custom model images */}
                 <div className="flex items-start space-x-3">
-                  <div className={`w-8 h-8 ${getModelColor(msg.selectedModel || '')} rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0`}>
-                    {getModelIcon(msg.selectedModel || '')}
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                    {getModelImage(msg.selectedModel || '') ? (
+                      <img 
+                        src={getModelImage(msg.selectedModel || '') || ''} 
+                        alt={msg.selectedModel || 'AI Model'} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                        ?
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     {/* Enhanced Classification Info */}
