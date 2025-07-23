@@ -38,11 +38,11 @@ export default function TypingAnimation({ text = "Analyzing your message and rou
   }, [text]);
 
   return (
-    <div className="flex items-start space-x-4 px-6 pb-8">
+    <div className="flex items-center space-x-4 px-6 pb-8">
       <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
         <Loader2 className="h-4 w-4 animate-spin text-white" />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 flex items-center">
         <div className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
           <span>{displayText}</span>
           <span className={`inline-block w-0.5 h-4 bg-blue-600 ml-1 ${showCursor ? 'opacity-100' : 'opacity-0'} transition-opacity`}>|</span>
