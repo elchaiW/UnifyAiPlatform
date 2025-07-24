@@ -29,11 +29,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Demo user for development - in production this would use proper authentication
-  const demoUser = await storage.createUser({
-    username: "demo",
-    email: "demo@example.com",
-    password: "demo123"
-  });
+  let demoUser = await storage.getUserByUsername("demo");
+  if (!demoUser) {
+    demoUser = await storage.createUser({
+      username: "demo",
+      email: "demo@example.com",
+      password: "demo123"
+    });
+  }
 
   // Submit prompt for processing (unified endpoint)
   app.post("/api/requests", async (req, res) => {
