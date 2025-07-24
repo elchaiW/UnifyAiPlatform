@@ -198,14 +198,14 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Supabase Storage Implementation
-export class SupabaseStorage implements IStorage {
+// PostgreSQL Storage Implementation  
+export class PostgreSQLStorage implements IStorage {
   private db: any;
 
   constructor() {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
-      throw new Error('DATABASE_URL is required for Supabase storage');
+      throw new Error('DATABASE_URL is required for PostgreSQL storage');
     }
     
     const sql = postgres(connectionString, { 
@@ -344,16 +344,18 @@ export class SupabaseStorage implements IStorage {
 // Create storage with error handling
 let storage: IStorage;
 try {
-  if (process.env.DATABASE_URL) {
-    console.log('Attempting to connect to Supabase...');
-    storage = new SupabaseStorage();
-    console.log('✅ Supabase storage initialized');
+  // Check if we have a proper PostgreSQL DATABASE_URL (not Supabase)
+  const dbUrl = process.env.DATABASE_URL;
+  if (dbUrl && dbUrl.startsWith('postgres')) {
+    console.log('Attempting to connect to PostgreSQL...');
+    storage = new PostgreSQLStorage();
+    console.log('✅ PostgreSQL storage initialized');
   } else {
-    console.log('⚠️  Using in-memory storage (DATABASE_URL not found)');
+    console.log('⚠️  Using in-memory storage (PostgreSQL DATABASE_URL not found)');
     storage = new MemStorage();
   }
 } catch (error) {
-  console.log('⚠️  Supabase connection failed, falling back to memory storage');
+  console.log('⚠️  PostgreSQL connection failed, falling back to memory storage');
   console.log('Error:', (error as Error).message);
   storage = new MemStorage();
 }
