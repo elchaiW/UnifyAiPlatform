@@ -1,24 +1,39 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public",
+  "buildCommand": "vite build",
+  "outputDirectory": "client/dist",
   "functions": {
-    "api/**/*.js": {
+    "api/**/*.ts": {
       "runtime": "nodejs20.x",
       "maxDuration": 30
     }
   },
   "routes": [
     {
+      "src": "/api/requests/history",
+      "dest": "/api/requests"
+    },
+    {
+      "src": "/api/analytics/stats",
+      "dest": "/api/analytics"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/client/dist/$1"
     }
   ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "rewrites": [
+    {
+      "source": "/api/requests/history",
+      "destination": "/api/requests"
+    },
+    {
+      "source": "/api/analytics/stats", 
+      "destination": "/api/analytics"
+    }
+  ]
 }
