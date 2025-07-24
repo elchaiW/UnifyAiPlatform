@@ -60,9 +60,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Architecture
 - **ORM**: Drizzle ORM with PostgreSQL
-- **Database**: Supabase PostgreSQL (instead of AWS/Neon)
+- **Database**: Supabase PostgreSQL with transaction pooler
 - **Migrations**: Drizzle Kit for schema management
-- **Storage Implementation**: In-memory storage for development with interface for production database migration
+- **Storage Implementation**: Supabase storage with fallback to in-memory for development
 - **Real-time Features**: Supabase real-time subscriptions for live analytics updates
 
 ## Key Components
