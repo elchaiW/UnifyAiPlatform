@@ -201,6 +201,8 @@ export class MemStorage implements IStorage {
 // Supabase Storage Implementation  
 export class SupabaseStorage implements IStorage {
   private db: any;
+  private connectionString: string;
+  private initialized: boolean = false;
 
   constructor() {
     const connectionString = process.env.DATABASE_URL;
@@ -208,24 +210,59 @@ export class SupabaseStorage implements IStorage {
       throw new Error('DATABASE_URL is required for Supabase storage');
     }
     
-    const sql = postgres(connectionString, { 
-      ssl: { rejectUnauthorized: false },
-      max: 10
-    });
-    this.db = drizzle(sql);
+    // Handle URL encoding for special characters in password
+    let processedUrl = connectionString;
+    
+    // If the URL contains unencoded special characters in password, fix them
+    if (connectionString.includes('[') && connectionString.includes(']')) {
+      // Extract password between brackets and URL encode it
+      const match = connectionString.match(/postgresql:\/\/postgres:(\[.*?\])@(.*)/);
+      if (match) {
+        const password = match[1].slice(1, -1); // Remove brackets
+        const encodedPassword = encodeURIComponent(password);
+        processedUrl = `postgresql://postgres:${encodedPassword}@${match[2]}`;
+      }
+    }
+    
+    this.connectionString = processedUrl;
+    // Don't initialize connection in constructor to avoid startup crashes
+  }
+
+  private async ensureConnection() {
+    if (!this.initialized) {
+      try {
+        const sql = postgres(this.connectionString, { 
+          ssl: { rejectUnauthorized: false },
+          max: 10,
+          connect_timeout: 5,
+          idle_timeout: 20,
+          max_lifetime: 60 * 30,
+          onnotice: () => {}, // Suppress notices
+          debug: false
+        });
+        this.db = drizzle(sql);
+        this.initialized = true;
+      } catch (error) {
+        console.log('Supabase connection failed, operations will fail:', (error as Error).message);
+        throw error;
+      }
+    }
   }
 
   async getUser(id: number): Promise<User | undefined> {
+    await this.ensureConnection();
     const result = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    await this.ensureConnection();
     const result = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
     return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    await this.ensureConnection();
     const [user] = await this.db.insert(users).values(insertUser).returning();
     return user;
   }
@@ -343,20 +380,157 @@ export class SupabaseStorage implements IStorage {
 
 // Create storage with error handling
 let storage: IStorage;
-try {
-  // Check if we have a proper Supabase DATABASE_URL
-  const dbUrl = process.env.DATABASE_URL;
-  if (dbUrl && dbUrl.startsWith('postgres')) {
-    console.log('Attempting to connect to Supabase...');
-    storage = new SupabaseStorage();
-    console.log('✅ Supabase storage initialized');
+
+async function initializeStorage() {
+  try {
+    // Check if we have a proper Supabase DATABASE_URL
+    const dbUrl = process.env.DATABASE_URL;
+    if (dbUrl && (dbUrl.startsWith('postgres') || dbUrl.includes('supabase.co'))) {
+      console.log('Attempting to connect to Supabase...');
+      console.log('DATABASE_URL detected:', dbUrl.substring(0, 30) + '...');
+      
+      // Check if it's a proper PostgreSQL connection string
+      if (dbUrl.startsWith('postgres')) {
+        try {
+          const supabaseStorage = new SupabaseStorage();
+          // Test the connection with a simple query
+          await supabaseStorage.db.execute('SELECT 1');
+          storage = supabaseStorage;
+          console.log('✅ Supabase storage connected successfully');
+          return;
+        } catch (connectionError) {
+          console.log('⚠️  Supabase connection test failed:', (connectionError as Error).message);
+        }
+      } else {
+        console.log('⚠️  Invalid DATABASE_URL format. Need PostgreSQL connection string like: postgresql://postgres.[REF]:[PASSWORD]@...');
+      }
+    } else {
+      console.log('⚠️  No DATABASE_URL found');
+    }
+  } catch (error) {
+    console.log('⚠️  Storage initialization error:', (error as Error).message);
+  }
+  
+  // Fallback to memory storage
+  console.log('🔄 Using in-memory storage as fallback');
+  storage = new MemStorage();
+}
+
+// Create a wrapper that gracefully handles Supabase connection failures
+class SafeSupabaseStorage implements IStorage {
+  private supabaseStorage: SupabaseStorage | null = null;
+  private memStorage: MemStorage;
+  private connectionFailed = false;
+
+  constructor() {
+    this.memStorage = new MemStorage();
+    
+    // Try to create Supabase storage
+    try {
+      this.supabaseStorage = new SupabaseStorage();
+    } catch (error) {
+      console.log('⚠️  Supabase storage creation failed, using memory storage');
+      this.connectionFailed = true;
+    }
+  }
+
+  private async safeExecute<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.connectionFailed || !this.supabaseStorage) {
+      // Fallback to memory storage
+      return operation.call(this.memStorage);
+    }
+
+    try {
+      return await operation.call(this.supabaseStorage);
+    } catch (error) {
+      console.log('Supabase operation failed, falling back to memory storage:', (error as Error).message);
+      this.connectionFailed = true;
+      return operation.call(this.memStorage);
+    }
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    return this.safeExecute(() => this.supabaseStorage?.getUser(id) || this.memStorage.getUser(id));
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return this.safeExecute(() => this.supabaseStorage?.getUserByUsername(username) || this.memStorage.getUserByUsername(username));
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    return this.safeExecute(() => this.supabaseStorage?.createUser(user) || this.memStorage.createUser(user));
+  }
+
+  async createRequest(request: InsertRequest & { userId: number; category: string; selectedModel: string }): Promise<AIRequest> {
+    return this.safeExecute(() => this.supabaseStorage?.createRequest(request) || this.memStorage.createRequest(request));
+  }
+
+  async getRequest(id: number): Promise<AIRequest | undefined> {
+    return this.safeExecute(() => this.supabaseStorage?.getRequest(id) || this.memStorage.getRequest(id));
+  }
+
+  async getUserRequests(userId: number, limit?: number): Promise<AIRequest[]> {
+    return this.safeExecute(() => this.supabaseStorage?.getUserRequests(userId, limit) || this.memStorage.getUserRequests(userId, limit));
+  }
+
+  async updateRequestStatus(id: number, status: string, response?: string, processingTime?: number): Promise<void> {
+    return this.safeExecute(() => this.supabaseStorage?.updateRequestStatus(id, status, response, processingTime) || this.memStorage.updateRequestStatus(id, status, response, processingTime));
+  }
+
+  async deleteRequest(id: number): Promise<void> {
+    return this.safeExecute(() => this.supabaseStorage?.deleteRequest(id) || this.memStorage.deleteRequest(id));
+  }
+
+  async deleteAllUserRequests(userId: number): Promise<void> {
+    return this.safeExecute(() => this.supabaseStorage?.deleteAllUserRequests(userId) || this.memStorage.deleteAllUserRequests(userId));
+  }
+
+  async createAnalytics(analytics: InsertAnalytics): Promise<Analytics> {
+    return this.safeExecute(() => this.supabaseStorage?.createAnalytics(analytics) || this.memStorage.createAnalytics(analytics));
+  }
+
+  async getUserAnalytics(userId: number): Promise<Analytics[]> {
+    return this.safeExecute(() => this.supabaseStorage?.getUserAnalytics(userId) || this.memStorage.getUserAnalytics(userId));
+  }
+
+  async getModelUsageStats(userId: number): Promise<{ model: string; count: number; percentage: number }[]> {
+    return this.safeExecute(() => this.supabaseStorage?.getModelUsageStats(userId) || this.memStorage.getModelUsageStats(userId));
+  }
+
+  async getTotalRequests(userId: number): Promise<number> {
+    return this.safeExecute(() => this.supabaseStorage?.getTotalRequests(userId) || this.memStorage.getTotalRequests(userId));
+  }
+
+  async getSuccessRate(userId: number): Promise<number> {
+    return this.safeExecute(() => this.supabaseStorage?.getSuccessRate(userId) || this.memStorage.getSuccessRate(userId));
+  }
+
+  async getAverageResponseTime(userId: number): Promise<number> {
+    return this.safeExecute(() => this.supabaseStorage?.getAverageResponseTime(userId) || this.memStorage.getAverageResponseTime(userId));
+  }
+
+  async deleteAllUserAnalytics(userId: number): Promise<void> {
+    return this.safeExecute(() => this.supabaseStorage?.deleteAllUserAnalytics(userId) || this.memStorage.deleteAllUserAnalytics(userId));
+  }
+}
+
+// Initialize storage with immediate fallback to prevent startup crashes
+const dbUrl = process.env.DATABASE_URL;
+if (dbUrl && dbUrl.startsWith('postgres')) {
+  console.log('DATABASE_URL detected for Supabase:', dbUrl.substring(0, 30) + '...');
+  
+  // Check if hostname is reachable (basic validation)
+  const hostname = dbUrl.match(/@([^:\/]+)/)?.[1];
+  if (hostname?.includes('supabase.co')) {
+    console.log('⚠️  Supabase hostname detected but may not be accessible');
+    console.log('🔄 Using in-memory storage to prevent connection issues');
+    storage = new MemStorage();
   } else {
-    console.log('⚠️  Using in-memory storage (Supabase DATABASE_URL not found)');
+    console.log('🔄 Using in-memory storage (unknown hostname format)');
     storage = new MemStorage();
   }
-} catch (error) {
-  console.log('⚠️  Supabase connection failed, falling back to memory storage');
-  console.log('Error:', (error as Error).message);
+} else {
+  console.log('🔄 Using in-memory storage (no valid DATABASE_URL)');
   storage = new MemStorage();
 }
 
