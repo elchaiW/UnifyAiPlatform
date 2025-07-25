@@ -1,3 +1,5 @@
+import { cleanMarkdownFormatting } from '../utils/textFormatter';
+
 // Note: This would typically use the actual Grok API
 // For now, using a placeholder that returns a technical-focused response
 
@@ -7,7 +9,8 @@ export async function processWithGrok(prompt: string): Promise<string> {
   
   if (!process.env.XAI_API_KEY) {
     // Return a technical-focused response as fallback
-    return `Technical Analysis: ${prompt}\n\nThis is a technical query that would typically be processed by Grok AI. The system has analyzed your request and identified it as technical content requiring specialized coding or technical expertise.`;
+    const response = `Technical Analysis: ${prompt}\n\nThis is a technical query that would typically be processed by Grok AI. The system has analyzed your request and identified it as technical content requiring specialized coding or technical expertise.`;
+    return cleanMarkdownFormatting(response);
   }
 
   try {
@@ -15,7 +18,8 @@ export async function processWithGrok(prompt: string): Promise<string> {
     // const response = await grokAPI.process(prompt);
     // return response.text;
     
-    return `Technical Analysis: ${prompt}\n\nProcessed with technical expertise focus.`;
+    const response = `Technical Analysis: ${prompt}\n\nProcessed with technical expertise focus.`;
+    return cleanMarkdownFormatting(response);
   } catch (error) {
     console.error('Grok API error:', error);
     throw new Error('Failed to process request with Grok');
