@@ -133,7 +133,7 @@ export default function Dashboard() {
               </h1>
             </div>
 
-            <div className="flex items-center">
+            <div className="hidden lg:flex items-center">
               <ThemeToggle />
             </div>
           </div>
