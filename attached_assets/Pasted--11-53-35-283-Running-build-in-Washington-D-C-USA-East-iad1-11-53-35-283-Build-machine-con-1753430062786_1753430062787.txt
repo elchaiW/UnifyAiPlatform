@@ -1,0 +1,32 @@
+[11:53:35.283] Running build in Washington, D.C., USA (East) – iad1
+[11:53:35.283] Build machine configuration: 2 cores, 8 GB
+[11:53:35.297] Cloning github.com/nfcrent/luminadocv8 (Branch: main, Commit: d3f3f99)
+[11:53:35.652] Previous build caches not available
+[11:53:36.092] Cloning completed: 795.000ms
+[11:53:38.028] Running "vercel build"
+[11:53:38.766] Vercel CLI 44.5.0
+[11:53:39.647] > Installing Builder: @vercel/node@3.0.7
+[11:53:51.089] Installing dependencies...
+[11:53:56.236] npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+[11:53:56.766] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[11:53:56.788] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[11:54:02.815] 
+[11:54:02.815] added 625 packages in 11s
+[11:54:02.816] 
+[11:54:02.816] 78 packages are looking for funding
+[11:54:02.816]   run `npm fund` for details
+[11:54:03.580] [36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[11:54:03.629] transforming...
+[11:54:03.905] Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+[11:54:03.905]   npx update-browserslist-db@latest
+[11:54:03.905]   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[11:54:08.787] [32m✓[39m 2025 modules transformed.
+[11:54:09.113] rendering chunks...
+[11:54:09.122] computing gzip size...
+[11:54:09.252] [2m../dist/public/[22m[32mindex.html                 [39m[1m[2m  1.06 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
+[11:54:09.276] [2m../dist/public/[22m[2massets/[22m[35mindex-CE8OMT02.css  [39m[1m[2m103.48 kB[22m[1m[22m[2m │ gzip:  16.33 kB[22m
+[11:54:09.276] [2m../dist/public/[22m[2massets/[22m[36mindex-Clqss7Ul.js   [39m[1m[2m400.33 kB[22m[1m[22m[2m │ gzip: 121.09 kB[22m
+[11:54:09.276] [32m✓ built in 5.65s[39m
+[11:54:09.322] Error: Found invalid Node.js Version: "22.x". Please set Node.js Version to 18.x in your Project Settings to use Node.js 18.
+[11:54:09.322] Learn More: http://vercel.link/node-version
+[11:54:09.689] 
