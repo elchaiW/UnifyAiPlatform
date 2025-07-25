@@ -267,7 +267,7 @@ ${item.response}
                 How can I help you today?
               </h2>
               <p className="text-base text-gray-600 dark:text-gray-400 mb-8 text-center max-w-md">
-                I'll automatically route your message to the best AI model for optimal results.
+                I&apos;ll automatically route your message to the best AI model for optimal results.
               </p>
               
               {/* ChatGPT-style suggestion cards */}

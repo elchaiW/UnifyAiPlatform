@@ -1,0 +1,19 @@
+{
+  "name": "luminadoc",
+  "build": {
+    "main": "app/page.tsx",
+    "buildCommand": "npm run build",
+    "installCommand": "npm install",
+    "dev": "npm run dev"
+  },
+  "run": {
+    "main": "server.js",
+    "command": "npm start"
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

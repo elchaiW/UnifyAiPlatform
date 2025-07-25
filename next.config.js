@@ -23,6 +23,7 @@ const nextConfig = withPWA({
     domains: ['localhost'],
     unoptimized: true,
   },
+  output: 'standalone', // Required for Docker deployment
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Handle client-side imports
     if (!isServer) {

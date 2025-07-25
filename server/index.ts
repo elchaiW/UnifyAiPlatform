@@ -1,6 +1,5 @@
-// Temporary compatibility server for development
-// This allows the existing .replit workflow to continue working
-// while we transition to Next.js
+// Next.js compatibility wrapper for Replit workflows
+// This ensures the existing workflow continues to work with Next.js
 
 import { spawn } from 'child_process';
 
@@ -8,7 +7,8 @@ console.log('🚀 Starting Next.js development server...');
 
 const nextProcess = spawn('npx', ['next', 'dev'], {
   stdio: 'inherit',
-  cwd: process.cwd()
+  cwd: process.cwd(),
+  env: { ...process.env, NODE_ENV: 'development' }
 });
 
 nextProcess.on('error', (error) => {

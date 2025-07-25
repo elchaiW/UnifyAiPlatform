@@ -82,10 +82,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let result;
     if (enhancedAnalysis) {
       // Use enhanced transcription with sentiment and topic analysis
-      result = await transcribeAudioWithSentimentAnalysis(file.buffer, file.mimetype);
+      result = await transcribeAudioWithSentimentAnalysis(file);
     } else {
       // Use basic transcription
-      const text = await transcribeAudio(file.buffer, file.mimetype);
+      const text = await transcribeAudio(file);
       result = { text };
     }
 
