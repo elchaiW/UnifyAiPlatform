@@ -1,0 +1,12 @@
+{
+  "name": "UnifyAiPlatform Dev",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:18",
+  "features": {},
+  "forwardPorts": [3000, 5173],
+  "postCreateCommand": "npm install --prefix client && npm install --prefix server",
+  "customizations": {
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+    }
+  }
+}
