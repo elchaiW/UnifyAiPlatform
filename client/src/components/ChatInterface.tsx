@@ -217,27 +217,34 @@ Classification Details:
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 relative">
-      {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
-      <div className="flex-1 overflow-y-auto pt-8 pb-40 lg:pb-32 lg:pt-8 mobile-messages-top">
+    <div className="flex-1 flex flex-col h-full bg-black lg:bg-white lg:dark:bg-gray-900 relative">
+      {/* Messages Area with Fixed Bottom Space */}
+      <div className="flex-1 overflow-y-auto pt-8 pb-24 lg:pb-32 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
-          {/* Welcome Message - ChatGPT style */}
+          {/* Mobile: Empty minimalist state, Desktop: Full welcome */}
           {messages.length === 0 && !isLoading && (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-lg mb-4 lg:mb-6 flex items-center justify-center">
-                <Bot className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
+            <>
+              {/* Mobile: Clean empty state */}
+              <div className="lg:hidden flex flex-col items-center justify-center min-h-[80vh] px-4">
+                {/* Completely empty for mobile */}
               </div>
-              <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
-                Ask anything
-              </h2>
-              <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-8 lg:mb-12 text-center max-w-lg">
-                Your intelligent AI assistant that automatically routes to the best model
-              </p>
               
-              {/* Perplexity-style suggestion cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
-                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+              {/* Desktop: Full welcome state */}
+              <div className="hidden lg:flex flex-col items-center justify-center min-h-[60vh] px-4">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-lg mb-4 lg:mb-6 flex items-center justify-center">
+                  <Bot className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
+                </div>
+                <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
+                  Ask anything
+                </h2>
+                <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-8 lg:mb-12 text-center max-w-lg">
+                  Your intelligent AI assistant that automatically routes to the best model
+                </p>
+                
+                {/* Desktop suggestion cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                    <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
                         src="/attached_assets/claude_1753267938951.webp" 
@@ -250,57 +257,58 @@ Classification Details:
                       <p className="text-xs text-gray-500 dark:text-gray-400">Legal & Analysis</p>
                     </div>
                   </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
-                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
-                      <img 
-                        src="/attached_assets/Chatgpt_1753267928029.webp" 
-                        alt="ChatGPT" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">ChatGPT</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
-                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
-                      <img 
-                        src="/attached_assets/gemini_1753267772227.png" 
-                        alt="Gemini" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Gemini</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                    <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                        <img 
+                          src="/attached_assets/Chatgpt_1753267928029.webp" 
+                          alt="ChatGPT" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">ChatGPT</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
-                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
-                      <img 
-                        src="/attached_assets/grok_1753267912240.png" 
-                        alt="Grok" 
-                        className="w-full h-full object-cover"
-                      />
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                    <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                        <img 
+                          src="/attached_assets/gemini_1753267772227.png" 
+                          alt="Gemini" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Gemini</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Grok</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                    <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                        <img 
+                          src="/attached_assets/grok_1753267912240.png" 
+                          alt="Grok" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Grok</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            </>
           )}
 
           {/* Perplexity-style Messages */}
@@ -427,8 +435,8 @@ Classification Details:
         </div>
       </div>
 
-      {/* Modern AI Chat Input Area - Dark Theme - Fixed Position */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-gray-900 dark:bg-gray-900 border-t border-gray-700 px-4 py-4 safe-area-pb z-20 chat-input-fixed">
+      {/* Input Area - Mobile: Black minimalist, Desktop: Standard */}
+      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-black lg:bg-gray-900 lg:dark:bg-gray-900 lg:border-t lg:border-gray-700 px-4 py-4 safe-area-pb z-20 chat-input-fixed">
         <div className="max-w-4xl mx-auto">
           {selectedFile && (
             <div className="mb-3">
@@ -450,8 +458,8 @@ Classification Details:
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
-              <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
+            <div className="relative bg-gray-800 rounded-full lg:rounded-3xl lg:border lg:border-gray-700 shadow-lg lg:hover:border-gray-600 transition-all duration-200">
+              <div className="flex items-center px-4 py-3 lg:py-4 min-h-[48px] lg:min-h-[56px]">
                 {/* Plus Button - Left Side */}
                 <Button
                   type="button"
@@ -502,7 +510,6 @@ Classification Details:
                       setTimeout(() => textareaRef.current?.focus(), 100);
                     }}
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-8 w-8 rounded-full bg-gray-600 hover:bg-gray-500 text-white"
                   />
 
                   {/* Audio Waves Button */}
