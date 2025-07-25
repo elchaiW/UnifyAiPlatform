@@ -1,5 +1,4 @@
-import { useState } from "react";
-import React from "react";
+import { useState, useEffect } from "react";
 import ChatInterface from "@/components/ChatInterface";
 import Sidebar from "@/components/Sidebar";
 import AnalyticsView from "@/components/AnalyticsView";
@@ -17,14 +16,14 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Listen for mobile sidebar toggle from input area
-  React.useEffect(() => {
+  useEffect(() => {
     const handleToggleSidebar = () => {
-      setIsSidebarOpen(!isSidebarOpen);
+      setIsSidebarOpen(prev => !prev);
     };
     
     window.addEventListener('toggleMobileSidebar', handleToggleSidebar);
     return () => window.removeEventListener('toggleMobileSidebar', handleToggleSidebar);
-  }, [isSidebarOpen]);
+  }, []);
 
   const handleNewChat = () => {
     setCurrentConversationId(null);
