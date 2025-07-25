@@ -110,28 +110,17 @@ export default function Dashboard() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ChatGPT-style Mobile Navigation */}
-        <div className="lg:hidden bg-gray-800 px-4 py-3 pt-8 safe-area-pt">
-          <div className="flex items-center justify-between">
-            {/* Left: Hamburger menu */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </Button>
-            
-            {/* Center: App name */}
-            <h1 className="text-white font-medium text-lg">LUMINADOC</h1>
-            
-            {/* Right: Spacer for centering */}
-            <div className="w-9"></div>
-          </div>
-        </div>
+        {/* Floating Hamburger Menu */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="lg:hidden fixed top-4 left-4 z-40 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md safe-area-pt"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </Button>
         
         {/* Content */}
         <div className="flex-1 min-h-0">

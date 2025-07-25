@@ -219,7 +219,7 @@ Classification Details:
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 relative">
       {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
-      <div className="flex-1 overflow-y-auto pt-8 pb-40 lg:pb-32 lg:pt-8 mobile-messages-top">
+      <div className="flex-1 overflow-y-auto pt-4 pb-40 lg:pb-32 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
