@@ -6,7 +6,7 @@ interface TypingAnimationProps {
   speed?: number;
 }
 
-export default function TypingAnimation({ text = "Analyzing your message and routing to the best AI model...", speed = 50 }: TypingAnimationProps) {
+export default function TypingAnimation({ text = "Generating response...", speed = 50 }: TypingAnimationProps) {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
