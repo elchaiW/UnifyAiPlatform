@@ -101,7 +101,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       <div className="p-4 space-y-2">
         <Button
           variant={activeView === 'chat' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${activeView === 'chat' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`w-full justify-start ${activeView === 'chat' ? 'bg-gradient-to-r from-[#3EC5FE] to-[#AE7CFE] text-white' : 'text-gray-300 hover:text-white'}`}
           onClick={() => onViewChange('chat')}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
@@ -109,7 +109,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </Button>
         <Button
           variant={activeView === 'analytics' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${activeView === 'analytics' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`w-full justify-start ${activeView === 'analytics' ? 'bg-gradient-to-r from-[#3EC5FE] to-[#AE7CFE] text-white' : 'text-gray-300 hover:text-white'}`}
           onClick={() => onViewChange('analytics')}
         >
           <BarChart3 className="h-4 w-4 mr-2" />
@@ -117,7 +117,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </Button>
         <Button
           variant={activeView === 'history' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${activeView === 'history' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`w-full justify-start ${activeView === 'history' ? 'bg-gradient-to-r from-[#3EC5FE] to-[#AE7CFE] text-white' : 'text-gray-300 hover:text-white'}`}
           onClick={() => onViewChange('history')}
         >
           <History className="h-4 w-4 mr-2" />
