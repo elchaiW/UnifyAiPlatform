@@ -427,95 +427,113 @@ Classification Details:
         </div>
       </div>
 
-      {/* ChatGPT-style Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-4 safe-area-pb">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm focus-within:shadow-md transition-all">
-            {selectedFile && (
-              <div className="p-3 border-b border-gray-200 dark:border-gray-600">
-                <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-blue-900 dark:text-blue-100">{selectedFile.name}</span>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setSelectedFile(null)}
-                    className="h-6 w-6 p-0 text-blue-600 hover:bg-blue-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
+      {/* Modern AI Chat Input Area - Dark Theme */}
+      <div className="bg-gray-900 dark:bg-gray-900 border-t border-gray-700 px-4 py-4 safe-area-pb">
+        <div className="max-w-4xl mx-auto">
+          {selectedFile && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3 border border-gray-700">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-gray-300">{selectedFile.name}</span>
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedFile(null)}
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </div>
-            )}
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="p-4">
-              <div className="flex items-end space-x-3">
+          <form onSubmit={handleSubmit}>
+            <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
+              <div className="flex items-center px-4 py-3">
+                {/* Plus Button - Left Side */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-9 w-9 p-0 mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </Button>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept=".txt,.docx,.pdf"
+                  className="hidden"
+                />
+
+                {/* Text Input */}
                 <div className="flex-1 relative">
                   <textarea
                     ref={textareaRef}
                     value={message}
                     onChange={handleInputChange}
-                    placeholder="Ask anything or use voice..."
-                    className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-20 text-sm placeholder-gray-400 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[52px] max-h-32 leading-relaxed transition-all"
-                    style={{ height: '52px', fontSize: '16px' }}
+                    placeholder="Fai una domanda"
+                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-base leading-6 min-h-[24px] max-h-32 py-0"
+                    style={{ fontSize: '16px' }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
                         handleSubmit(e);
                       }
                     }}
+                    rows={1}
                   />
-                  
-                  {/* Inline action buttons */}
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileSelect}
-                      accept=".txt,.docx,.pdf"
-                      className="hidden"
-                    />
-                    
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    >
-                      <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                    </Button>
-                    
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                      className="h-8 w-8 p-0 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
-                    >
-                      {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Send className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
                 </div>
-                
-                {/* Voice Input Component */}
-                <VoiceInput 
-                  onTranscription={(text) => {
-                    setMessage(text);
-                    // Auto-focus the textarea after transcription
-                    setTimeout(() => textareaRef.current?.focus(), 100);
-                  }}
-                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                />
+
+                {/* Right Side Controls */}
+                <div className="flex items-center space-x-2 ml-3">
+                  {/* Voice Input Component */}
+                  <VoiceInput 
+                    onTranscription={(text) => {
+                      setMessage(text);
+                      setTimeout(() => textareaRef.current?.focus(), 100);
+                    }}
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                  />
+
+                  {/* Additional Tools Button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700"
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </Button>
+
+                  {/* Send Button */}
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    className="h-9 w-9 p-0 rounded-full bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400 border-none"
+                  >
+                    {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

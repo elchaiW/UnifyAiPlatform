@@ -247,3 +247,12 @@ The application implements a clean separation between frontend and backend, with
 - **User Experience**: Voice button integrated into chat interface with recording playback functionality
 - **API Endpoints**: Created /api/transcribe and /api/transcribe/enhanced for voice processing
 - **Feature Showcase**: Added voice capability display cards showing transcription accuracy and features
+
+### Modern AI Chat Interface Design (January 25, 2025)
+- **Dark Theme Input**: Updated input area to match modern AI interfaces with dark gray background
+- **Rounded Design**: Implemented rounded-pill input field similar to Claude/ChatGPT interfaces
+- **Smart Button Layout**: Plus button on left for attachments, voice and tools on right
+- **Integrated Controls**: Voice recording seamlessly integrated with circular button design
+- **Professional Styling**: Dark theme with proper contrast and hover states for all controls
+- **Italian Placeholder**: Added "Fai una domanda" placeholder to match reference design
+- **Consistent Icons**: Updated all buttons to use circular design with proper spacing
