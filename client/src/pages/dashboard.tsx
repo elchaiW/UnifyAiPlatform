@@ -3,7 +3,7 @@ import ChatInterface from "@/components/ChatInterface";
 import Sidebar from "@/components/Sidebar";
 import AnalyticsView from "@/components/AnalyticsView";
 import HistoryView from "@/components/HistoryView";
-import { VoiceFeatureShowcase } from "@/components/VoiceFeatureShowcase";
+
 import { Button } from "@/components/ui/button";
 import { MessageSquare, BarChart3, History } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -28,21 +28,11 @@ export default function Dashboard() {
   const renderView = () => {
     switch (activeView) {
       case 'analytics':
-        return (
-          <div>
-            <VoiceFeatureShowcase />
-            <AnalyticsView />
-          </div>
-        );
+        return <AnalyticsView />;
       case 'history':
         return <HistoryView onLoadConversation={handleLoadConversation} />;
       default:
-        return (
-          <div>
-            <VoiceFeatureShowcase />
-            <ChatInterface />
-          </div>
-        );
+        return <ChatInterface />;
     }
   };
 

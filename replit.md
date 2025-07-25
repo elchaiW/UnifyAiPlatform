@@ -256,3 +256,5 @@ The application implements a clean separation between frontend and backend, with
 - **Professional Styling**: Dark theme with proper contrast and hover states for all controls
 - **Italian Placeholder**: Added "Fai una domanda" placeholder to match reference design
 - **Consistent Icons**: Updated all buttons to use circular design with proper spacing
+- **Fixed Input Position**: Input area now stays fixed at bottom with proper spacing to prevent layout shifts
+- **Removed Feature Cards**: Cleaned up interface by removing voice feature showcase cards for streamlined design
