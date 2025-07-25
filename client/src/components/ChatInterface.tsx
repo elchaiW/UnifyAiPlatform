@@ -494,7 +494,7 @@ Classification Details:
                 </div>
 
                 {/* Right Side Controls */}
-                <div className="flex items-center space-x-1 lg:space-x-2 ml-2 lg:ml-3">
+                <div className="flex items-center space-x-2 ml-3">
                   {/* Voice Input Component */}
                   <VoiceInput 
                     onTranscription={(text) => {
@@ -502,34 +502,26 @@ Classification Details:
                       setTimeout(() => textareaRef.current?.focus(), 100);
                     }}
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-7 w-7 lg:h-9 lg:w-9"
+                    className="h-8 w-8 rounded-full bg-gray-600 hover:bg-gray-500 text-white"
                   />
 
-                  {/* Additional Tools Button */}
+                  {/* Audio Waves Button */}
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 lg:h-9 lg:w-9 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700"
+                    className="h-8 w-8 p-0 rounded-full bg-gray-600 hover:bg-gray-500 text-white border-none"
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                   >
-                    <svg className="h-3 w-3 lg:h-4 lg:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2L13.09 8.26L14.18 14.52L15.27 20.78L16.36 27.04H7.64L8.73 20.78L9.82 14.52L10.91 8.26L12 2Z" />
+                      <path d="M2 12H5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                      <path d="M19 12H22" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                      <path d="M3 8H6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                      <path d="M18 8H21" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                      <path d="M3 16H6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+                      <path d="M18 16H21" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
                     </svg>
-                  </Button>
-
-                  {/* Send Button */}
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-7 w-7 lg:h-9 lg:w-9 p-0 rounded-full bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400 border-none"
-                  >
-                    {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
-                      <Loader2 className="h-3 w-3 lg:h-4 lg:w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-3 w-3 lg:h-4 lg:w-4" />
-                    )}
                   </Button>
                 </div>
               </div>
