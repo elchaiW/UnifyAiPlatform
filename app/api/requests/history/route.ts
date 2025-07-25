@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '../../../../server/storage';
+import { storage, ensureDemoUser } from '../../../../server/storage';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get demo user
+    // Ensure demo user exists
+    await ensureDemoUser();
     const demoUser = await storage.getUserByUsername("demo");
     if (!demoUser) {
+      console.log('📱 No demo user found, returning empty array');
       return NextResponse.json([], { status: 200 });
     }
 
@@ -14,6 +16,7 @@ export async function GET(request: NextRequest) {
     const limitNum = limit ? parseInt(limit, 10) : 50;
 
     const requests = await storage.getUserRequests(demoUser.id, limitNum);
+    console.log(`📱 History: Found ${requests.length} messages for user ${demoUser.id}`);
     return NextResponse.json(requests);
   } catch (error) {
     console.error('Error fetching request history:', error);
