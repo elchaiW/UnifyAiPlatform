@@ -119,8 +119,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Deployment Strategy
 
+### Deployment Configuration Fixed (January 25, 2025)
+- **Fixed Build Commands**: Updated all deployment configurations to use Next.js instead of Vite
+- **Deployment Files Updated**: 
+  - `replit_deploy.json`: Changed buildCommand to "next build" and outputDirectory to ".next"
+  - `apprunner.yaml`: Updated build commands and output directory verification
+  - `buildspec.yml`: Fixed build commands and artifact paths for AWS deployments
+  - `docker-compose.yml`: Updated ports from 5000 to 3000 for Next.js compatibility
+- **Build Verification**: Confirmed Next.js production build works correctly
+- **Architecture Clarity**: Project confirmed as Next.js 15 with App Router, not Vite-based
+
 ### Development
-- Local development with Next.js dev server
+- Local development with Next.js dev server on port 5000 (development) / 3000 (production)
 - Hot module replacement for React components and API routes
 - In-memory storage for rapid development
 - Automatic TypeScript compilation and error checking

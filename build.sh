@@ -1,15 +1,28 @@
 #!/bin/bash
-# Next.js build script for deployment
 
-echo "🚀 Building Next.js application for deployment..."
+# Next.js production build script
+echo "🚀 Starting Next.js production build..."
+
+# Clean previous builds
+echo "🧹 Cleaning previous builds..."
+rm -rf .next
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-npm install
+npm ci
 
-# Build Next.js application
+# Build the application
 echo "🔨 Building Next.js application..."
-npx next build
+next build
 
-echo "✅ Build completed successfully!"
-echo "🎯 Application ready for deployment"
+# Verify build completed
+if [ -d ".next" ]; then
+    echo "✅ Build completed successfully!"
+    echo "📁 Build output:"
+    ls -la .next/
+else
+    echo "❌ Build failed - .next directory not found"
+    exit 1
+fi
+
+echo "🎉 Ready for deployment!"
