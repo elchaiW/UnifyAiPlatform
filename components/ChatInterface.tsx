@@ -61,9 +61,16 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages using default queryFn
+  // Fetch messages with explicit queryFn
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
-    queryKey: ["/api", "requests", "history"],
+    queryKey: ["requests-history"],
+    queryFn: async () => {
+      const response = await fetch("/api/requests/history");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
     refetchInterval: 2000, // Faster refresh
     staleTime: 0, // Always consider data stale
     gcTime: 0, // Don't cache
@@ -91,8 +98,8 @@ export default function ChatInterface() {
     },
     onSuccess: () => {
       // Force immediate refetch of messages
-      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      queryClient.refetchQueries({ queryKey: ["/api/requests/history"] });
+      queryClient.invalidateQueries({ queryKey: ["requests-history"] });
+      queryClient.refetchQueries({ queryKey: ["requests-history"] });
     },
     onError: (error) => {
       toast({
