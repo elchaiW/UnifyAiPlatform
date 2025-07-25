@@ -428,7 +428,7 @@ Classification Details:
       </div>
 
       {/* Modern AI Chat Input Area - Dark Theme - Fixed Position */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-gray-900 dark:bg-gray-900 border-t border-gray-700 px-4 py-4 safe-area-pb z-20 chat-input-fixed">
+      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-gray-900 px-4 py-4 safe-area-pb z-20 chat-input-fixed">
         <div className="max-w-4xl mx-auto">
           {selectedFile && (
             <div className="mb-3">
