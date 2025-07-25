@@ -224,13 +224,6 @@ Classification Details:
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-              <div className="mb-4 lg:mb-6">
-                <img 
-                  src="/attached_assets/Group 1171274849 (1)_1753432882218.png" 
-                  alt="LUMINADOC" 
-                  className="h-16 w-auto lg:h-20"
-                />
-              </div>
               <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
                 Ask anything
               </h2>
