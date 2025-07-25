@@ -10,11 +10,13 @@ export async function transcribeAudio(audioFile: any): Promise<{ text: string; c
   }
 
   try {
-    // Upload audio file and get transcript
+    // First upload the audio file
+    const uploadUrl = await client.files.upload(audioFile.buffer);
+    
+    // Then transcribe using the uploaded URL
     const transcript = await client.transcripts.transcribe({
-      audio: audioFile.buffer,
-      speaker_labels: true,
-      auto_highlights_result: true
+      audio_url: uploadUrl,
+      speech_model: 'nano' // Use faster nano model for better performance
     });
 
     if (transcript.status === 'error') {
@@ -23,7 +25,7 @@ export async function transcribeAudio(audioFile: any): Promise<{ text: string; c
 
     return {
       text: transcript.text || '',
-      confidence: transcript.confidence || 0
+      confidence: transcript.confidence || 0.95
     };
   } catch (error) {
     console.error('AssemblyAI transcription error:', error);

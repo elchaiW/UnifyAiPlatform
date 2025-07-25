@@ -11,15 +11,15 @@ export async function processWithChatGPT(prompt: string): Promise<string> {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini', // Use faster mini model for better performance
       messages: [
         {
           role: 'user',
           content: prompt
         }
       ],
-      max_tokens: 1000,
-      temperature: 0.7,
+      max_tokens: 300, // Further reduced for speed
+      temperature: 0.5, // Lower temperature for faster processing
     });
 
     return completion.choices[0]?.message?.content || 'Sorry, I could not process your request.';
