@@ -85,7 +85,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       {/* Header */}
       <div className="px-4 py-4 pt-6 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Multi-AI Assistant
+          Luminadoc
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Intelligent AI Routing

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a multi-AI integrated platform inspired by UnifyGTM's modern design aesthetic. The application allows users to submit prompts or upload documents and automatically routes requests to the most appropriate AI model (Claude, ChatGPT, Gemini, or Grok) based on intelligent classification. The system features a sophisticated routing algorithm, real-time analytics, and a beautiful gradient-based UI that provides seamless multi-AI processing capabilities.
+Luminadoc is a multi-AI integrated platform inspired by UnifyGTM's modern design aesthetic. The application allows users to submit prompts or upload documents and automatically routes requests to the most appropriate AI model (Claude, ChatGPT, Gemini, or Grok) based on intelligent classification. The system features a sophisticated routing algorithm, real-time analytics, and a beautiful gradient-based UI that provides seamless multi-AI processing capabilities.
 
 ## User Preferences
 
@@ -228,6 +228,12 @@ The application implements a clean separation between frontend and backend, with
 - **Enhanced User Experience**: Eliminated distracting markdown formatting from AI model responses
 - **Consistent Output**: Applied text cleaning across Claude, ChatGPT, Gemini, and Grok services
 - **Professional Presentation**: Responses now display as clean, properly formatted plain text
+
+### Application Branding Update (January 25, 2025)
+- **Brand Identity**: Changed application name from "Multi-AI Assistant" to "Luminadoc"
+- **UI Updates**: Updated sidebar header, mobile navigation title, and documentation
+- **Brand Consistency**: Applied new "Luminadoc" name across all user-facing components
+- **Documentation**: Updated project overview and architecture descriptions with new branding
 
 ### Vercel Serverless Deployment Ready (January 24, 2025)
 - **Serverless Architecture**: Created Vercel-compatible API functions with @vercel/node runtime

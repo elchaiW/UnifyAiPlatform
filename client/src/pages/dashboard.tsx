@@ -129,7 +129,7 @@ export default function Dashboard() {
                 <span className="text-white font-bold text-xs">AI</span>
               </div>
               <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Multi-AI Assistant
+                Luminadoc
               </h1>
             </div>
 
