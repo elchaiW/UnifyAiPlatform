@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import ChatInterface from "@/components/ChatInterface";
-import Sidebar from "@/components/Sidebar";
-import AnalyticsView from "@/components/AnalyticsView";
-import HistoryView from "@/components/HistoryView";
+import React, { useState, useEffect } from "react";
+import ChatInterface from "./ChatInterface";
+import Sidebar from "./Sidebar";
+import AnalyticsView from "./AnalyticsView";
+import HistoryView from "./HistoryView";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "./ui/button";
 import { MessageSquare, BarChart3, History, Menu, X } from "lucide-react";
 
 type View = 'chat' | 'analytics' | 'history';
@@ -43,7 +43,6 @@ export default function Dashboard() {
         return (
           <ChatInterface 
             key={currentConversationId || 'new'}
-            conversationId={currentConversationId}
           />
         );
       case 'analytics':
@@ -54,7 +53,6 @@ export default function Dashboard() {
         return (
           <ChatInterface 
             key={currentConversationId || 'new'}
-            conversationId={currentConversationId}
           />
         );
     }
