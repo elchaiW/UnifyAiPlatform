@@ -235,6 +235,15 @@ The application implements a clean separation between frontend and backend, with
 - **Brand Consistency**: Applied new "Luminadoc" name across all user-facing components
 - **Documentation**: Updated project overview and architecture descriptions with new branding
 
+### iOS Mobile App Conversion (January 25, 2025)
+- **Progressive Web App (PWA)**: Converted web application to installable mobile app
+- **iOS Optimization**: Added Apple-specific meta tags and safe area support for iPhone notches
+- **Service Worker**: Implemented offline functionality and background caching
+- **App Manifest**: Created comprehensive manifest with app icons and metadata
+- **Mobile Installation**: Users can now install LUMINADOC as native-like app on iOS devices
+- **Offline Support**: Basic functionality works without internet connection
+- **Native Experience**: Full-screen mode without browser UI when installed from home screen
+
 ### Vercel Serverless Deployment Ready (January 24, 2025)
 - **Serverless Architecture**: Created Vercel-compatible API functions with @vercel/node runtime
 - **Production Build**: Implemented proper build pipeline with vite build for frontend optimization

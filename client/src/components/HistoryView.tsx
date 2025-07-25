@@ -53,7 +53,7 @@ const getStatusColor = (status: string) => {
     case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
     case 'processing': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
     case 'failed': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-[#2A2A2A] dark:text-gray-200';
   }
 };
 
@@ -146,7 +146,7 @@ Classification Details:
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-6 pt-6 bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 p-6 pt-6 bg-gray-50 dark:bg-[#2A2A2A]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-12">
             <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-pulse" />
@@ -158,7 +158,7 @@ Classification Details:
   }
 
   return (
-    <div className="flex-1 p-3 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto pt-6 lg:pt-6">
+    <div className="flex-1 p-3 lg:p-6 bg-gray-50 dark:bg-[#2A2A2A] overflow-y-auto pt-6 lg:pt-6">
       <div className="max-w-6xl mx-auto">
         {/* Header - Mobile responsive */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">

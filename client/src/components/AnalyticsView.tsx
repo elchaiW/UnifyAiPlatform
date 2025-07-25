@@ -98,7 +98,7 @@ ${analytics.processingTimes.map(p =>
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-6 pt-6 bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 p-6 pt-6 bg-gray-50 dark:bg-[#2A2A2A]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-12">
             <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-pulse" />
@@ -111,7 +111,7 @@ ${analytics.processingTimes.map(p =>
 
   if (!analytics) {
     return (
-      <div className="flex-1 p-6 pt-6 bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 p-6 pt-6 bg-gray-50 dark:bg-[#2A2A2A]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-12">
             <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -126,7 +126,7 @@ ${analytics.processingTimes.map(p =>
   const totalModelRequests = Object.values(analytics.modelUsage).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex-1 p-3 lg:p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto pt-6 lg:pt-6">
+    <div className="flex-1 p-3 lg:p-6 bg-gray-50 dark:bg-[#2A2A2A] overflow-y-auto pt-6 lg:pt-6">
       <div className="max-w-6xl mx-auto">
         {/* Header - Mobile responsive */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 gap-4">
@@ -255,7 +255,7 @@ ${analytics.processingTimes.map(p =>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {analytics.processingTimes.map((metric) => (
-              <div key={metric.model} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={metric.model} className="p-4 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <div className={`w-3 h-3 ${getModelColor(metric.model)} rounded-full`} />
                   <span className="text-sm font-medium text-gray-900 dark:text-white capitalize">

@@ -81,7 +81,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
   };
 
   return (
-    <div className="w-64 lg:w-80 h-screen bg-gray-800 border-r border-gray-700 flex flex-col shrink-0">
+    <div className="w-64 lg:w-80 h-screen bg-[#1E1E1E] border-r border-gray-700 flex flex-col shrink-0">
       {/* Header */}
       <div className="px-4 py-4 pt-6 border-b border-gray-700">
         <div className="flex items-center space-x-3 mb-2">
@@ -89,7 +89,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
           <img 
             src="/attached_assets/Group 1171274849 (1)_1753432882218.png" 
             alt="LUMINADOC" 
-            className="h-10 w-auto"
+            className="h-14 w-auto"
           />
         </div>
         <p className="text-sm text-gray-400">
@@ -101,7 +101,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       <div className="p-4 space-y-2">
         <Button
           variant={activeView === 'chat' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${activeView === 'chat' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`w-full justify-start ${activeView === 'chat' ? 'bg-gradient-to-r from-[#3EC5FE] to-[#AE7CFE] text-white' : 'text-gray-300 hover:text-white'}`}
           onClick={() => onViewChange('chat')}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
@@ -109,7 +109,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </Button>
         <Button
           variant={activeView === 'analytics' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${activeView === 'analytics' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`w-full justify-start ${activeView === 'analytics' ? 'bg-gradient-to-r from-[#3EC5FE] to-[#AE7CFE] text-white' : 'text-gray-300 hover:text-white'}`}
           onClick={() => onViewChange('analytics')}
         >
           <BarChart3 className="h-4 w-4 mr-2" />
@@ -117,7 +117,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </Button>
         <Button
           variant={activeView === 'history' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${activeView === 'history' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-gray-300 hover:text-white'}`}
+          className={`w-full justify-start ${activeView === 'history' ? 'bg-gradient-to-r from-[#3EC5FE] to-[#AE7CFE] text-white' : 'text-gray-300 hover:text-white'}`}
           onClick={() => onViewChange('history')}
         >
           <History className="h-4 w-4 mr-2" />
