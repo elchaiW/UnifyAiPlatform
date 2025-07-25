@@ -419,7 +419,7 @@ Classification Details:
 
           {/* Loading State with ChatGPT-style typing animation */}
           {(sendMessageMutation.isPending || uploadFileMutation.isPending) && (
-            <TypingAnimation text="Analyzing your message and routing to the best AI model..." />
+            <TypingAnimation text="Generating response..." />
           )}
 
           {/* Scroll anchor for auto-scroll */}
