@@ -93,7 +93,7 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
     const files = Array.from(e.dataTransfer.files);
     const file = files[0];
     
-    if (file && file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+    if (file && (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
       setSelectedFile(file);
     } else {
       alert('Please upload a text file (.txt, .md)');
@@ -119,8 +119,8 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
       fetch("/api/requests/document", { method: "POST", body: formData }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      setSelectedFile(null); // Clear file after upload
-      setMessage(""); // Clear message field too
+      setSelectedFile(null);
+      setMessage("");
     },
   });
 
@@ -148,8 +148,8 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
       formData.append("document", selectedFile);
       uploadFileMutation.mutate(formData);
     } else {
-      const messageToSend = message; // Store the message before clearing
-      setMessage(""); // Clear input field immediately
+      const messageToSend = message;
+      setMessage("");
       sendMessageMutation.mutate({ content: messageToSend });
     }
   };
@@ -206,6 +206,7 @@ ${item.response}
           </div>
         </div>
       )}
+
       {/* Header - Hidden on mobile, shown on desktop */}
       <div className="hidden lg:block border-b bg-white dark:bg-[#1E1E1E] px-4 lg:px-6 py-4 mt-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -389,35 +390,125 @@ ${item.response}
                         </div>
                       )}
 
-                      {/* AI Response Content */}
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
-                        <p className="text-gray-900 dark:text-white text-sm lg:text-base whitespace-pre-wrap">
-                          {msg.response}
-                        </p>
-                      </div>
+                      {/* Status-based content rendering */}
+                      {msg.status === 'processing' && (
+                        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Processing with {msg.selectedModel}...</span>
+                        </div>
+                      )}
+
+                      {msg.status === 'completed' && msg.response && (
+                        <div className="prose prose-sm max-w-none dark:prose-invert">
+                          <p className="text-gray-900 dark:text-white text-sm lg:text-base whitespace-pre-wrap">
+                            {msg.response}
+                          </p>
+                        </div>
+                      )}
+
+                      {msg.status === 'failed' && (
+                        <div className="text-red-600 dark:text-red-400">
+                          <p>Processing failed. Please try again.</p>
+                        </div>
+                      )}
 
                       {/* Response Actions */}
-                      <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                        <p className="text-xs text-gray-500 flex-1">
-                          {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
-                        </p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => downloadResponse(msg)}
-                          className="h-8 px-2"
-                        >
-                          <Download className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => deleteMessage(msg.id)}
-                          className="h-8 px-2 text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      {msg.status === 'completed' && msg.response && (
+                        <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                          <p className="text-xs text-gray-500 flex-1">
+                            {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
+                          </p>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 text-xs">
+                                <Eye className="h-3 w-3 mr-1" />
+                                View Details
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh]">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <div className={`w-6 h-6 ${getModelColor(msg.selectedModel || '')} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
+                                    {getModelIcon(msg.selectedModel || '')}
+                                  </div>
+                                  {msg.selectedModel} Response Details
+                                </DialogTitle>
+                              </DialogHeader>
+                              <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                <div className="space-y-4">
+                                  <div>
+                                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Document Analysis:</h4>
+                                    <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-2">
+                                      <p><strong>Category:</strong> {msg.category}</p>
+                                      <p><strong>Model Selected:</strong> {msg.selectedModel}</p>
+                                      <p><strong>Confidence:</strong> {msg.classification ? Math.round(msg.classification.confidence * 100) : 'N/A'}%</p>
+                                      <p><strong>Processing Time:</strong> {msg.processingTime}s</p>
+                                      {msg.classification?.documentType && (
+                                        <p><strong>Document Type:</strong> {msg.classification.documentType}</p>
+                                      )}
+                                      {msg.classification?.complexity && (
+                                        <p><strong>Complexity:</strong> {msg.classification.complexity}</p>
+                                      )}
+                                      {msg.classification?.keyTopics && msg.classification.keyTopics.length > 0 && (
+                                        <div>
+                                          <strong>Key Topics:</strong>
+                                          <div className="flex flex-wrap gap-1 mt-1">
+                                            {msg.classification.keyTopics.map((topic: string, idx: number) => (
+                                              <span key={idx} className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                                {topic}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Original Request:</h4>
+                                    <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                      {msg.content}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-sm text-gray-700 mb-2">AI Response:</h4>
+                                    <div className="prose prose-sm max-w-none">
+                                      <pre className="whitespace-pre-wrap text-sm">{msg.response}</pre>
+                                    </div>
+                                  </div>
+                                </div>
+                              </ScrollArea>
+                            </DialogContent>
+                          </Dialog>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => downloadResponse(msg)}
+                            className="h-8 px-2"
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              if (confirm("Are you sure you want to delete this message?")) {
+                                deleteRequestMutation.mutate(msg.id);
+                              }
+                            }}
+                            className="h-8 px-2 text-red-600 hover:text-red-700"
+                            disabled={deleteRequestMutation.isPending}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                          
+                          <span className="text-xs text-gray-500">
+                            {msg.processingTime}s
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -426,140 +517,16 @@ ${item.response}
           </div>
 
           {/* Loading State */}
-                        {msg.status === 'processing' && (
-                          <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Processing with {msg.selectedModel}...</span>
-                          </div>
-                        )}
-
-                        {msg.status === 'completed' && msg.response && (
-                          <div className="prose prose-sm max-w-none dark:prose-invert">
-                            <div className="whitespace-pre-wrap font-sans text-sm text-gray-900 dark:text-gray-100 leading-relaxed">
-                              {msg.response}
-                            </div>
-                          </div>
-                        )}
-
-                        {msg.status === 'failed' && (
-                          <div className="text-red-600 dark:text-red-400">
-                            <p>Processing failed. Please try again.</p>
-                          </div>
-                        )}
-
-                        {/* Action Buttons */}
-                        {msg.status === 'completed' && msg.response && (
-                          <div className="flex items-center space-x-2 mt-3 pt-3 border-t">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 text-xs">
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  View Details
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh]">
-                                <DialogHeader>
-                                  <DialogTitle className="flex items-center gap-2">
-                                    <div className={`w-6 h-6 ${getModelColor(msg.selectedModel || '')} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
-                                      {getModelIcon(msg.selectedModel || '')}
-                                    </div>
-                                    {msg.selectedModel} Response Details
-                                  </DialogTitle>
-                                </DialogHeader>
-                                <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                  <div className="space-y-4">
-                                    <div>
-                                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Document Analysis:</h4>
-                                      <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-2">
-                                        <p><strong>Category:</strong> {msg.category}</p>
-                                        <p><strong>Model Selected:</strong> {msg.selectedModel}</p>
-                                        <p><strong>Confidence:</strong> {msg.classification ? Math.round(msg.classification.confidence * 100) : 'N/A'}%</p>
-                                        <p><strong>Processing Time:</strong> {msg.processingTime}s</p>
-                                        {msg.classification?.documentType && (
-                                          <p><strong>Document Type:</strong> {msg.classification.documentType}</p>
-                                        )}
-                                        {msg.classification?.complexity && (
-                                          <p><strong>Complexity:</strong> {msg.classification.complexity}</p>
-                                        )}
-                                        {msg.classification?.keyTopics && msg.classification.keyTopics.length > 0 && (
-                                          <div>
-                                            <strong>Key Topics:</strong>
-                                            <div className="flex flex-wrap gap-1 mt-1">
-                                              {msg.classification.keyTopics.map((topic: string, idx: number) => (
-                                                <span key={idx} className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                                                  {topic}
-                                                </span>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Original Request:</h4>
-                                      <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                                        {msg.content}
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <h4 className="font-semibold text-sm text-gray-700 mb-2">AI Response:</h4>
-                                      <div className="prose prose-sm max-w-none">
-                                        <pre className="whitespace-pre-wrap text-sm">{msg.response}</pre>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </ScrollArea>
-                              </DialogContent>
-                            </Dialog>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 text-xs"
-                              onClick={() => downloadResponse(msg)}
-                            >
-                              <Download className="h-3 w-3 mr-1" />
-                              Download
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 text-xs text-red-600 hover:text-red-700"
-                              onClick={() => {
-                                if (confirm("Are you sure you want to delete this message?")) {
-                                  deleteRequestMutation.mutate(msg.id);
-                                }
-                              }}
-                              disabled={deleteRequestMutation.isPending}
-                            >
-                              <Trash2 className="h-3 w-3 mr-1" />
-                              Delete
-                            </Button>
-                            <span className="text-xs text-gray-500">
-                              {msg.processingTime}s
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* Loading State */}
           {(sendMessageMutation.isPending || uploadFileMutation.isPending) && (
-            <div className="flex justify-start">
-              <div className="max-w-3xl w-full">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="bg-white dark:bg-[#1E1E1E] border p-4 rounded-2xl rounded-tl-md">
-                      <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                        <span>Analyzing and routing to best AI model...</span>
-                      </div>
+            <div className="px-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="bg-white dark:bg-[#1E1E1E] border p-4 rounded-2xl rounded-tl-md">
+                    <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                      <span>Analyzing and routing to best AI model...</span>
                     </div>
                   </div>
                 </div>
