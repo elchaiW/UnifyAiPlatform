@@ -184,8 +184,11 @@ export class MemStorage implements IStorage {
 // Initialize storage
 export const storage: IStorage = new MemStorage();
 
-// Initialize demo user on startup for consistent state
-(async () => {
+// Create a singleton function to ensure demo user is only created once
+let demoUserInitialized = false;
+export async function ensureDemoUser() {
+  if (demoUserInitialized) return;
+  
   try {
     let demoUser = await storage.getUserByUsername("demo");
     if (!demoUser) {
@@ -197,7 +200,8 @@ export const storage: IStorage = new MemStorage();
       });
       console.log('✅ Demo user created with ID:', demoUser.id);
     }
+    demoUserInitialized = true;
   } catch (error) {
     console.error('Failed to initialize demo user:', error);
   }
-})();
+}

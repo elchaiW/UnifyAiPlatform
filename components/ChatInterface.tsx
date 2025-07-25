@@ -61,11 +61,20 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages
-  const { data: messages = [], isLoading, error } = useQuery<Message[]>({
+  // Fetch messages with immediate refetch
+  const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
     queryKey: ["/api/requests/history"],
-    refetchInterval: 3000,
+    refetchInterval: 2000, // Faster refresh
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache
   });
+
+  // Debug: Log messages to console
+  useEffect(() => {
+    console.log('ChatInterface - Messages updated:', messages);
+    console.log('ChatInterface - Message count:', messages.length);
+    if (error) console.error('Query error:', error);
+  }, [messages, error]);
 
 
 
@@ -81,8 +90,9 @@ export default function ChatInterface() {
       return response.json();
     },
     onSuccess: () => {
+      // Force immediate refetch of messages
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      // Message already cleared in handleSubmit for immediate feedback
+      queryClient.refetchQueries({ queryKey: ["/api/requests/history"] });
     },
     onError: (error) => {
       toast({
