@@ -61,14 +61,9 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages with explicit queryFn
+  // Fetch messages using default queryFn
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
-    queryKey: ["/api/requests/history"],
-    queryFn: async () => {
-      const response = await fetch("/api/requests/history");
-      if (!response.ok) throw new Error('Failed to fetch messages');
-      return response.json();
-    },
+    queryKey: ["/api", "requests", "history"],
     refetchInterval: 2000, // Faster refresh
     staleTime: 0, // Always consider data stale
     gcTime: 0, // Don't cache
