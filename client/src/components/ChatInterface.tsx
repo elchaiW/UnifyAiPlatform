@@ -217,9 +217,9 @@ Classification Details:
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900">
-      {/* ChatGPT-style Messages Area */}
-      <div className="flex-1 overflow-y-auto pt-8 pb-4 lg:pt-8 mobile-messages-top">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 relative">
+      {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
+      <div className="flex-1 overflow-y-auto pt-8 pb-32 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
@@ -427,8 +427,8 @@ Classification Details:
         </div>
       </div>
 
-      {/* Modern AI Chat Input Area - Dark Theme */}
-      <div className="bg-gray-900 dark:bg-gray-900 border-t border-gray-700 px-4 py-4 safe-area-pb">
+      {/* Modern AI Chat Input Area - Dark Theme - Fixed Position */}
+      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-gray-900 dark:bg-gray-900 border-t border-gray-700 px-4 py-4 safe-area-pb z-20 chat-input-fixed">
         <div className="max-w-4xl mx-auto">
           {selectedFile && (
             <div className="mb-3">

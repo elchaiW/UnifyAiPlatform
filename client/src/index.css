@@ -204,3 +204,14 @@
     font-size: 0.875rem;
   }
 }
+
+/* Fixed input area positioning */
+.chat-input-fixed {
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .chat-input-fixed {
+    left: 0 !important;
+  }
+}
