@@ -237,3 +237,13 @@ The application implements a clean separation between frontend and backend, with
 - **Environment Variable Support**: Full support for API keys and database URL through Vercel environment settings
 - **Auto-scaling Ready**: Configured 30-second timeout limits and Node.js 20.x runtime for optimal performance
 - **Cost-Effective Hosting**: Estimated $20-75/month total cost including Vercel hosting and AI API usage
+
+### AssemblyAI Voice Integration (January 25, 2025)
+- **Voice Input Component**: Added microphone recording with WebM, MP3, WAV, M4A, AAC, and OGG support
+- **AssemblyAI Transcription**: Implemented high-accuracy speech-to-text with language detection and punctuation
+- **Enhanced Analysis**: Optional sentiment analysis and topic extraction from voice messages
+- **Multi-Format Support**: Handles various audio formats with 25MB file size limit
+- **Real-time Processing**: Voice messages automatically transcribed and sent to appropriate AI models
+- **User Experience**: Voice button integrated into chat interface with recording playback functionality
+- **API Endpoints**: Created /api/transcribe and /api/transcribe/enhanced for voice processing
+- **Feature Showcase**: Added voice capability display cards showing transcription accuracy and features

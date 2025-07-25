@@ -7,6 +7,7 @@ import { processWithChatGPT, summarizeContent } from "./services/openaiService";
 import { processWithGemini, createMarketingStrategy, analyzeBusiness } from "./services/geminiService";
 import { processWithGrok, debugCode, analyzeTechnicalDocument } from "./services/grokService";
 import { extractTextFromFile, validateFileUpload } from "./services/documentProcessor";
+import { transcribeAudio, transcribeAudioWithSentimentAnalysis } from "./services/assemblyaiService";
 import multer from 'multer';
 import { insertRequestSchema } from "@shared/schema";
 import { z } from "zod";
@@ -16,6 +17,30 @@ import * as path from 'path';
 const upload = multer({ 
   dest: 'uploads/',
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
+
+// Configure multer for audio files
+const audioUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 25 * 1024 * 1024, // 25MB limit for audio files
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = [
+      'audio/webm',
+      'audio/mp3',
+      'audio/wav',
+      'audio/m4a',
+      'audio/aac',
+      'audio/ogg'
+    ];
+    
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported audio format'));
+    }
+  }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -397,6 +422,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Clear analytics error:', error);
       res.status(500).json({ error: "Failed to clear analytics" });
+    }
+  });
+
+  // Voice transcription endpoint
+  app.post("/api/transcribe", audioUpload.single('audio'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No audio file provided' });
+      }
+
+      console.log('Processing audio transcription:', {
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      });
+
+      // Check if AssemblyAI API key is available
+      if (!process.env.ASSEMBLYAI_API_KEY) {
+        return res.status(500).json({ 
+          error: 'AssemblyAI API key not configured. Please add ASSEMBLYAI_API_KEY to environment variables.' 
+        });
+      }
+
+      const text = await transcribeAudio(req.file.buffer, req.file.mimetype);
+      
+      res.json({
+        success: true,
+        text,
+        audioInfo: {
+          format: req.file.mimetype,
+          size: req.file.size
+        }
+      });
+
+    } catch (error) {
+      console.error('Transcription error:', error);
+      res.status(500).json({ 
+        error: 'Transcription failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Enhanced voice transcription with sentiment analysis
+  app.post("/api/transcribe/enhanced", audioUpload.single('audio'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No audio file provided' });
+      }
+
+      console.log('Processing enhanced audio transcription:', {
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,  
+        size: req.file.size
+      });
+
+      if (!process.env.ASSEMBLYAI_API_KEY) {
+        return res.status(500).json({ 
+          error: 'AssemblyAI API key not configured.' 
+        });
+      }
+
+      const result = await transcribeAudioWithSentimentAnalysis(req.file.buffer, req.file.mimetype);
+      
+      res.json({
+        success: true,
+        ...result,
+        audioInfo: {
+          format: req.file.mimetype,
+          size: req.file.size
+        }
+      });
+
+    } catch (error) {
+      console.error('Enhanced transcription error:', error);
+      res.status(500).json({ 
+        error: 'Enhanced transcription failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
