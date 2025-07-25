@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '../../../server/storage';
+import { storage, ensureDemoUser } from '../../../server/storage';
 import { classifyRequest } from '../../../server/services/aiClassifier';
 import { processWithClaude } from '../../../server/services/claudeService';
 import { processWithChatGPT } from '../../../server/services/openaiService';
@@ -16,14 +16,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    // Get demo user (in production, use proper authentication)
-    let demoUser = await storage.getUserByUsername("demo");
+    // Ensure demo user exists
+    await ensureDemoUser();
+    const demoUser = await storage.getUserByUsername("demo");
     if (!demoUser) {
-      demoUser = await storage.createUser({
-        username: "demo",
-        email: "demo@example.com",
-        password: "demo123"
-      });
+      throw new Error('Failed to initialize demo user');
     }
 
     console.log(`📝 Processing request: "${messageContent.substring(0, 50)}..."`);
