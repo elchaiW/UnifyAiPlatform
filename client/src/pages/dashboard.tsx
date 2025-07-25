@@ -111,7 +111,7 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Reference-style Mobile Navigation matching your design */}
-        <div className="lg:hidden bg-gray-800 border-b border-gray-600 px-4 py-3 pt-8 safe-area-pt">
+        <div className="lg:hidden bg-gray-900 border-b border-gray-800 px-4 py-3 pt-8 safe-area-pt">
           <div className="flex items-center justify-between">
             {/* Left: webview label matching your design */}
             <div className="px-2 py-1 border border-gray-500 rounded text-xs text-gray-300 font-mono cursor-pointer"
