@@ -62,10 +62,12 @@ export default function ChatInterface() {
   const { toast } = useToast();
 
   // Fetch messages
-  const { data: messages = [], isLoading } = useQuery<Message[]>({
+  const { data: messages = [], isLoading, error } = useQuery<Message[]>({
     queryKey: ["/api/requests/history"],
     refetchInterval: 3000,
   });
+
+
 
   // Send message mutation
   const sendMessageMutation = useMutation({
