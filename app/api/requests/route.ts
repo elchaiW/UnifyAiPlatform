@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage, ensureDemoUser } from '../../../server/storage';
-import { classifyRequest } from '../../../server/services/aiClassifier';
-import { processWithClaude } from '../../../server/services/claudeService';
-import { processWithChatGPT } from '../../../server/services/openaiService';
-import { processWithGemini } from '../../../server/services/geminiService';
-import { processWithGrok } from '../../../server/services/grokService';
+import { storage, initializeDemoUser } from '@/lib/storage';
+import { AIClassifier } from '@/lib/services/aiClassifier';
+import { processWithClaude } from '@/lib/services/claudeService';
+import { processWithChatGPT } from '@/lib/services/openaiService';
+import { processWithGemini } from '@/lib/services/geminiService';
+import { processWithGrok } from '@/lib/services/grokService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,30 +16,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    // Ensure demo user exists
-    await ensureDemoUser();
-    const demoUser = await storage.getUserByUsername("demo");
-    if (!demoUser) {
-      throw new Error('Failed to initialize demo user');
-    }
+    // Initialize demo user
+    await initializeDemoUser();
 
     console.log(`📝 Processing request: "${messageContent.substring(0, 50)}..."`);
     
     // Classify the request to determine the best AI model
-    const classification = await classifyRequest(messageContent);
+    const classifier = new AIClassifier();
+    const classification = await classifier.classifyRequest(messageContent);
     console.log(`🤖 Classification result:`, classification);
     
     // Create request record
     const requestRecord = await storage.createRequest({
-      type: 'prompt',
-      content: messageContent,
-      userId: demoUser.id,
-      category: classification.category,
-      selectedModel: classification.model
+      userId: 1, // Demo user ID
+      prompt: messageContent,
+      selectedModel: classification.selectedModel,
+      status: 'processing',
+      confidence: classification.confidence,
+      reasoning: classification.reasoning
     });
-    
-    // Update status to processing
-    await storage.updateRequestStatus(requestRecord.id, 'processing');
     
     let response: string;
     let processingTimeMs: number;
@@ -47,7 +42,7 @@ export async function POST(request: NextRequest) {
     
     try {
       // Route to appropriate AI model based on classification
-      switch (classification.model) {
+      switch (classification.selectedModel) {
         case 'claude':
           console.log(`🧠 Processing with Claude...`);
           response = await processWithClaude(messageContent);
@@ -72,15 +67,10 @@ export async function POST(request: NextRequest) {
       processingTimeMs = Date.now() - startTime;
       
       // Update request with response
-      await storage.updateRequestStatus(requestRecord.id, 'completed', response, processingTimeMs);
-      
-      // Create analytics record
-      await storage.createAnalytics({
-        userId: demoUser.id,
-        requestId: requestRecord.id,
-        modelUsed: classification.model,
-        responseTime: processingTimeMs.toString(),
-        success: true
+      await storage.updateRequest(requestRecord.id.toString(), {
+        status: 'completed',
+        response: response,
+        processingTime: processingTimeMs
       });
       
       // Return the response with classification details
@@ -90,7 +80,7 @@ export async function POST(request: NextRequest) {
         classification,
         processingTime: processingTimeMs,
         requestId: requestRecord.id,
-        model: classification.model
+        model: classification.selectedModel
       });
       
     } catch (error) {
@@ -100,16 +90,10 @@ export async function POST(request: NextRequest) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown processing error';
       
       // Update request with error
-      await storage.updateRequestStatus(requestRecord.id, 'failed', `Error: ${errorMessage}`, processingTimeMs);
-      
-      // Create failed analytics record
-      await storage.createAnalytics({
-        userId: demoUser.id,
-        requestId: requestRecord.id,
-        modelUsed: classification.model,
-        responseTime: processingTimeMs.toString(),
-        success: false,
-        errorType: errorMessage
+      await storage.updateRequest(requestRecord.id.toString(), {
+        status: 'failed',
+        response: `Error: ${errorMessage}`,
+        processingTime: processingTimeMs
       });
       
       return NextResponse.json({
@@ -131,18 +115,16 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Get demo user
-    const demoUser = await storage.getUserByUsername("demo");
-    if (!demoUser) {
-      return NextResponse.json([], { status: 200 });
-    }
-
+    await initializeDemoUser();
+    
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit');
     const limitNum = limit ? parseInt(limit, 10) : 50;
 
-    const requests = await storage.getUserRequests(demoUser.id, limitNum);
-    return NextResponse.json(requests);
+    const requests = await storage.getAllRequests(1);
+    const limitedRequests = requests.slice(0, limitNum);
+    
+    return NextResponse.json(limitedRequests);
   } catch (error) {
     console.error('Error fetching requests:', error);
     return NextResponse.json({ error: 'Failed to fetch requests' }, { status: 500 });
