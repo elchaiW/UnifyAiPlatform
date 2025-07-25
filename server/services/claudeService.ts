@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { cleanMarkdownFormatting } from '../utils/textFormatter';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -21,9 +22,10 @@ export async function processWithClaude(prompt: string): Promise<string> {
       ]
     });
 
-    return message.content[0].type === 'text' 
+    const response = message.content[0].type === 'text' 
       ? message.content[0].text 
       : 'Sorry, I could not process your request.';
+    return cleanMarkdownFormatting(response);
   } catch (error) {
     console.error('Claude API error:', error);
     throw new Error('Failed to process request with Claude');

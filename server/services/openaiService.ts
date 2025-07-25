@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { cleanMarkdownFormatting } from '../utils/textFormatter';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -22,7 +23,8 @@ export async function processWithChatGPT(prompt: string): Promise<string> {
       temperature: 0.5, // Lower temperature for faster processing
     });
 
-    return completion.choices[0]?.message?.content || 'Sorry, I could not process your request.';
+    const response = completion.choices[0]?.message?.content || 'Sorry, I could not process your request.';
+    return cleanMarkdownFormatting(response);
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Failed to process request with ChatGPT');

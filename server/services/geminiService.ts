@@ -1,3 +1,5 @@
+import { cleanMarkdownFormatting } from '../utils/textFormatter';
+
 export async function processWithGemini(prompt: string): Promise<string> {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY not configured');
@@ -24,7 +26,8 @@ export async function processWithGemini(prompt: string): Promise<string> {
     }
 
     const data = await response.json();
-    return data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not process your request.';
+    const responseText = data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not process your request.';
+    return cleanMarkdownFormatting(responseText);
   } catch (error) {
     console.error('Gemini API error:', error);
     throw new Error('Failed to process request with Gemini');
