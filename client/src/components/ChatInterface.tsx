@@ -149,7 +149,7 @@ export default function ChatInterface() {
     } else if (message.trim()) {
       const messageToSend = message;
       setMessage(""); // Clear immediately
-      if (textareaRef.current) textareaRef.current.style.height = '56px';
+      if (textareaRef.current) textareaRef.current.style.height = '40px';
       sendMessageMutation.mutate(messageToSend);
     }
   };
@@ -174,7 +174,7 @@ export default function ChatInterface() {
     
     // Auto-resize textarea
     const textarea = e.target;
-    textarea.style.height = '56px';
+    textarea.style.height = '40px';
     const scrollHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = scrollHeight + 'px';
   };
@@ -451,14 +451,14 @@ Classification Details:
 
           <form onSubmit={handleSubmit}>
             <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
-              <div className="flex items-center px-3 lg:px-4 py-3 lg:py-4 min-h-[48px] lg:min-h-[56px]">
+              <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
                 {/* Plus Button - Left Side */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-8 w-8 lg:h-9 lg:w-9 p-0 mr-2 lg:mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  className="h-7 w-7 lg:h-9 lg:w-9 p-0 mr-2 lg:mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
                   disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,7 +481,7 @@ Classification Details:
                     value={message}
                     onChange={handleInputChange}
                     placeholder="Ask a question or share a document"
-                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-base leading-relaxed min-h-[28px] max-h-32 py-3"
+                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-sm lg:text-base leading-relaxed min-h-[24px] lg:min-h-[28px] max-h-32 py-2 lg:py-3"
                     style={{ fontSize: '16px' }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
@@ -494,7 +494,7 @@ Classification Details:
                 </div>
 
                 {/* Right Side Controls */}
-                <div className="flex items-center space-x-2 ml-3">
+                <div className="flex items-center space-x-1 lg:space-x-2 ml-2 lg:ml-3">
                   {/* Voice Input Component */}
                   <VoiceInput 
                     onTranscription={(text) => {
@@ -502,6 +502,7 @@ Classification Details:
                       setTimeout(() => textareaRef.current?.focus(), 100);
                     }}
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    className="h-7 w-7 lg:h-9 lg:w-9"
                   />
 
                   {/* Additional Tools Button */}
@@ -509,10 +510,10 @@ Classification Details:
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-9 w-9 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700"
+                    className="h-7 w-7 lg:h-9 lg:w-9 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700"
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-3 w-3 lg:h-4 lg:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   </Button>
@@ -522,12 +523,12 @@ Classification Details:
                     type="submit"
                     size="sm"
                     disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-9 w-9 p-0 rounded-full bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400 border-none"
+                    className="h-7 w-7 lg:h-9 lg:w-9 p-0 rounded-full bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400 border-none"
                   >
                     {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3 w-3 lg:h-4 lg:w-4 animate-spin" />
                     ) : (
-                      <Send className="h-4 w-4" />
+                      <Send className="h-3 w-3 lg:h-4 lg:w-4" />
                     )}
                   </Button>
                 </div>
