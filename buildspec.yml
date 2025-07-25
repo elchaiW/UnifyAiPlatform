@@ -12,7 +12,7 @@ phases:
   build:
     commands:
       - echo "Building Next.js application..."
-      - next build
+      - npx next build
       - echo "Build completed successfully"
       - ls -la .next/
       

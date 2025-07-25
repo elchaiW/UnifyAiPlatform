@@ -4,16 +4,16 @@ build:
   commands:
     build:
       - echo "Installing dependencies..."
-      - npm ci
+      - npm install
       - echo "Building Next.js application..."
-      - next build
+      - npx next build
       - echo "Build completed successfully"
     post_build:
       - echo "Verifying build..."
       - ls -la .next/
 run:
   runtime-version: 18
-  command: next start
+  command: npx next start
   network:
     port: 3000
     env: PORT
