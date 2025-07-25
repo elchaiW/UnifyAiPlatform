@@ -5,7 +5,7 @@ import AnalyticsView from "@/components/AnalyticsView";
 import HistoryView from "@/components/HistoryView";
 
 import { Button } from "@/components/ui/button";
-import { MessageSquare, BarChart3, History } from "lucide-react";
+import { MessageSquare, BarChart3, History, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 type View = 'chat' | 'analytics' | 'history';
@@ -110,21 +110,26 @@ export default function Dashboard() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Reference-style Mobile Navigation matching your design */}
-        <div className="lg:hidden bg-gray-800 border-b border-gray-600 px-4 py-3 pt-8 safe-area-pt">
+        {/* ChatGPT-style Mobile Navigation */}
+        <div className="lg:hidden bg-gray-800 px-4 py-3 pt-8 safe-area-pt">
           <div className="flex items-center justify-between">
-            {/* Left: webview label matching your design */}
-            <div className="px-2 py-1 border border-gray-500 rounded text-xs text-gray-300 font-mono cursor-pointer"
-                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-              webview
-            </div>
+            {/* Left: Hamburger menu */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </Button>
             
-            {/* Right: Your authentic LUMINADOC logo */}
-            <img 
-              src="/attached_assets/Group 1171274849_1753431811341.png" 
-              alt="LUMINADOC" 
-              className="h-6 w-auto"
-            />
+            {/* Center: App name */}
+            <h1 className="text-white font-medium text-lg">LUMINADOC</h1>
+            
+            {/* Right: Spacer for centering */}
+            <div className="w-9"></div>
           </div>
         </div>
         
