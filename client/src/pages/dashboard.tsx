@@ -111,7 +111,7 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* ChatGPT-style Mobile Navigation with Hamburger Menu */}
-        <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 pt-6 safe-area-pt">
+        <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-4 pt-8 safe-area-pt">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"

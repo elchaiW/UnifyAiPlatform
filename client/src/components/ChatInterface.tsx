@@ -219,7 +219,7 @@ Classification Details:
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 relative">
       {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
-      <div className="flex-1 overflow-y-auto pt-8 pb-32 lg:pt-8 mobile-messages-top">
+      <div className="flex-1 overflow-y-auto pt-8 pb-40 lg:pb-32 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
@@ -481,7 +481,7 @@ Classification Details:
                     value={message}
                     onChange={handleInputChange}
                     placeholder="Ask a question or share a document"
-                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-base leading-6 min-h-[24px] max-h-32 py-1 flex items-center"
+                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-base leading-6 min-h-[24px] max-h-32 py-2"
                     style={{ fontSize: '16px' }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
