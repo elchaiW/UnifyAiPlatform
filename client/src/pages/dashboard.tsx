@@ -110,31 +110,26 @@ export default function Dashboard() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ChatGPT-style Mobile Navigation with Hamburger Menu */}
-        <div className="lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-4 pt-8 safe-area-pt">
+        {/* Reference-style Mobile Navigation matching your design */}
+        <div className="lg:hidden bg-gray-800 border-b border-gray-600 px-4 py-3 pt-8 safe-area-pt">
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 -ml-2"
-            >
-              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </Button>
-            
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-500 rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-xs">AI</span>
-              </div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Luminadoc
-              </h1>
+            {/* Left: webview label matching your design */}
+            <div className="px-2 py-1 border border-gray-500 rounded text-xs text-gray-300 font-mono cursor-pointer"
+                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+              webview
             </div>
-
-            <div className="hidden lg:flex items-center">
-              <ThemeToggle />
+            
+            {/* Right: LUMINADOC logo exactly as shown in your design */}
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 1L15 8.5L23 10L17.5 15L19 23L12 19L5 23L6.5 15L1 10L9 8.5L12 1Z" fill="#4F8EF7"/>
+                  <path d="M12 4L14 10L20 11L16 14.5L17 21L12 18L7 21L8 14.5L4 11L10 10L12 4Z" fill="#7BA7F7"/>
+                </svg>
+              </div>
+              <span className="text-white font-medium text-base">
+                <span className="text-blue-400">LUMINA</span>DOC
+              </span>
             </div>
           </div>
         </div>
