@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "../hooks/use-toast";
-import { TypingLoadingAnimation } from './LoadingAnimation';
+import TypingAnimation from './TypingAnimation';
 import { VoiceInput } from './VoiceInput';
 
 interface Message {
@@ -431,11 +431,9 @@ Classification Details:
             ))}
           </div>
 
-          {/* Loading State with LUMINADOC logo animation */}
+          {/* Loading State with ChatGPT-style typing animation */}
           {(sendMessageMutation.isPending || uploadFileMutation.isPending) && (
-            <div className="px-6 pb-6">
-              <TypingLoadingAnimation message="LUMINADOC is processing your request..." />
-            </div>
+            <TypingAnimation text="Generating response..." />
           )}
 
           {/* Scroll anchor for auto-scroll */}

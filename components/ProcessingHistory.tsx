@@ -6,7 +6,6 @@ import { ScrollArea } from "./ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Download, Eye, FileText } from "lucide-react";
-import LoadingAnimation from './LoadingAnimation';
 
 interface HistoryItem {
   id: number;
