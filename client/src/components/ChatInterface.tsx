@@ -451,7 +451,7 @@ Classification Details:
 
           <form onSubmit={handleSubmit}>
             <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
-              <div className="flex items-center px-4 py-3">
+              <div className="flex items-center px-4 py-3 min-h-[48px]">
                 {/* Plus Button - Left Side */}
                 <Button
                   type="button"
@@ -480,8 +480,8 @@ Classification Details:
                     ref={textareaRef}
                     value={message}
                     onChange={handleInputChange}
-                    placeholder="Fai una domanda"
-                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-base leading-6 min-h-[24px] max-h-32 py-0"
+                    placeholder="Ask a question or share a document"
+                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-base leading-6 min-h-[24px] max-h-32 py-1 flex items-center"
                     style={{ fontSize: '16px' }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
