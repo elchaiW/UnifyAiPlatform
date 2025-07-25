@@ -3,8 +3,10 @@
 import { QueryClient } from '@tanstack/react-query';
 
 // Default fetcher for React Query
-async function defaultQueryFn({ queryKey }: { queryKey: string[] }) {
-  const [url] = queryKey;
+import type { QueryFunctionContext } from '@tanstack/react-query';
+
+async function defaultQueryFn({ queryKey }: QueryFunctionContext) {
+  const [url] = queryKey as string[];
   const response = await fetch(url);
   
   if (!response.ok) {

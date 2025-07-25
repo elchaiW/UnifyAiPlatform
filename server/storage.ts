@@ -1,4 +1,4 @@
-import { users, aiRequests, analytics, type User, type InsertUser, type AIRequest, type InsertRequest, type Analytics, type InsertAnalytics } from "@shared/schema";
+import { users, aiRequests, analytics, type User, type InsertUser, type AIRequest, type InsertRequest, type Analytics, type InsertAnalytics } from "../shared/schema.js";
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { eq, desc } from 'drizzle-orm';
@@ -394,7 +394,7 @@ async function initializeStorage() {
         try {
           const supabaseStorage = new SupabaseStorage();
           // Test the connection with a simple query
-          await supabaseStorage.db.execute('SELECT 1');
+          await supabaseStorage.getUser(1); // Test connection with a simple query
           storage = supabaseStorage;
           console.log('✅ Supabase storage connected successfully');
           return;
