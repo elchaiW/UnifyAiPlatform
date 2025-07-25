@@ -449,13 +449,12 @@ Classification Details:
           <form onSubmit={handleSubmit}>
             <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
               <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
-                {/* Mobile Menu Button (replaces plus on mobile) */}
+                {/* Mobile Hamburger Menu Button */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    // Access parent component's sidebar function through props or context
                     const event = new CustomEvent('toggleMobileSidebar');
                     window.dispatchEvent(event);
                   }}
@@ -463,7 +462,7 @@ Classification Details:
                   disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </Button>
                 
