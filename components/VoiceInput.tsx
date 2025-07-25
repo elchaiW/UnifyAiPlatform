@@ -101,18 +101,19 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
       
       const result = await response.json();
       
-      if (result.text) {
-        onTranscription(result.text);
+      if (result.text && result.text.trim()) {
+        const transcribedText = result.text.trim();
+        onTranscription(transcribedText);
         toast({
-          title: "Voice message processed",
-          description: `Transcribed: "${result.text.substring(0, 50)}${result.text.length > 50 ? '...' : ''}"`
+          title: "Voice transcribed",
+          description: `"${transcribedText.substring(0, 40)}${transcribedText.length > 40 ? '...' : ''}"`
         });
         
         // Clear the audio after successful processing
         setAudioBlob(null);
         setAudioUrl(null);
       } else {
-        throw new Error('No text was transcribed');
+        throw new Error('No speech detected in recording');
       }
       
     } catch (error) {

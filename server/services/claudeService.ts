@@ -12,7 +12,7 @@ export async function processWithClaude(prompt: string): Promise<string> {
   try {
     const message = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1000,
+      max_tokens: 300, // Reduced for faster response
       messages: [
         {
           role: 'user',

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      transcription: transcription.text,
+      text: transcription.text,
       confidence: transcription.confidence
     });
     
