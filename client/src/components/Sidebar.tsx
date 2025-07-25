@@ -89,7 +89,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
           <img 
             src="/attached_assets/Group 1171274849 (1)_1753432882218.png" 
             alt="LUMINADOC" 
-            className="h-10 w-auto"
+            className="h-14 w-auto"
           />
         </div>
         <p className="text-sm text-gray-400">
