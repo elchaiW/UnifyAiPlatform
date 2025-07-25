@@ -19,6 +19,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import TypingAnimation from './TypingAnimation';
+import { VoiceInput } from './VoiceInput';
 
 interface Message {
   id: number;
@@ -449,57 +450,69 @@ Classification Details:
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex items-end space-x-4 p-4">
-              <div className="flex-1 relative">
-                <textarea
-                  ref={textareaRef}
-                  value={message}
-                  onChange={handleInputChange}
-                  placeholder="Ask anything..."
-                  className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-20 text-sm placeholder-gray-400 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[52px] max-h-32 leading-relaxed transition-all"
-                  style={{ height: '52px', fontSize: '16px' }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSubmit(e);
-                    }
-                  }}
-                />
-                
-                {/* Inline action buttons */}
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    accept=".txt,.docx,.pdf"
-                    className="hidden"
+            <form onSubmit={handleSubmit} className="p-4">
+              <div className="flex items-end space-x-3">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={handleInputChange}
+                    placeholder="Ask anything or use voice..."
+                    className="w-full resize-none rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-20 text-sm placeholder-gray-400 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[52px] max-h-32 leading-relaxed transition-all"
+                    style={{ height: '52px', fontSize: '16px' }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
                   />
                   
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
-                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                  >
-                    <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  </Button>
-                  
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-8 w-8 p-0 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
-                  >
-                    {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Send className="h-3 w-3" />
-                    )}
-                  </Button>
+                  {/* Inline action buttons */}
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      accept=".txt,.docx,.pdf"
+                      className="hidden"
+                    />
+                    
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    >
+                      <Paperclip className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    </Button>
+                    
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
+                      className="h-8 w-8 p-0 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
+                    >
+                      {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Send className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
+                
+                {/* Voice Input Component */}
+                <VoiceInput 
+                  onTranscription={(text) => {
+                    setMessage(text);
+                    // Auto-focus the textarea after transcription
+                    setTimeout(() => textareaRef.current?.focus(), 100);
+                  }}
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                />
               </div>
             </form>
           </div>
