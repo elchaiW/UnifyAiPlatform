@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { transcribeAudio } from '../../../server/services/assemblyaiService';
+import { transcribeAudio } from '@/lib/services/assemblyaiService';
 
 export async function POST(request: NextRequest) {
   try {

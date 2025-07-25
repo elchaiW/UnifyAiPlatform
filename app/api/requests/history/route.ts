@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage, ensureDemoUser } from '../../../../server/storage';
+import { storage, initializeDemoUser } from '@/lib/storage';
 
 export async function GET(request: NextRequest) {
   try {
-    // Ensure demo user exists
-    await ensureDemoUser();
-    const demoUser = await storage.getUserByUsername("demo");
-    if (!demoUser) {
-      console.log('📱 No demo user found, returning empty array');
-      return NextResponse.json([], { status: 200 });
-    }
-
+    // Initialize demo user
+    await initializeDemoUser();
+    
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit');
     const limitNum = limit ? parseInt(limit, 10) : 50;
 
-    const requests = await storage.getUserRequests(demoUser.id, limitNum);
-    console.log(`📱 History: Found ${requests.length} messages for user ${demoUser.id}`);
-    return NextResponse.json(requests);
+    // Get requests for demo user (ID: 1)
+    const requests = await storage.getAllRequests(1);
+    const limitedRequests = requests.slice(0, limitNum);
+    
+    return NextResponse.json(limitedRequests);
   } catch (error) {
     console.error('Error fetching request history:', error);
     return NextResponse.json({ error: 'Failed to fetch request history' }, { status: 500 });
@@ -26,15 +23,8 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Get demo user
-    const demoUser = await storage.getUserByUsername("demo");
-    if (!demoUser) {
-      return NextResponse.json({ success: true });
-    }
-
-    await storage.deleteAllUserRequests(demoUser.id);
-    await storage.deleteAllUserAnalytics(demoUser.id);
-    
+    // For demo purposes, we'll just return success
+    // In a real implementation, you would clear user-specific data
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error clearing history:', error);

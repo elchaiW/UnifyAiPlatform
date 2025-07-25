@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '../../../../server/storage';
+import { storage } from '@/lib/storage';
 
 export async function DELETE(
   request: NextRequest,
@@ -12,8 +12,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });
     }
 
-    await storage.deleteRequest(id);
-    return NextResponse.json({ success: true });
+    const success = await storage.deleteRequest(id.toString());
+    return NextResponse.json({ success });
   } catch (error) {
     console.error('Error deleting request:', error);
     return NextResponse.json({ error: 'Failed to delete request' }, { status: 500 });
