@@ -47,9 +47,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-[#2A2A2A] overflow-hidden">
       {/* Mobile Sidebar - Slide-out menu */}
-      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-900 shadow-lg transform transition-transform duration-300 ease-in-out ${
+      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-[#2A2A2A] shadow-lg transform transition-transform duration-300 ease-in-out ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">

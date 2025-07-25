@@ -217,7 +217,7 @@ Classification Details:
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 relative">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#2A2A2A] relative">
       {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
       <div className="flex-1 overflow-y-auto pt-4 pb-32 lg:pb-24 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
@@ -425,7 +425,7 @@ Classification Details:
       </div>
 
       {/* Modern AI Chat Input Area - Dark Theme - Fixed Position */}
-      <div className="fixed bottom-4 left-0 right-0 lg:left-80 bg-gray-900 px-4 py-4 safe-area-pb z-20 chat-input-fixed">
+      <div className="fixed bottom-4 left-0 right-0 lg:left-80 bg-[#2A2A2A] px-4 py-4 safe-area-pb z-20 chat-input-fixed">
         <div className="max-w-4xl mx-auto">
           {selectedFile && (
             <div className="mb-3">

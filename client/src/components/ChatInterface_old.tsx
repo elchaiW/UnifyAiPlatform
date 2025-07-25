@@ -189,7 +189,7 @@ ${item.response}
 
   return (
     <div 
-      className={`flex flex-col h-screen bg-gray-50 dark:bg-gray-900 flex-1 min-w-0 relative ${
+      className={`flex flex-col h-screen bg-gray-50 dark:bg-[#2A2A2A] flex-1 min-w-0 relative ${
         isDragOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
       }`}
       onDragOver={handleDragOver}
@@ -254,7 +254,7 @@ ${item.response}
       </div>
 
       {/* ChatGPT-style Messages Area */}
-      <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+      <div className="flex-1 overflow-y-auto bg-white dark:bg-[#2A2A2A]">
         <div className="max-w-3xl mx-auto">
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
@@ -573,7 +573,7 @@ ${item.response}
       </div>
 
       {/* ChatGPT-style Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-4 safe-area-pb">
+      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2A2A2A] px-4 py-4 safe-area-pb">
         <div className="max-w-3xl mx-auto">
           <div className="relative bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm focus-within:shadow-md transition-all">
             {selectedFile && (
