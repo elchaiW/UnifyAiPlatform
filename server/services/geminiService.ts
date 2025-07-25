@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from '@google/genai';
+const { GoogleGenAI } = require('@google/genai');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || '');
 
 export async function processWithGemini(prompt: string): Promise<string> {
   if (!process.env.GEMINI_API_KEY) {
