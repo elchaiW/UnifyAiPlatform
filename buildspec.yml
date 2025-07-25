@@ -11,10 +11,10 @@ phases:
       
   build:
     commands:
-      - echo "Building the application..."
-      - npm run build
+      - echo "Building Next.js application..."
+      - next build
       - echo "Build completed successfully"
-      - ls -la dist/
+      - ls -la .next/
       
   post_build:
     commands:
@@ -23,5 +23,6 @@ phases:
 artifacts:
   files:
     - '**/*'
-    - dist/**/*
+    - .next/**/*
+    - public/**/*
   base-directory: '.'

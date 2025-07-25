@@ -2,13 +2,13 @@
   "name": "luminadoc",
   "build": {
     "main": "app/page.tsx",
-    "buildCommand": "npm run build",
+    "buildCommand": "next build",
     "installCommand": "npm install",
-    "dev": "npm run dev"
+    "dev": "next dev"
   },
   "run": {
-    "main": "server.js",
-    "command": "npm start"
+    "main": ".next/standalone/server.js",
+    "command": "next start"
   },
   "env": {
     "NODE_ENV": "production"
