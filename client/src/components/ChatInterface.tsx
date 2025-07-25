@@ -224,8 +224,12 @@ Classification Details:
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-lg mb-4 lg:mb-6 flex items-center justify-center">
-                <Bot className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
+              <div className="mb-4 lg:mb-6">
+                <img 
+                  src="/attached_assets/Group 1171274849 (1)_1753432882218.png" 
+                  alt="LUMINADOC" 
+                  className="h-16 w-auto lg:h-20"
+                />
               </div>
               <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
                 Ask anything
@@ -234,52 +238,68 @@ Classification Details:
                 Your intelligent AI assistant that automatically routes to the best model
               </p>
               
-              {/* Model cards with #2A2A2A background */}
+              {/* Perplexity-style suggestion cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
-                <div className="rounded-lg p-3 lg:p-4 hover:bg-gray-700 transition-colors cursor-pointer group" style={{backgroundColor: '#2A2A2A'}}>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">A</span>
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/claude_1753267938951.webp" 
+                        alt="Claude" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">Claude</p>
-                      <p className="text-xs text-gray-400">Legal & Analysis</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Claude</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Legal & Analysis</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="rounded-lg p-3 lg:p-4 hover:bg-gray-700 transition-colors cursor-pointer group" style={{backgroundColor: '#2A2A2A'}}>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">G</span>
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/Chatgpt_1753267928029.webp" 
+                        alt="ChatGPT" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">ChatGPT</p>
-                      <p className="text-xs text-gray-400">General & Science</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">ChatGPT</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="rounded-lg p-3 lg:p-4 hover:bg-gray-700 transition-colors cursor-pointer group" style={{backgroundColor: '#2A2A2A'}}>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">G</span>
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/gemini_1753267772227.png" 
+                        alt="Gemini" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">Gemini</p>
-                      <p className="text-xs text-gray-400">Marketing & Business</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Gemini</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="rounded-lg p-3 lg:p-4 hover:bg-gray-700 transition-colors cursor-pointer group" style={{backgroundColor: '#2A2A2A'}}>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
-                    <div className="w-8 h-8 bg-gray-600 rounded flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">G</span>
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/grok_1753267912240.png" 
+                        alt="Grok" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">Grok</p>
-                      <p className="text-xs text-gray-400">Code & Technical</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Grok</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
                     </div>
                   </div>
                 </div>
