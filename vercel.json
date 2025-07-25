@@ -1,25 +1,10 @@
 {
   "version": 2,
-  "buildCommand": "vite build",
-  "outputDirectory": "dist/public",
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node@3.1.0",
-      "maxDuration": 30
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/requests/history",
-      "destination": "/api/requests"
-    },
-    {
-      "source": "/api/analytics/stats", 
-      "destination": "/api/analytics"
-    },
-    {
-      "source": "/api/transcribe/(.*)",
-      "destination": "/api/transcribe"
-    }
-  ]
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

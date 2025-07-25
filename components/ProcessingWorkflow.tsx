@@ -66,7 +66,7 @@ export default function ProcessingWorkflow() {
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-white/5 rounded-lg p-6">
               <h4 className="text-lg font-medium text-white mb-3">Input</h4>
-              <p className="text-gray-300 text-sm italic">"Review this contract for compliance issues."</p>
+              <p className="text-gray-300 text-sm italic">&quot;Review this contract for compliance issues.&quot;</p>
             </div>
             <div className="bg-white/5 rounded-lg p-6">
               <h4 className="text-lg font-medium text-white mb-3">Classification</h4>

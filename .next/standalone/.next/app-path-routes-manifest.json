@@ -1,0 +1,10 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/analytics/stats/route": "/api/analytics/stats",
+  "/api/requests/[id]/route": "/api/requests/[id]",
+  "/api/requests/history/route": "/api/requests/history",
+  "/api/requests/route": "/api/requests",
+  "/api/transcribe/route": "/api/transcribe",
+  "/dashboard/page": "/dashboard",
+  "/page": "/"
+}

@@ -1,56 +1,50 @@
-# Multi-stage Docker build for optimized production image
-FROM node:18-alpine AS builder
+# Next.js Dockerfile for deployment
+FROM node:18-alpine AS base
 
-# Set working directory
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install ALL dependencies (including dev dependencies for build)
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Copy source code
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the application
+# Build Next.js application
+ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
-# Production stage
-FROM node:18-alpine AS production
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Create app user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S appuser -u 1001
-
-# Set working directory
+# Production image, copy all the files and run next
+FROM base AS runner
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
 
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 
-# Copy static files if they exist
-COPY --from=builder /app/client/dist ./client/dist 2>/dev/null || true
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
-# Change ownership to app user
-RUN chown -R appuser:nodejs /app
-USER appuser
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Expose port
-EXPOSE 5000
+USER nextjs
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
+EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/index.js"]
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]
