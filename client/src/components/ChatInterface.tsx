@@ -217,7 +217,7 @@ Classification Details:
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-gray-800 relative">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 relative">
       {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
       <div className="flex-1 overflow-y-auto pt-8 pb-40 lg:pb-32 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
@@ -227,16 +227,16 @@ Classification Details:
               <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-lg mb-4 lg:mb-6 flex items-center justify-center">
                 <Bot className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
               </div>
-              <h2 className="text-2xl lg:text-3xl font-medium text-white mb-2 lg:mb-3 text-center">
+              <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
                 Ask anything
               </h2>
-              <p className="text-base lg:text-lg text-gray-400 mb-8 lg:mb-12 text-center max-w-lg">
+              <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-8 lg:mb-12 text-center max-w-lg">
                 Your intelligent AI assistant that automatically routes to the best model
               </p>
               
-              {/* Model cards matching your dark design exactly */}
+              {/* Perplexity-style suggestion cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
-                <div className="bg-gray-700 rounded-lg p-3 lg:p-4 hover:bg-gray-600 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -246,13 +246,13 @@ Classification Details:
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">Claude</p>
-                      <p className="text-xs text-gray-400">Legal & Analysis</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Claude</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Legal & Analysis</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-700 rounded-lg p-3 lg:p-4 hover:bg-gray-600 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -262,13 +262,13 @@ Classification Details:
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">ChatGPT</p>
-                      <p className="text-xs text-gray-400">General & Science</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">ChatGPT</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-700 rounded-lg p-3 lg:p-4 hover:bg-gray-600 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -278,13 +278,13 @@ Classification Details:
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">Gemini</p>
-                      <p className="text-xs text-gray-400">Marketing & Business</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Gemini</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-700 rounded-lg p-3 lg:p-4 hover:bg-gray-600 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -294,8 +294,8 @@ Classification Details:
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-white text-xs lg:text-sm">Grok</p>
-                      <p className="text-xs text-gray-400">Code & Technical</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Grok</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
                     </div>
                   </div>
                 </div>
@@ -502,6 +502,7 @@ Classification Details:
                       setTimeout(() => textareaRef.current?.focus(), 100);
                     }}
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    className="h-7 w-7 lg:h-9 lg:w-9"
                   />
 
                   {/* Additional Tools Button */}

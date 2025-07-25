@@ -81,9 +81,9 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
   };
 
   return (
-    <div className="w-64 lg:w-80 h-screen bg-gray-900 border-r border-gray-800 flex flex-col shrink-0">
+    <div className="w-64 lg:w-80 h-screen bg-gray-800 border-r border-gray-700 flex flex-col shrink-0">
       {/* Header */}
-      <div className="px-4 py-4 pt-6 border-b border-gray-800">
+      <div className="px-4 py-4 pt-6 border-b border-gray-700">
         <div className="flex items-center space-x-3 mb-2">
           {/* Your authentic LUMINADOC logo */}
           <img 
@@ -92,7 +92,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
             className="h-7 w-auto"
           />
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-400">
           Intelligent AI Routing
         </p>
       </div>
@@ -101,11 +101,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       <div className="p-4 space-y-2">
         <Button
           variant={activeView === 'chat' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${
-            activeView === 'chat' 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'text-gray-300 hover:text-white hover:bg-gray-800'
-          }`}
+          className="w-full justify-start"
           onClick={() => onViewChange('chat')}
         >
           <MessageSquare className="h-4 w-4 mr-2" />
@@ -113,11 +109,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </Button>
         <Button
           variant={activeView === 'analytics' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${
-            activeView === 'analytics' 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'text-gray-300 hover:text-white hover:bg-gray-800'
-          }`}
+          className="w-full justify-start"
           onClick={() => onViewChange('analytics')}
         >
           <BarChart3 className="h-4 w-4 mr-2" />
@@ -125,11 +117,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </Button>
         <Button
           variant={activeView === 'history' ? 'default' : 'ghost'}
-          className={`w-full justify-start ${
-            activeView === 'history' 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'text-gray-300 hover:text-white hover:bg-gray-800'
-          }`}
+          className="w-full justify-start"
           onClick={() => onViewChange('history')}
         >
           <History className="h-4 w-4 mr-2" />
@@ -142,23 +130,23 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       {/* Quick Stats */}
       {stats && (
         <div className="p-4">
-          <h3 className="text-sm font-semibold text-white mb-3">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
             Quick Stats
           </h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Activity className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-400">Total</span>
+                <Activity className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">Total</span>
               </div>
-              <Badge variant="secondary" className="bg-gray-800 text-gray-300">{stats.totalRequests}</Badge>
+              <Badge variant="secondary">{stats.totalRequests}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <TrendingUp className="h-4 w-4 text-green-400" />
-                <span className="text-sm text-gray-400">Success</span>
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">Success</span>
               </div>
-              <Badge variant="secondary" className="bg-gray-800 text-gray-300">{Math.round(stats.successRate * 100)}%</Badge>
+              <Badge variant="secondary">{Math.round(stats.successRate * 100)}%</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
