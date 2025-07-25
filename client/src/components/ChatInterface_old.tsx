@@ -199,7 +199,7 @@ ${item.response}
       {/* Drag overlay */}
       {isDragOver && (
         <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+          <div className="bg-white dark:bg-[#1E1E1E] p-6 rounded-lg shadow-lg text-center">
             <Upload className="h-12 w-12 text-blue-500 mx-auto mb-2" />
             <p className="text-lg font-semibold text-gray-900 dark:text-white">Drop your file here</p>
             <p className="text-sm text-gray-600 dark:text-gray-400">Supports .txt and .md files</p>
@@ -207,7 +207,7 @@ ${item.response}
         </div>
       )}
       {/* Header - Hidden on mobile, shown on desktop */}
-      <div className="hidden lg:block border-b bg-white dark:bg-gray-800 px-4 lg:px-6 py-4 mt-4">
+      <div className="hidden lg:block border-b bg-white dark:bg-[#1E1E1E] px-4 lg:px-6 py-4 mt-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">
@@ -271,7 +271,7 @@ ${item.response}
               
               {/* ChatGPT-style suggestion cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl mb-8">
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-[#1E1E1E] transition-colors cursor-pointer">
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs font-bold">C</span>
@@ -283,7 +283,7 @@ ${item.response}
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-[#1E1E1E] transition-colors cursor-pointer">
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs font-bold">G</span>
@@ -295,7 +295,7 @@ ${item.response}
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-[#1E1E1E] transition-colors cursor-pointer">
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs font-bold">G</span>
@@ -307,7 +307,7 @@ ${item.response}
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-[#1E1E1E] transition-colors cursor-pointer">
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs font-bold">X</span>
@@ -350,7 +350,7 @@ ${item.response}
                     <div className="bg-transparent">
                       {/* Enhanced Classification Info */}
                       {msg.classification && (
-                        <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                        <div className="mb-3 p-3 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg border">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-2">
                               <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -556,7 +556,7 @@ ${item.response}
                     <Loader2 className="h-4 w-4 animate-spin text-white" />
                   </div>
                   <div className="flex-1">
-                    <div className="bg-white dark:bg-gray-800 border p-4 rounded-2xl rounded-tl-md">
+                    <div className="bg-white dark:bg-[#1E1E1E] border p-4 rounded-2xl rounded-tl-md">
                       <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
                         <span>Analyzing and routing to best AI model...</span>
                       </div>
@@ -575,7 +575,7 @@ ${item.response}
       {/* ChatGPT-style Input Area */}
       <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2A2A2A] px-4 py-4 safe-area-pb">
         <div className="max-w-3xl mx-auto">
-          <div className="relative bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm focus-within:shadow-md transition-all">
+          <div className="relative bg-gray-100 dark:bg-[#1E1E1E] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm focus-within:shadow-md transition-all">
             {selectedFile && (
               <div className="p-3 border-b border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">

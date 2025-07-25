@@ -255,7 +255,7 @@ ${analytics.processingTimes.map(p =>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {analytics.processingTimes.map((metric) => (
-              <div key={metric.model} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={metric.model} className="p-4 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <div className={`w-3 h-3 ${getModelColor(metric.model)} rounded-full`} />
                   <span className="text-sm font-medium text-gray-900 dark:text-white capitalize">

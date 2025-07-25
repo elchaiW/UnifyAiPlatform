@@ -233,7 +233,7 @@ Classification Details:
               
               {/* Perplexity-style suggestion cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -249,7 +249,7 @@ Classification Details:
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -265,7 +265,7 @@ Classification Details:
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -281,7 +281,7 @@ Classification Details:
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
                   <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
                       <img 
@@ -337,7 +337,7 @@ Classification Details:
                   <div className="flex-1 min-w-0">
                     {/* Enhanced Classification Info */}
                     {msg.classification && (
-                      <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                      <div className="mb-3 p-3 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg border">
                         <div className="flex items-center space-x-2 mb-2">
                           <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             {msg.category || msg.classification.category}
@@ -429,7 +429,7 @@ Classification Details:
         <div className="max-w-4xl mx-auto">
           {selectedFile && (
             <div className="mb-3">
-              <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3 border border-gray-700">
+              <div className="flex items-center justify-between bg-[#1E1E1E] rounded-lg p-3 border border-gray-700">
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-blue-400" />
                   <span className="text-sm text-gray-300">{selectedFile.name}</span>
@@ -447,7 +447,7 @@ Classification Details:
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
+            <div className="relative bg-[#1E1E1E] rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
               <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
                 {/* Mobile Hamburger Menu Button */}
                 <Button
