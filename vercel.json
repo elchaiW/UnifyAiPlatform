@@ -8,28 +8,6 @@
       "maxDuration": 30
     }
   },
-  "routes": [
-    {
-      "src": "/api/requests/history",
-      "dest": "/api/requests"
-    },
-    {
-      "src": "/api/analytics/stats",
-      "dest": "/api/analytics"
-    },
-    {
-      "src": "/api/transcribe/(.*)",
-      "dest": "/api/transcribe"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/dist/$1"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/requests/history",
