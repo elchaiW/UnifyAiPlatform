@@ -499,7 +499,6 @@ Classification Details:
                       setTimeout(() => textareaRef.current?.focus(), 100);
                     }}
                     disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
-                    className="h-7 w-7 lg:h-9 lg:w-9"
                   />
 
                   {/* Additional Tools Button */}
