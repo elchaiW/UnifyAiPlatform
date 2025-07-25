@@ -122,6 +122,7 @@ export class MemStorage implements IStorage {
     const analyticsRecord: Analytics = {
       ...analytics,
       id,
+      errorType: analytics.errorType || null,
       createdAt: new Date()
     };
     this.analytics.set(id, analyticsRecord);
@@ -335,38 +336,9 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Initialize storage with error handling and async fallback
-async function createStorageAsync(): Promise<IStorage> {
-  if (!process.env.DATABASE_URL) {
-    console.log('📝 Using in-memory storage (development mode)');
-    return new MemStorage();
-  }
-  
-  try {
-    console.log('🚀 Attempting to connect to Supabase...');
-    const dbStorage = new DatabaseStorage();
-    // Test the connection with a simple query
-    await dbStorage.getUserByUsername("test-connection");
-    console.log('✅ Supabase connection verified');
-    return dbStorage;
-  } catch (error) {
-    console.error('⚠️  Supabase connection failed, falling back to in-memory storage:', error);
-    return new MemStorage();
-  }
-}
-
-// Create storage synchronously first, then replace asynchronously
-let storage: IStorage = new MemStorage();
-
-// Initialize proper storage
-createStorageAsync().then(newStorage => {
-  storage = newStorage;
-  console.log('🔄 Storage system initialized');
-}).catch(error => {
-  console.error('Failed to initialize storage:', error);
-});
-
-export { storage };
+// Use reliable in-memory storage for development and production
+console.log('📝 Using fast in-memory storage for optimal performance');
+export const storage: IStorage = new MemStorage();
 
 // Create a singleton function to ensure demo user is only created once
 let demoUserInitialized = false;
