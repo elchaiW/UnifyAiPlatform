@@ -45,10 +45,14 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
         setAudioBlob(blob);
-        setAudioUrl(URL.createObjectURL(blob));
         
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
+        
+        // Automatically process audio immediately after stopping
+        setTimeout(() => {
+          processAudioImmediately(blob);
+        }, 100);
       };
       
       mediaRecorder.start(100); // Collect data every 100ms
@@ -81,14 +85,13 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
     }
   }, [isRecording, toast]);
 
-  const processAudio = useCallback(async () => {
-    if (!audioBlob) return;
-    
+  // Immediate processing function for automatic transcription
+  const processAudioImmediately = useCallback(async (blob: Blob) => {
     setIsProcessing(true);
     
     try {
       const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
+      formData.append('audio', blob, 'recording.webm');
       
       const response = await fetch('/api/transcribe', {
         method: 'POST',
@@ -126,7 +129,7 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
     } finally {
       setIsProcessing(false);
     }
-  }, [audioBlob, onTranscription, toast]);
+  }, [onTranscription, toast]);
 
   const playRecording = useCallback(() => {
     if (audioUrl) {
@@ -148,67 +151,27 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
   }, []);
 
   return (
-    <>
-      {!audioBlob ? (
-        <Button
-          type="button"
-          variant="ghost" 
-          size="sm"
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={disabled || isProcessing}
-          className={`h-9 w-9 p-0 rounded-full border-none ${
-            isRecording 
-              ? 'bg-red-600 text-white hover:bg-red-700' 
-              : 'text-gray-400 hover:text-white hover:bg-gray-700'
-          }`}
-        >
-          {isRecording ? (
-            <Square className="h-4 w-4" />
-          ) : (
-            <Mic className="h-4 w-4" />
-          )}
-        </Button>
+    <Button
+      type="button"
+      variant="ghost" 
+      size="sm"
+      onClick={isRecording ? stopRecording : startRecording}
+      disabled={disabled || isProcessing}
+      className={`h-9 w-9 p-0 rounded-full border-none ${
+        isRecording 
+          ? 'bg-red-600 text-white hover:bg-red-700' 
+          : isProcessing
+          ? 'bg-blue-600 text-white'
+          : 'text-gray-400 hover:text-white hover:bg-gray-700'
+      }`}
+    >
+      {isProcessing ? (
+        <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      ) : isRecording ? (
+        <Square className="h-4 w-4" />
       ) : (
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={playRecording}
-            disabled={disabled}
-            className="h-9 w-9 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 border-none"
-          >
-            <Play className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={processAudio}
-            disabled={disabled || isProcessing}
-            className="h-9 px-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-600 border-none text-xs"
-          >
-            {isProcessing ? (
-              <>
-                <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-1" />
-                Processing
-              </>
-            ) : (
-              'Send'
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={clearRecording}
-            disabled={disabled || isProcessing}
-            className="h-9 w-9 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 border-none"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        <Mic className="h-4 w-4" />
       )}
-    </>
+    </Button>
   );
 }
