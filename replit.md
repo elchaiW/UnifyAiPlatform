@@ -147,6 +147,13 @@ The application implements a clean separation between frontend and backend, with
 
 ## Recent Changes: Latest modifications with dates
 
+### Voice & Performance Optimization (January 25, 2025)
+- **Performance Fixed**: ChatGPT responses now ~700ms (down from 15+ seconds)
+- **Voice Functionality Restored**: Updated AssemblyAI service with proper file upload method
+- **Complete Responses**: Increased token limits from 300 to 1500 for full AI responses
+- **API Response Fix**: Fixed UI display issue showing only partial responses
+- **Enhanced Token Limits**: All AI models now support complete, detailed responses
+
 ### Delete Functionality Added (January 21, 2025)
 - **Individual Message Deletion**: Users can delete specific chat messages
 - **Clear All History**: Button to delete entire chat history with confirmation

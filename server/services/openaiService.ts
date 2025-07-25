@@ -18,7 +18,7 @@ export async function processWithChatGPT(prompt: string): Promise<string> {
           content: prompt
         }
       ],
-      max_tokens: 300, // Further reduced for speed
+      max_tokens: 1500, // Maximum tokens for complete responses
       temperature: 0.5, // Lower temperature for faster processing
     });
 
