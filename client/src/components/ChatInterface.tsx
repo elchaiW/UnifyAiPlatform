@@ -466,13 +466,13 @@ Classification Details:
                   </svg>
                 </Button>
                 
-                {/* File Upload Button - Mobile shows plus, Desktop shows plus */}
+                {/* File Upload Button - Desktop Only - Centered Plus */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="hidden lg:block h-9 w-9 p-0 mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  className="hidden lg:flex h-9 w-9 p-0 mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none items-center justify-center"
                   disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
