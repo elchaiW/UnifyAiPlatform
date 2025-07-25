@@ -1,0 +1,27 @@
+{
+  "name": "LUMINADOC - Multi-AI Assistant",
+  "short_name": "LUMINADOC",
+  "description": "Intelligent AI routing platform for document processing and multi-model conversations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#1f2937",
+  "orientation": "portrait",
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/attached_assets/Group 1171274849 (1)_1753432882218.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/attached_assets/Group 1171274849 (1)_1753432882218.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

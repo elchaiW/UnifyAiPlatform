@@ -1,0 +1,33 @@
+[11:55:49.906] Running build in Washington, D.C., USA (East) – iad1
+[11:55:49.906] Build machine configuration: 2 cores, 8 GB
+[11:55:49.924] Cloning github.com/nfcrent/luminadocv9 (Branch: main, Commit: 6952fae)
+[11:55:50.103] Previous build caches not available
+[11:55:50.600] Cloning completed: 675.000ms
+[11:55:52.572] Running "vercel build"
+[11:55:53.094] Vercel CLI 44.5.0
+[11:55:53.695] > Installing Builder: @vercel/node@3.1.0
+[11:56:03.804] Installing dependencies...
+[11:56:08.919] npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+[11:56:09.451] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[11:56:09.451] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[11:56:15.578] 
+[11:56:15.579] added 625 packages in 11s
+[11:56:15.579] 
+[11:56:15.580] 78 packages are looking for funding
+[11:56:15.580]   run `npm fund` for details
+[11:56:15.918] [36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[11:56:15.971] transforming...
+[11:56:16.274] Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+[11:56:16.275]   npx update-browserslist-db@latest
+[11:56:16.275]   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[11:56:20.927] [32m✓[39m 2025 modules transformed.
+[11:56:21.280] rendering chunks...
+[11:56:21.289] computing gzip size...
+[11:56:21.367] [2m../dist/public/[22m[32mindex.html                 [39m[1m[2m  1.06 kB[22m[1m[22m[2m │ gzip:   0.53 kB[22m
+[11:56:21.369] [2m../dist/public/[22m[2massets/[22m[35mindex-CE8OMT02.css  [39m[1m[2m103.48 kB[22m[1m[22m[2m │ gzip:  16.33 kB[22m
+[11:56:21.370] [2m../dist/public/[22m[2massets/[22m[36mindex-Clqss7Ul.js   [39m[1m[2m400.33 kB[22m[1m[22m[2m │ gzip: 121.09 kB[22m
+[11:56:21.371] [32m✓ built in 5.43s[39m
+[11:56:21.441] Error: Found invalid Node.js Version: "22.x". Please set Node.js Version to 20.x in your Project Settings to use Node.js 20.
+[11:56:21.442] Learn More: http://vercel.link/node-version
+[11:56:21.848] 
+[11:56:24.462] Exiting build container
