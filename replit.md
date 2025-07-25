@@ -45,18 +45,18 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React with TypeScript
+- **Framework**: Next.js 15 with App Router and TypeScript
 - **Styling**: Tailwind CSS with shadcn/ui component library
-- **Routing**: Wouter for client-side routing
+- **Routing**: Next.js App Router for server-side routing
 - **State Management**: TanStack Query for server state management
-- **Build Tool**: Vite for development and building
+- **Build Tool**: Next.js built-in bundler with Webpack 5
 
 ### Backend Architecture
-- **Framework**: Express.js with TypeScript
+- **Framework**: Next.js API Routes with TypeScript
 - **Runtime**: Node.js with ES modules
-- **API Design**: RESTful API with JSON responses
-- **File Processing**: Multer for handling file uploads
-- **Error Handling**: Centralized error middleware
+- **API Design**: RESTful API with JSON responses using Next.js API routes
+- **File Processing**: Multer for handling file uploads in API routes
+- **Error Handling**: Next.js error boundaries and API error handling
 
 ### Database Architecture
 - **ORM**: Drizzle ORM with PostgreSQL
@@ -120,9 +120,10 @@ Preferred communication style: Simple, everyday language.
 ## Deployment Strategy
 
 ### Development
-- Local development with Vite dev server
-- Hot module replacement for React components
+- Local development with Next.js dev server
+- Hot module replacement for React components and API routes
 - In-memory storage for rapid development
+- Automatic TypeScript compilation and error checking
 - Environment-specific configurations
 
 ### Production Build

@@ -1,11 +1,9 @@
-// Next.js compatibility wrapper for Replit workflows
-// This ensures the existing workflow continues to work with Next.js
-
+// Pure Next.js development startup
 import { spawn } from 'child_process';
 
 console.log('🚀 Starting Next.js development server...');
 
-const nextProcess = spawn('npx', ['next', 'dev'], {
+const nextProcess = spawn('npx', ['next', 'dev', '--port', '5000'], {
   stdio: 'inherit',
   cwd: process.cwd(),
   env: { ...process.env, NODE_ENV: 'development' }
