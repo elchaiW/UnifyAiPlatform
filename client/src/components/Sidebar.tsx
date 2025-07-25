@@ -83,7 +83,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
   return (
     <div className="w-64 lg:w-80 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
       {/* Header */}
-      <div className="p-4 pt-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-4 pt-6 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Multi-AI Assistant
         </h2>
@@ -234,7 +234,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       </div>
       
       {/* Theme Toggle at bottom of sidebar */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
+      <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600 dark:text-gray-400">Theme</span>
           <ThemeToggle />

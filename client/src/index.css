@@ -215,3 +215,12 @@
     left: 0 !important;
   }
 }
+
+/* Perfect border alignment between sidebar and main content */
+.sidebar-content-alignment {
+  border-top: 1px solid transparent;
+}
+
+.dark .sidebar-content-alignment {
+  border-top: 1px solid transparent;
+}
