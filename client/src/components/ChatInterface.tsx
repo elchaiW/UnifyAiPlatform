@@ -449,13 +449,31 @@ Classification Details:
           <form onSubmit={handleSubmit}>
             <div className="relative bg-gray-800 rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
               <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
-                {/* Plus Button - Left Side */}
+                {/* Mobile Menu Button (replaces plus on mobile) */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    // Access parent component's sidebar function through props or context
+                    const event = new CustomEvent('toggleMobileSidebar');
+                    window.dispatchEvent(event);
+                  }}
+                  className="lg:hidden h-7 w-7 p-0 mr-2 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </Button>
+                
+                {/* Plus Button - Desktop Only */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-7 w-7 lg:h-9 lg:w-9 p-0 mr-2 lg:mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  className="hidden lg:block h-9 w-9 p-0 mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
                   disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

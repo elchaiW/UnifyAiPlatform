@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import ChatInterface from "@/components/ChatInterface";
 import Sidebar from "@/components/Sidebar";
 import AnalyticsView from "@/components/AnalyticsView";
@@ -14,6 +15,16 @@ export default function Dashboard() {
   const [activeView, setActiveView] = useState<View>('chat');
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Listen for mobile sidebar toggle from input area
+  React.useEffect(() => {
+    const handleToggleSidebar = () => {
+      setIsSidebarOpen(!isSidebarOpen);
+    };
+    
+    window.addEventListener('toggleMobileSidebar', handleToggleSidebar);
+    return () => window.removeEventListener('toggleMobileSidebar', handleToggleSidebar);
+  }, [isSidebarOpen]);
 
   const handleNewChat = () => {
     setCurrentConversationId(null);
@@ -110,17 +121,7 @@ export default function Dashboard() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Floating Hamburger Menu */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="lg:hidden fixed top-4 left-4 z-40 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md safe-area-pt"
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </Button>
+
         
         {/* Content */}
         <div className="flex-1 min-h-0">
