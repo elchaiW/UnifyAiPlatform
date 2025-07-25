@@ -119,18 +119,12 @@ export default function Dashboard() {
               webview
             </div>
             
-            {/* Right: LUMINADOC logo exactly as shown in your design */}
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 1L15 8.5L23 10L17.5 15L19 23L12 19L5 23L6.5 15L1 10L9 8.5L12 1Z" fill="#4F8EF7"/>
-                  <path d="M12 4L14 10L20 11L16 14.5L17 21L12 18L7 21L8 14.5L4 11L10 10L12 4Z" fill="#7BA7F7"/>
-                </svg>
-              </div>
-              <span className="text-white font-medium text-base">
-                <span className="text-blue-400">LUMINA</span>DOC
-              </span>
-            </div>
+            {/* Right: Your authentic LUMINADOC logo */}
+            <img 
+              src="/attached_assets/Group 1171274849_1753431811341.png" 
+              alt="LUMINADOC" 
+              className="h-6 w-auto"
+            />
           </div>
         </div>
         

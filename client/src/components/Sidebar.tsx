@@ -85,16 +85,12 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
       {/* Header */}
       <div className="px-4 py-4 pt-6 border-b border-gray-700">
         <div className="flex items-center space-x-3 mb-2">
-          {/* Custom Star Logo matching your design */}
-          <div className="w-7 h-7 flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 1.5L17.5 10L26 11.5L20 17L21.5 26L14 22L6.5 26L8 17L2 11.5L10.5 10L14 1.5Z" fill="#4F8EF7"/>
-              <path d="M14 5L16 11.5L22.5 12.5L18.5 16L19.5 23L14 20L8.5 23L9.5 16L5.5 12.5L12 11.5L14 5Z" fill="#7BA7F7"/>
-            </svg>
-          </div>
-          <h2 className="text-lg font-semibold">
-            <span className="text-blue-400">LUMINA</span><span className="text-white">DOC</span>
-          </h2>
+          {/* Your authentic LUMINADOC logo */}
+          <img 
+            src="/attached_assets/Group 1171274849_1753431811341.png" 
+            alt="LUMINADOC" 
+            className="h-7 w-auto"
+          />
         </div>
         <p className="text-sm text-gray-400">
           Intelligent AI Routing
