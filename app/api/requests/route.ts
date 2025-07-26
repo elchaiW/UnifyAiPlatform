@@ -25,27 +25,20 @@ export async function POST(request: NextRequest) {
 
     // Get authenticated user from Supabase
     const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-    }
-
     const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
+      authHeader?.replace('Bearer ', '') || ''
     );
 
-    if (authError || !supabaseUser) {
-      return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
+    // For now, fallback to demo user if no authentication (backwards compatibility)
+    let userId = 1; // Demo user
+    if (supabaseUser && !authError) {
+      const user = await getCurrentUser(supabaseUser);
+      if (user) {
+        userId = user.id;
+      }
     }
 
-    // Get or create user in our database
-    const user = await getCurrentUser(supabaseUser);
-    if (!user) {
-      return NextResponse.json({ error: "Failed to get user" }, { status: 500 });
-    }
-
-    const userId = user.id;
-
-    console.log(`📝 Processing request for user ${userId}: "${messageContent.substring(0, 50)}..."`);
+    console.log(`📝 Processing request: "${messageContent.substring(0, 50)}..."`);
     
     // Classify the request to determine the best AI model
     const classifier = new AIClassifier();
