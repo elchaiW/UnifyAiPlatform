@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { createSupabaseClient } from "@/lib/supabase";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
@@ -59,6 +60,23 @@ export default function ChatInterface() {
   // Fetch messages with explicit queryFn
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
     queryKey: ["/api/requests/history"],
+    queryFn: async () => {
+      const supabase = createSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: Record<string, string> = {};
+      if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+
+      const response = await fetch("/api/requests/history", {
+        headers,
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
     refetchInterval: 2000, // Faster refresh
     staleTime: 0, // Always consider data stale
     gcTime: 0, // Don't cache
