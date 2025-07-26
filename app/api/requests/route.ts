@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage, initializeDemoUser } from '@/lib/storage';
+import { dbStorage } from '@/lib/database';
+import { getCurrentUser } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
 import { AIClassifier } from '@/lib/services/aiClassifier';
 import { processWithClaude } from '@/lib/services/claudeService';
 import { processWithChatGPT } from '@/lib/services/openaiService';
 import { processWithGemini } from '@/lib/services/geminiService';
 import { processWithGrok } from '@/lib/services/grokService';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,8 +23,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    // Initialize demo user
-    await initializeDemoUser();
+    // Get authenticated user from Supabase
+    const authHeader = request.headers.get('authorization');
+    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
+      authHeader?.replace('Bearer ', '') || ''
+    );
+
+    // For now, fallback to demo user if no authentication (backwards compatibility)
+    let userId = 1; // Demo user
+    if (supabaseUser && !authError) {
+      const user = await getCurrentUser(supabaseUser);
+      if (user) {
+        userId = user.id;
+      }
+    }
 
     console.log(`📝 Processing request: "${messageContent.substring(0, 50)}..."`);
     
@@ -27,9 +46,12 @@ export async function POST(request: NextRequest) {
     console.log(`🤖 Classification result:`, classification);
     
     // Create request record
-    const requestRecord = await storage.createRequest({
-      userId: 1, // Demo user ID
+    const requestRecord = await dbStorage.createRequest({
+      userId: userId,
+      type: 'prompt',
       prompt: messageContent,
+      content: messageContent,
+      category: 'general',
       selectedModel: classification.selectedModel,
       status: 'processing',
       confidence: classification.confidence,
@@ -67,10 +89,11 @@ export async function POST(request: NextRequest) {
       processingTimeMs = Date.now() - startTime;
       
       // Update request with response
-      await storage.updateRequest(requestRecord.id.toString(), {
+      await dbStorage.updateRequest(requestRecord.id, {
         status: 'completed',
         response: response,
-        processingTime: processingTimeMs
+        processingTime: processingTimeMs,
+        completedAt: new Date()
       });
       
       // Return the response with classification details
@@ -90,10 +113,11 @@ export async function POST(request: NextRequest) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown processing error';
       
       // Update request with error
-      await storage.updateRequest(requestRecord.id.toString(), {
+      await dbStorage.updateRequest(requestRecord.id, {
         status: 'failed',
         response: `Error: ${errorMessage}`,
-        processingTime: processingTimeMs
+        processingTime: processingTimeMs,
+        completedAt: new Date()
       });
       
       return NextResponse.json({
@@ -115,16 +139,28 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    await initializeDemoUser();
+    // Get authenticated user from Supabase
+    const authHeader = request.headers.get('authorization');
+    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
+      authHeader?.replace('Bearer ', '') || ''
+    );
+
+    // For now, fallback to demo user if no authentication (backwards compatibility)
+    let userId = 1; // Demo user
+    if (supabaseUser && !authError) {
+      const user = await getCurrentUser(supabaseUser);
+      if (user) {
+        userId = user.id;
+      }
+    }
     
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit');
     const limitNum = limit ? parseInt(limit, 10) : 50;
 
-    const requests = await storage.getAllRequests(1);
-    const limitedRequests = requests.slice(0, limitNum);
+    const requests = await dbStorage.getAllRequests(userId, limitNum);
     
-    return NextResponse.json(limitedRequests);
+    return NextResponse.json(requests);
   } catch (error) {
     console.error('Error fetching requests:', error);
     return NextResponse.json({ error: 'Failed to fetch requests' }, { status: 500 });
