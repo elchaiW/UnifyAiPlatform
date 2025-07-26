@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
@@ -57,14 +58,7 @@ export default function ChatInterface() {
 
   // Fetch messages with explicit queryFn
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
-    queryKey: ["requests-history"],
-    queryFn: async () => {
-      const response = await fetch("/api/requests/history");
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-    },
+    queryKey: ["/api/requests/history"],
     refetchInterval: 2000, // Faster refresh
     staleTime: 0, // Always consider data stale
     gcTime: 0, // Don't cache
@@ -82,18 +76,13 @@ export default function ChatInterface() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
-      const response = await fetch('/api/requests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, type: 'prompt' }),
-      });
-      if (!response.ok) throw new Error('Failed to send message');
+      const response = await apiRequest('POST', '/api/requests', { content, type: 'prompt' });
       return response.json();
     },
     onSuccess: () => {
       // Force immediate refetch of messages
-      queryClient.invalidateQueries({ queryKey: ["requests-history"] });
-      queryClient.refetchQueries({ queryKey: ["requests-history"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
+      queryClient.refetchQueries({ queryKey: ["/api/requests/history"] });
     },
     onError: (error) => {
       toast({
@@ -107,11 +96,7 @@ export default function ChatInterface() {
   // Upload file mutation
   const uploadFileMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/requests/document', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) throw new Error('Failed to upload file');
+      const response = await apiRequest('POST', '/api/requests/document', formData);
       return response.json();
     },
     onSuccess: () => {
@@ -130,10 +115,7 @@ export default function ChatInterface() {
   // Delete message mutation
   const deleteRequestMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/requests/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete message');
+      await apiRequest('DELETE', `/api/requests/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
@@ -146,6 +128,27 @@ export default function ChatInterface() {
       toast({
         title: "Error",
         description: "Failed to delete message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Clear all history mutation
+  const clearAllMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', '/api/requests/history/clear');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
+      toast({
+        title: "Success",
+        description: "All chat history cleared successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to clear history. Please try again.",
         variant: "destructive",
       });
     },
@@ -307,6 +310,27 @@ Classification Details:
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Clear All History Button - Show when there are messages */}
+          {messages.length > 0 && (
+            <div className="flex justify-end mb-4 px-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete all chat history?")) {
+                    clearAllMutation.mutate();
+                  }
+                }}
+                className="flex items-center space-x-1 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-400/30"
+                disabled={clearAllMutation.isPending}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Clear All</span>
+                {clearAllMutation.isPending && <Loader2 className="h-3 w-3 animate-spin ml-1" />}
+              </Button>
             </div>
           )}
 
