@@ -23,23 +23,17 @@ import { VoiceInput } from './VoiceInput';
 
 interface Message {
   id: number;
-  type: 'prompt' | 'document';
-  content: string;
-  fileName?: string;
-  category: string;
+  userId: number;
+  prompt: string;
   selectedModel: string;
   status: string;
-  response?: string;
-  processingTime?: string;
+  confidence: number;
+  reasoning: string;
   createdAt: string;
-  classification?: {
-    category: string;
-    model: string;
-    confidence: number;
-    reasoning: string;
-    keyTopics?: string[];
-    documentType?: string;
-  };
+  updatedAt: string;
+  response?: string;
+  processingTime?: number;
+  fileName?: string;
 }
 
 const getModelImage = (model: string) => {
@@ -204,19 +198,16 @@ export default function ChatInterface() {
     const content = `AI Response from ${msg.selectedModel}
 Generated: ${new Date(msg.createdAt).toLocaleString()}
 
-Request: ${msg.content}
+Request: ${msg.prompt}
 ${msg.fileName ? `File: ${msg.fileName}` : ''}
 
 Response:
 ${msg.response}
 
-${msg.classification ? `
 Classification Details:
-- Category: ${msg.classification.category}
-- Model: ${msg.classification.model}
-- Confidence: ${Math.round(msg.classification.confidence * 100)}%
-- Reasoning: ${msg.classification.reasoning}
-` : ''}
+- Model: ${msg.selectedModel}
+- Confidence: ${Math.round(msg.confidence)}%
+- Reasoning: ${msg.reasoning}
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -333,7 +324,7 @@ Classification Details:
                           <span className="text-sm">{msg.fileName}</span>
                         </div>
                       )}
-                      <p className="text-gray-900 dark:text-white text-sm lg:text-base">{msg.content}</p>
+                      <p className="text-gray-900 dark:text-white text-sm lg:text-base">{msg.prompt}</p>
                     </div>
                   </div>
                 </div>
@@ -355,40 +346,22 @@ Classification Details:
                   </div>
                   <div className="flex-1 min-w-0">
                     {/* Enhanced Classification Info */}
-                    {msg.classification && (
+                    {msg.confidence && msg.reasoning && (
                       <div className="mb-3 p-3 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg border">
                         <div className="flex items-center space-x-2 mb-2">
                           <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                            {msg.category || msg.classification.category}
+                            {msg.selectedModel}
                           </Badge>
                           <Badge variant="outline">
-                            {Math.round(msg.classification.confidence * 100)}% confidence
+                            {Math.round(msg.confidence)}% confidence
                           </Badge>
-                          {msg.classification.documentType && (
-                            <Badge variant="outline" className="text-xs">
-                              {msg.classification.documentType}
-                            </Badge>
-                          )}
                         </div>
-                        
-                        {msg.classification.keyTopics && msg.classification.keyTopics.length > 0 && (
-                          <div className="mb-2">
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Key Topics:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {msg.classification.keyTopics.map((topic: string, index: number) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {topic}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                         
                         <details className="text-xs text-gray-600 dark:text-gray-400">
                           <summary className="cursor-pointer hover:text-gray-900 dark:hover:text-white">
                             Analysis reasoning
                           </summary>
-                          <p className="mt-2 text-xs">{msg.classification.reasoning}</p>
+                          <p className="mt-2 text-xs">{msg.reasoning}</p>
                         </details>
                       </div>
                     )}
