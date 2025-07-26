@@ -68,7 +68,13 @@ export default function ChatInterface() {
   useEffect(() => {
     console.log('ChatInterface - Messages updated:', messages);
     console.log('ChatInterface - Message count:', messages.length);
+    console.log('ChatInterface - Latest message:', messages[messages.length - 1]);
     if (error) console.error('Query error:', error);
+    
+    // Log specific details about message responses
+    messages.forEach((msg, index) => {
+      console.log(`Message ${index + 1}: Status=${msg.status}, HasResponse=${!!msg.response}, ResponseLength=${msg.response?.length || 0}`);
+    });
   }, [messages, error]);
 
 
@@ -79,10 +85,16 @@ export default function ChatInterface() {
       const response = await apiRequest('POST', '/api/requests', { content, type: 'prompt' });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Message sent successfully:', data);
       // Force immediate refetch of messages
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
       queryClient.refetchQueries({ queryKey: ["/api/requests/history"] });
+      
+      toast({
+        title: "Message sent",
+        description: "Your message is being processed...",
+      });
     },
     onError: (error) => {
       toast({
