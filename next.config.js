@@ -24,6 +24,14 @@ const nextConfig = withPWA({
     unoptimized: true,
   },
   output: 'standalone', // Required for Docker deployment
+  experimental: {
+    allowedDevOrigins: [
+      '*.replit.dev',
+      '*.picard.replit.dev',
+      'localhost:5000',
+      '127.0.0.1:5000'
+    ]
+  },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Handle client-side imports
     if (!isServer) {
@@ -34,6 +42,12 @@ const nextConfig = withPWA({
         tls: false,
       };
     }
+    
+    // Fix chunk loading issues in development
+    if (dev) {
+      config.optimization.splitChunks = false;
+    }
+    
     return config;
   },
 });
