@@ -313,6 +313,8 @@ The application implements a clean separation between frontend and backend, with
 - **Data Structure Alignment**: Updated frontend interface to match backend storage schema
 - **Real-time Updates**: Fixed query invalidation to show new messages immediately
 - **UI Consistency**: Maintained ChatGPT-style message bubbles with proper user/AI response layout
+- **Storage Persistence**: Fixed in-memory storage reset issue using global singleton pattern
+- **Message Ordering**: Fixed message display order to show newest messages at bottom like standard chat
 
 ### Vercel Serverless Deployment Ready (January 24, 2025)
 - **Serverless Architecture**: Created Vercel-compatible API functions with @vercel/node runtime

@@ -312,7 +312,7 @@ Classification Details:
 
           {/* Perplexity-style Messages */}
           <div className="px-6 space-y-8 pb-6 pt-4">
-            {messages.slice().reverse().map((msg) => (
+            {messages.map((msg) => (
               <div key={msg.id} className="space-y-4">
                 {/* User Message - ChatGPT style */}
                 <div className="flex justify-end">
