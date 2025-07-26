@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "./AuthProvider";
+import { LogOut } from "lucide-react";
 
 interface SidebarProps {
   activeView: 'chat' | 'analytics' | 'history';
@@ -49,6 +51,7 @@ const getModelColor = (model: string) => {
 };
 
 export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadConversation }: SidebarProps) {
+  const { user, signOut } = useAuth();
   const { data: history = [] } = useQuery<any[]>({
     queryKey: ["/api/requests/history"],
     refetchInterval: 5000,
@@ -238,8 +241,37 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
         </ScrollArea>
       </div>
       
-      {/* Theme Toggle at bottom of sidebar */}
-      <div className="px-4 py-4 mt-auto">
+      {/* User Profile and Settings at bottom of sidebar */}
+      <div className="px-4 py-4 mt-auto border-t border-gray-700">
+        {user && (
+          <div className="mb-4">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {user.email?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-200 truncate">
+                  {user.user_metadata?.full_name || user.email}
+                </p>
+                <p className="text-xs text-gray-400 truncate">
+                  {user.email}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600 dark:text-gray-400">Theme</span>
           <ThemeToggle />
