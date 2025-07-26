@@ -8,17 +8,8 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest) {
   try {
-    const resolvedParams = await params;
-    const id = parseInt(resolvedParams.id, 10);
-    if (isNaN(id)) {
-      return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });
-    }
-
     // Get authenticated user from Supabase
     const authHeader = request.headers.get('authorization');
     const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
@@ -34,10 +25,10 @@ export async function DELETE(
       }
     }
 
-    const success = await dbStorage.deleteRequest(id, userId);
+    const success = await dbStorage.deleteAllRequests(userId);
     return NextResponse.json({ success });
   } catch (error) {
-    console.error('Error deleting request:', error);
-    return NextResponse.json({ error: 'Failed to delete request' }, { status: 500 });
+    console.error('Error clearing all history:', error);
+    return NextResponse.json({ error: 'Failed to clear all history' }, { status: 500 });
   }
 }
