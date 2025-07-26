@@ -12,9 +12,25 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Get Supabase session token for authenticated requests
+  const headers: Record<string, string> = data ? { "Content-Type": "application/json" } : {};
+  
+  // Try to get session token from localStorage (Supabase stores it there)
+  if (typeof window !== 'undefined') {
+    try {
+      const session = JSON.parse(localStorage.getItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token') || '{}');
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+    } catch (e) {
+      // Fallback: try to get from Supabase client
+      console.log('Could not get session from localStorage, falling back to default');
+    }
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -29,7 +45,23 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Get Supabase session token for authenticated requests
+    const headers: Record<string, string> = {};
+    
+    // Try to get session token from localStorage (Supabase stores it there)
+    if (typeof window !== 'undefined') {
+      try {
+        const session = JSON.parse(localStorage.getItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token') || '{}');
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      } catch (e) {
+        console.log('Could not get session from localStorage');
+      }
+    }
+
     const res = await fetch(queryKey.join("/") as string, {
+      headers,
       credentials: "include",
     });
 

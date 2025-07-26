@@ -55,15 +55,12 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages with explicit queryFn
+  // Fetch messages with explicit queryFn using authenticated API client
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
     queryKey: ["requests-history"],
     queryFn: async () => {
-      const response = await fetch("/api/requests/history");
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
+      const { apiClient } = await import('@/lib/apiClient');
+      return apiClient.get('/api/requests/history');
     },
     refetchInterval: 2000, // Faster refresh
     staleTime: 0, // Always consider data stale
@@ -82,13 +79,8 @@ export default function ChatInterface() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
-      const response = await fetch('/api/requests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, type: 'prompt' }),
-      });
-      if (!response.ok) throw new Error('Failed to send message');
-      return response.json();
+      const { apiClient } = await import('@/lib/apiClient');
+      return apiClient.post('/api/requests', { content, type: 'prompt' });
     },
     onSuccess: () => {
       // Force immediate refetch of messages
@@ -107,11 +99,12 @@ export default function ChatInterface() {
   // Upload file mutation
   const uploadFileMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/requests/document', {
+      const { apiClient } = await import('@/lib/apiClient');
+      // For file uploads, we need to handle FormData differently
+      const response = await apiClient.makeRequest('/api/requests/document', {
         method: 'POST',
-        body: formData,
+        body: formData
       });
-      if (!response.ok) throw new Error('Failed to upload file');
       return response.json();
     },
     onSuccess: () => {
@@ -130,10 +123,8 @@ export default function ChatInterface() {
   // Delete message mutation
   const deleteRequestMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/requests/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete message');
+      const { apiClient } = await import('@/lib/apiClient');
+      return apiClient.delete(`/api/requests/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
