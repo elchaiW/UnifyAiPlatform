@@ -12,18 +12,25 @@ export async function GET(request: NextRequest) {
   try {
     // Get authenticated user from Supabase
     const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
     const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') || ''
+      authHeader.replace('Bearer ', '')
     );
 
-    // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = 1; // Demo user
-    if (supabaseUser && !authError) {
-      const user = await getCurrentUser(supabaseUser);
-      if (user) {
-        userId = user.id;
-      }
+    if (authError || !supabaseUser) {
+      return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
     }
+
+    // Get or create user in our database
+    const user = await getCurrentUser(supabaseUser);
+    if (!user) {
+      return NextResponse.json({ error: "Failed to get user" }, { status: 500 });
+    }
+
+    const userId = user.id;
     
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit');
@@ -43,18 +50,25 @@ export async function DELETE(request: NextRequest) {
   try {
     // Get authenticated user from Supabase
     const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
     const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') || ''
+      authHeader.replace('Bearer ', '')
     );
 
-    // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = 1; // Demo user
-    if (supabaseUser && !authError) {
-      const user = await getCurrentUser(supabaseUser);
-      if (user) {
-        userId = user.id;
-      }
+    if (authError || !supabaseUser) {
+      return NextResponse.json({ error: "Invalid authentication" }, { status: 401 });
     }
+
+    // Get or create user in our database
+    const user = await getCurrentUser(supabaseUser);
+    if (!user) {
+      return NextResponse.json({ error: "Failed to get user" }, { status: 500 });
+    }
+
+    const userId = user.id;
 
     // Clear user-specific chat history
     await dbStorage.deleteAllRequests(userId);
