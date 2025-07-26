@@ -103,8 +103,18 @@ class MemStorage implements IStorage {
   }
 }
 
-// Initialize storage
-export const storage = new MemStorage();
+// Create global singleton storage that persists across hot reloads
+declare global {
+  var __storage: MemStorage | undefined;
+}
+
+// Initialize storage as singleton
+export const storage = globalThis.__storage || new MemStorage();
+
+// Store in global to persist across hot reloads in development
+if (process.env.NODE_ENV === 'development') {
+  globalThis.__storage = storage;
+}
 
 // Initialize demo user
 let demoUserInitialized = false;
