@@ -236,7 +236,7 @@ Classification Details:
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#111827] relative">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#2A2A2A] relative">
       {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
       <div className="flex-1 overflow-y-auto pt-4 pb-32 lg:pb-24 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
