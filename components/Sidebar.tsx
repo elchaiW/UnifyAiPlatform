@@ -52,6 +52,7 @@ const getModelColor = (model: string) => {
 
 export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadConversation }: SidebarProps) {
   const { user, signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const { data: history = [] } = useQuery<any[]>({
     queryKey: ["/api/requests/history"],
     refetchInterval: 5000,
@@ -263,11 +264,30 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
             <Button
               variant="ghost"
               size="sm"
-              onClick={signOut}
-              className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700"
+              onClick={async () => {
+                setIsSigningOut(true);
+                try {
+                  await signOut();
+                } catch (error) {
+                  console.error('Failed to sign out:', error);
+                } finally {
+                  setIsSigningOut(false);
+                }
+              }}
+              disabled={isSigningOut}
+              className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700 disabled:opacity-50"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              {isSigningOut ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-300 mr-2" />
+                  Signing Out...
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </>
+              )}
             </Button>
           </div>
         )}

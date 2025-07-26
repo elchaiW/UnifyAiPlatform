@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
   user: User | null
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createSupabaseClient()
+  const router = useRouter()
 
   useEffect(() => {
     // Get initial session
@@ -41,17 +43,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setUser(session?.user || null)
         setLoading(false)
+        
+        // Redirect to auth page when user signs out
+        if (event === 'SIGNED_OUT') {
+          router.push('/auth')
+        }
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, [supabase.auth, router])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Error signing out:', error.message)
+        throw error
+      }
+      // The redirect is handled by the auth state change listener
+    } catch (error) {
+      console.error('Error during sign out:', error)
+    }
   }
 
   return (
