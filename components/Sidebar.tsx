@@ -81,7 +81,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
   };
 
   return (
-    <div className="w-64 lg:w-80 h-screen bg-[#1E1E1E] border-r border-gray-700 flex flex-col shrink-0">
+    <div className="w-64 lg:w-80 h-screen bg-[#111827] border-r border-gray-700 flex flex-col shrink-0">
       {/* Header */}
       <div className="px-4 py-4 pt-6 border-b border-gray-700">
         <div className="flex items-center space-x-3 mb-2">
