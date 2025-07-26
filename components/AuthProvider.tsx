@@ -59,14 +59,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
+      console.log('AuthProvider: Starting signout...')
+      
+      // Clear local session first
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'
+      })
+      
       if (error) {
         console.error('Error signing out:', error.message)
         throw error
       }
-      // The redirect is handled by the auth state change listener
+      
+      console.log('AuthProvider: Signout successful, clearing state...')
+      
+      // Force immediate state update
+      setUser(null)
+      
+      // Force redirect manually if auth state change doesn't trigger
+      setTimeout(() => {
+        if (window.location.pathname !== '/auth') {
+          console.log('AuthProvider: Forcing redirect to /auth')
+          router.push('/auth')
+        }
+      }, 100)
+      
     } catch (error) {
       console.error('Error during sign out:', error)
+      throw error
     }
   }
 
