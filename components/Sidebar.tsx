@@ -264,20 +264,17 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
             <Button
               variant="ghost"
               size="sm"
-              disabled={isSigningOut}
               onClick={async () => {
                 setIsSigningOut(true);
                 try {
-                  console.log('Starting signout process...');
                   await signOut();
-                  console.log('Signout completed successfully');
                 } catch (error) {
                   console.error('Failed to sign out:', error);
-                  alert('Failed to sign out. Please try again.');
                 } finally {
                   setIsSigningOut(false);
                 }
               }}
+              disabled={isSigningOut}
               className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700 disabled:opacity-50"
             >
               {isSigningOut ? (
