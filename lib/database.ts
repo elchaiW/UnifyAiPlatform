@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import * as schema from '@/shared/schema';
+import * as schema from '../shared/schema';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -103,13 +103,9 @@ export class DatabaseStorage {
 
   // Analytics operations
   async getAnalyticsStats(userId?: number) {
-    let query = db.select().from(schema.requests);
-    
-    if (userId) {
-      query = query.where(eq(schema.requests.userId, userId));
-    }
-    
-    const requests = await query;
+    const requests = userId 
+      ? await db.select().from(schema.requests).where(eq(schema.requests.userId, userId))
+      : await db.select().from(schema.requests);
     const totalRequests = requests.length;
     
     // Calculate average processing time

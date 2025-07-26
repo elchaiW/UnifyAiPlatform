@@ -26,8 +26,8 @@ class MemStorage implements IStorage {
   async createRequest(data: Request): Promise<SelectRequest> {
     const id = this.idCounter++;
     const request: SelectRequest = {
-      id,
       ...data,
+      id,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
