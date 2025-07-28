@@ -53,31 +53,51 @@ const getModelColor = (model: string) => {
 export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadConversation }: SidebarProps) {
   const { user, signOut } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  // Fetch history from client storage
   const { data: history = [] } = useQuery<any[]>({
-    queryKey: ["/api/requests/history"],
-    refetchInterval: 5000,
+    queryKey: ["client-history"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getMessages();
+    },
+    refetchInterval: 1000, // Fast refresh to show new messages
   });
 
-  const { data: stats } = useQuery<ProcessingStats>({
-    queryKey: ["/api/analytics/stats"],
-    refetchInterval: 10000,
+  // Fetch analytics from client storage
+  const { data: clientStats } = useQuery({
+    queryKey: ["client-analytics"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getAnalytics();
+    },
+    refetchInterval: 2000,
   });
 
-  const recentRequests = history.slice(0, 5);
+  // Convert client analytics to expected format
+  const stats: ProcessingStats | undefined = clientStats ? {
+    totalRequests: clientStats.totalRequests,
+    successRate: clientStats.successRate / 100, // Convert percentage to decimal
+    avgProcessingTime: clientStats.averageResponseTime / 1000, // Convert ms to seconds
+    modelUsage: {
+      claude: clientStats.modelUsage.claude || 0,
+      chatgpt: clientStats.modelUsage.chatgpt || 0,
+      gemini: clientStats.modelUsage.gemini || 0,
+      grok: clientStats.modelUsage.grok || 0,
+    }
+  } : undefined;
 
-  const downloadHistory = () => {
-    const csvContent = [
-      'Date,Type,Content,Model,Status,Processing Time',
-      ...history.map(item => 
-        `"${new Date(item.createdAt).toLocaleString()}","${item.fileName ? 'File' : 'Text'}","${item.content.replace(/"/g, '""')}","${item.selectedModel}","${item.status}","${item.processingTime}s"`
-      )
-    ].join('\n');
+  // Show most recent messages first
+  const recentRequests = history.slice(-5).reverse();
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+  const downloadHistory = async () => {
+    const { clientStorage } = await import('@/lib/clientStorage');
+    const exportData = clientStorage.exportAllData();
+    
+    const blob = new Blob([exportData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ai_processing_history_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `luminadoc_backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -221,7 +241,7 @@ export default function Sidebar({ activeView, onViewChange, onNewChat, onLoadCon
                 </div>
                 
                 <p className="text-xs text-gray-700 dark:text-gray-200 mb-2 line-clamp-2">
-                  {item.fileName || item.content.substring(0, 50) + '...'}
+                  {item.fileName || item.prompt?.substring(0, 50) + '...'}
                 </p>
                 
                 <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
