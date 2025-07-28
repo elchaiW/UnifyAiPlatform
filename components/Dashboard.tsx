@@ -5,6 +5,10 @@ import ChatInterface from "./ChatInterface";
 import Sidebar from "./Sidebar";
 import AnalyticsView from "./AnalyticsView";
 import HistoryView from "./HistoryView";
+import PWAInstallPrompt from "./PWAInstallPrompt";
+import PWAStatus from "./PWAStatus";
+import OfflineIndicator from "./OfflineIndicator";
+import usePWAShortcuts from "../hooks/usePWAShortcuts";
 
 import { Button } from "./ui/button";
 import { MessageSquare, BarChart3, History, Menu, X } from "lucide-react";
@@ -15,6 +19,12 @@ export default function Dashboard() {
   const [activeView, setActiveView] = useState<View>('chat');
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Handle PWA shortcuts
+  usePWAShortcuts(
+    () => handleNewChat(),
+    () => setActiveView('analytics')
+  );
   
   // Listen for mobile sidebar toggle from input area
   useEffect(() => {
@@ -60,6 +70,11 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
+      {/* PWA Components */}
+      <PWAInstallPrompt />
+      <PWAStatus />
+      <OfflineIndicator />
+      
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 

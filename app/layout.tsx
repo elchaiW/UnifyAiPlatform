@@ -27,8 +27,11 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/attached_assets/Group 1171274849 (1)_1753432882218.png',
-    apple: '/attached_assets/Group 1171274849 (1)_1753432882218.png',
+    icon: [
+      { url: '/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' },
+      { url: '/icon-512.svg', sizes: '512x512', type: 'image/svg+xml' }
+    ],
+    apple: '/apple-touch-icon.svg',
   },
   appleWebApp: {
     capable: true,
