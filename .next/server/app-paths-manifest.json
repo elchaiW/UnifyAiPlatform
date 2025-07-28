@@ -1,13 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/analytics/stats/route": "app/api/analytics/stats/route.js",
-  "/api/requests/[id]/route": "app/api/requests/[id]/route.js",
-  "/api/requests/client-only/route": "app/api/requests/client-only/route.js",
-  "/api/requests/history/clear/route": "app/api/requests/history/clear/route.js",
-  "/api/requests/history/route": "app/api/requests/history/route.js",
-  "/api/requests/route": "app/api/requests/route.js",
-  "/api/transcribe/route": "app/api/transcribe/route.js",
-  "/auth/page": "app/auth/page.js",
-  "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/page": "app/page.js"
 }
