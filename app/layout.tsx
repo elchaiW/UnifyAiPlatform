@@ -14,6 +14,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('http://localhost:5000'),
   title: 'LUMINADOC - Multi-AI Assistant',
   description: 'Intelligent AI routing platform that automatically selects the best AI model for your requests. Process documents with Claude, ChatGPT, Gemini, and Grok.',
   keywords: 'AI, artificial intelligence, document processing, multi-AI, ChatGPT, Claude, Gemini, Grok, productivity',

@@ -28,14 +28,21 @@ export function ThemeProvider({
   storageKey = 'luminadoc-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [mounted, setMounted] = useState(false);
+
+  // Only access localStorage after component mounts to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+    const savedTheme = localStorage.getItem(storageKey) as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
     }
-    return defaultTheme;
-  });
+  }, [storageKey]);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     const root = window.document.documentElement;
 
     root.classList.remove('light', 'dark');
@@ -50,15 +57,22 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
+      if (mounted) {
+        localStorage.setItem(storageKey, theme);
+      }
       setTheme(theme);
     },
   };
+
+  // Don't render children until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return <div className={defaultTheme}>{children}</div>;
+  }
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
