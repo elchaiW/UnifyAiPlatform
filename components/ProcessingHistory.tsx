@@ -42,9 +42,29 @@ const getModelClassName = (model: string) => {
 };
 
 export default function ProcessingHistory() {
+  // Fetch history from client storage
   const { data: history, isLoading, error } = useQuery<HistoryItem[]>({
-    queryKey: ["/api/requests/history"],
-    refetchInterval: 10000, // Refresh every 10 seconds
+    queryKey: ["client-history"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      const messages = clientStorage.getMessages();
+      
+      // Convert messages to history format
+      return messages.map((msg, index) => ({
+        id: index + 1,
+        type: msg.fileName ? 'file' : 'text',
+        content: msg.prompt || '',
+        fileName: msg.fileName,
+        category: msg.category || 'general',
+        selectedModel: msg.selectedModel || 'chatgpt',
+        status: msg.status,
+        response: msg.response,
+        processingTime: msg.processingTime ? (msg.processingTime / 1000).toFixed(2) : undefined,
+        createdAt: msg.createdAt,
+        completedAt: msg.status === 'completed' ? msg.completedAt || msg.createdAt : undefined,
+      }));
+    },
+    refetchInterval: 2000, // Fast refresh
   });
 
   const downloadResponse = (item: HistoryItem) => {

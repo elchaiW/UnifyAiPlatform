@@ -28,6 +28,7 @@ interface AppSettings {
 interface Analytics {
   totalRequests: number;
   modelUsage: Record<string, number>;
+  categoryBreakdown: Record<string, number>;
   averageResponseTime: number;
   successRate: number;
   lastUpdated: string;
@@ -119,11 +120,12 @@ class ClientStorage {
   }
 
   // Enhanced analytics tracking
-  updateAnalytics(modelUsed: string, responseTime: number, success: boolean): void {
+  updateAnalytics(modelUsed: string, responseTime: number, success: boolean = true, category: string = 'general'): void {
     try {
       const analytics = this.getAnalytics();
       analytics.totalRequests++;
       analytics.modelUsage[modelUsed] = (analytics.modelUsage[modelUsed] || 0) + 1;
+      analytics.categoryBreakdown[category] = (analytics.categoryBreakdown[category] || 0) + 1;
       
       // Update average response time
       const currentAvg = analytics.averageResponseTime || 0;
@@ -150,6 +152,7 @@ class ClientStorage {
       return stored ? JSON.parse(stored) : {
         totalRequests: 0,
         modelUsage: {},
+        categoryBreakdown: {},
         averageResponseTime: 0,
         successRate: 100,
         lastUpdated: new Date().toISOString()
@@ -158,6 +161,7 @@ class ClientStorage {
       return {
         totalRequests: 0,
         modelUsage: {},
+        categoryBreakdown: {},
         averageResponseTime: 0,
         successRate: 100,
         lastUpdated: new Date().toISOString()

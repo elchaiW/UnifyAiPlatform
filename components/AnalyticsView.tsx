@@ -47,14 +47,49 @@ const getModelColor = (model: string) => {
 };
 
 export default function AnalyticsView() {
-  const { data: analytics, isLoading } = useQuery<AnalyticsData>({
-    queryKey: ["/api/analytics/detailed"],
-    refetchInterval: 10000,
+  // Fetch analytics from client storage
+  const { data: clientStats, isLoading } = useQuery({
+    queryKey: ["client-analytics"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getAnalytics();
+    },
+    refetchInterval: 2000,
   });
 
+  // Fetch history from client storage
   const { data: history = [] } = useQuery<any[]>({
-    queryKey: ["/api/requests/history"],
+    queryKey: ["client-history"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getMessages();
+    },
+    refetchInterval: 2000,
   });
+
+  // Convert client analytics to expected format
+  const analytics: AnalyticsData | undefined = clientStats ? {
+    totalRequests: clientStats.totalRequests,
+    successRate: clientStats.successRate / 100, // Convert percentage to decimal
+    avgProcessingTime: clientStats.averageResponseTime / 1000, // Convert ms to seconds
+    modelUsage: {
+      claude: clientStats.modelUsage.claude || 0,
+      chatgpt: clientStats.modelUsage.chatgpt || 0,
+      gemini: clientStats.modelUsage.gemini || 0,
+      grok: clientStats.modelUsage.grok || 0,
+    },
+    categoryBreakdown: {
+      legal: clientStats.categoryBreakdown?.legal || 0,
+      marketing: clientStats.categoryBreakdown?.marketing || 0,
+      coding: clientStats.categoryBreakdown?.coding || 0,
+      general: clientStats.categoryBreakdown?.general || 0,
+    },
+    processingTimes: Object.entries(clientStats.modelUsage).map(([model, count]) => ({
+      model,
+      avgTime: clientStats.averageResponseTime / 1000,
+      requestCount: count,
+    }))
+  } : undefined;
 
   const downloadAnalytics = () => {
     if (!analytics) return;
