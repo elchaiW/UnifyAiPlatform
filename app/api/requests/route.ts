@@ -29,27 +29,34 @@ export async function POST(request: NextRequest) {
     let response: string;
     
     try {
-      // Route to appropriate AI model based on classification
-      switch (classification.selectedModel) {
-        case 'claude':
-          console.log(`🧠 Processing with Claude...`);
-          response = await processWithClaude(messageContent);
-          break;
-        case 'chatgpt':
-          console.log(`💬 Processing with ChatGPT...`);
-          response = await processWithChatGPT(messageContent);
-          break;
-        case 'gemini':
-          console.log(`✨ Processing with Gemini...`);
-          response = await processWithGemini(messageContent);
-          break;
-        case 'grok':
-          console.log(`🚀 Processing with Grok...`);
-          response = await processWithGrok(messageContent);
-          break;
-        default:
-          console.log(`💬 Defaulting to ChatGPT...`);
-          response = await processWithChatGPT(messageContent);
+      // Route to appropriate AI model based on classification with fallback
+      try {
+        switch (classification.selectedModel) {
+          case 'claude':
+            console.log(`🧠 Processing with Claude...`);
+            response = await processWithClaude(messageContent);
+            break;
+          case 'chatgpt':
+            console.log(`💬 Processing with ChatGPT...`);
+            response = await processWithChatGPT(messageContent);
+            break;
+          case 'gemini':
+            console.log(`✨ Processing with Gemini...`);
+            response = await processWithGemini(messageContent);
+            break;
+          case 'grok':
+            console.log(`🚀 Processing with Grok...`);
+            response = await processWithGrok(messageContent);
+            break;
+          default:
+            console.log(`💬 Defaulting to ChatGPT...`);
+            response = await processWithChatGPT(messageContent);
+        }
+      } catch (modelError) {
+        console.log(`❌ ${classification.selectedModel} failed, falling back to ChatGPT:`, modelError);
+        response = await processWithChatGPT(messageContent);
+        classification.selectedModel = 'chatgpt';
+        classification.reasoning = `${classification.reasoning} (fallback to ChatGPT due to service error)`;
       }
       
       const processingTime = Date.now() - startTime;
