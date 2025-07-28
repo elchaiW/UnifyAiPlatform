@@ -489,13 +489,31 @@ Classification Details:
                     {/* AI Response Content */}
                     <div className="prose prose-sm max-w-none dark:prose-invert">
                       {msg.status === 'processing' ? (
-                        <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
-                          <div className="animate-pulse flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center space-x-3">
+                            {/* Beautiful animated gradient orb */}
+                            <div className="relative">
+                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full animate-pulse"></div>
+                              <div className="absolute inset-0 w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-ping opacity-75"></div>
+                            </div>
+                            
+                            {/* Processing text with typing effect */}
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                  {msg.selectedModel || 'AI'} is analyzing your request
+                                </span>
+                                <div className="flex space-x-1">
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                </div>
+                              </div>
+                              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                This may take a few seconds...
+                              </p>
+                            </div>
                           </div>
-                          <span className="text-sm">AI is thinking...</span>
                         </div>
                       ) : msg.status === 'failed' ? (
                         <p className="text-red-600 dark:text-red-400 text-sm lg:text-base">
@@ -541,28 +559,7 @@ Classification Details:
             ))}
           </div>
 
-          {/* Loading State with ChatGPT-style typing animation */}
-          {(sendMessageMutation.isPending || uploadFileMutation.isPending || isTyping) && (
-            <div className="flex items-start space-x-3 mb-6">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gray-500">
-                <div className="w-full h-full bg-gray-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
-                  AI
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="bg-gray-100 dark:bg-[#1E1E1E] rounded-lg p-4">
-                  <div className="flex items-center space-x-1">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
-                    </div>
-                    <span className="text-sm text-gray-500 ml-2">AI is thinking...</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Scroll anchor for auto-scroll */}
           <div ref={messagesEndRef} />
