@@ -144,18 +144,30 @@ export default function ChatInterface() {
           completedAt: new Date().toISOString(),
         });
         
-        console.log('✅ Message updated successfully:', updatedMessage);
+        console.log('✅ Message updated successfully:', {
+          id: updatedMessage?.id,
+          response: updatedMessage?.response?.substring(0, 100) + '...',
+          status: updatedMessage?.status
+        });
         console.log('📝 Current messages in storage:', clientStorage.getMessages().length);
+        console.log('📄 All messages:', clientStorage.getMessages().map(m => ({
+          id: m.id, 
+          status: m.status, 
+          responseLength: m.response?.length || 0,
+          response: m.response?.substring(0, 50) + '...'
+        })));
         
         return result;
       } catch (error) {
         // Update message with error status
-        clientStorage.updateMessage(message.id, {
+        const errorMessage = clientStorage.updateMessage(message.id, {
           status: 'failed',
           response: `Error: ${error instanceof Error ? error.message : 'AI service temporarily unavailable'}`,
           processingTime: 0,
           completedAt: new Date().toISOString(),
         });
+        
+        console.log('❌ Error message updated:', errorMessage);
         
         throw error;
       }
@@ -163,8 +175,10 @@ export default function ChatInterface() {
     onSuccess: (data) => {
       console.log('Message sent successfully:', data);
       setIsTyping(false);
-      // Invalidate client storage queries
+      // Force refresh client storage queries
       queryClient.invalidateQueries({ queryKey: ["client-messages"] });
+      // Also force refetch to ensure immediate UI update
+      refetch();
     },
     onError: (error) => {
       setIsTyping(false);
@@ -474,9 +488,24 @@ Classification Details:
 
                     {/* AI Response Content */}
                     <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <p className="text-gray-900 dark:text-white text-sm lg:text-base whitespace-pre-wrap">
-                        {msg.response}
-                      </p>
+                      {msg.status === 'processing' ? (
+                        <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+                          <div className="animate-pulse flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          </div>
+                          <span className="text-sm">AI is thinking...</span>
+                        </div>
+                      ) : msg.status === 'failed' ? (
+                        <p className="text-red-600 dark:text-red-400 text-sm lg:text-base">
+                          {msg.response || 'Failed to process request'}
+                        </p>
+                      ) : (
+                        <p className="text-gray-900 dark:text-white text-sm lg:text-base whitespace-pre-wrap">
+                          {msg.response || 'No response available'}
+                        </p>
+                      )}
                     </div>
 
                     {/* Response Actions */}
