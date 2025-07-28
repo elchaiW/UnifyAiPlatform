@@ -120,7 +120,7 @@ export default function ChatInterface() {
         type: 'prompt',
         prompt: content,
         content: content,
-        category: classification.category || 'general',
+        category: 'general', // Simplified category
         selectedModel: classification.selectedModel,
         status: 'processing',
         confidence: classification.confidence,
