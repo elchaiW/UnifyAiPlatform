@@ -45,6 +45,21 @@ class ClientStorage {
     if (messages.length > 0) {
       this.messageId = Math.max(...messages.map(m => m.id)) + 1;
     }
+    
+    // Debug: Log storage status on initialization
+    console.log('📦 ClientStorage initialized');
+    console.log('💾 Existing messages found:', messages.length);
+    console.log('🔢 Next message ID:', this.messageId);
+    
+    // Show first few messages for debugging
+    if (messages.length > 0) {
+      console.log('📋 Recent messages:', messages.slice(-3).map(m => ({
+        id: m.id,
+        prompt: m.prompt.substring(0, 50) + '...',
+        status: m.status,
+        hasResponse: !!m.response
+      })));
+    }
   }
 
   getMessages(): Message[] {
