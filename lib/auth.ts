@@ -3,7 +3,7 @@ import { User } from '@supabase/supabase-js';
 
 // Define user type for our application
 export interface AppUser {
-  id: number;
+  id: string;
   email: string;
   supabaseId: string;
   createdAt: Date;
@@ -13,7 +13,7 @@ export interface AppUser {
 // Mock user data for development/demo purposes
 const mockUsers: AppUser[] = [
   {
-    id: 1,
+    id: "demo-user-1",
     email: 'demo@luminadoc.com',
     supabaseId: 'demo-user-id',
     createdAt: new Date(),
@@ -36,7 +36,7 @@ export async function getCurrentUser(supabaseUser: User): Promise<AppUser | null
 
     // Create new user if not exists (in real implementation, this would save to database)
     const newUser: AppUser = {
-      id: mockUsers.length + 1,
+      id: `user_${mockUsers.length + 1}`,
       email: supabaseUser.email || 'unknown@example.com',
       supabaseId: supabaseUser.id,
       createdAt: new Date(),
@@ -54,7 +54,7 @@ export async function getCurrentUser(supabaseUser: User): Promise<AppUser | null
 /**
  * Get user by ID
  */
-export async function getUserById(id: number): Promise<AppUser | null> {
+export async function getUserById(id: string): Promise<AppUser | null> {
   return mockUsers.find(u => u.id === id) || null;
 }
 

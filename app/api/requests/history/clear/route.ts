@@ -17,7 +17,7 @@ export async function DELETE(request: NextRequest) {
     );
 
     // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = 1; // Demo user
+    let userId = "demo-user-1"; // Demo user
     if (supabaseUser && !authError) {
       const user = await getCurrentUser(supabaseUser);
       if (user) {
