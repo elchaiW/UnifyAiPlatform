@@ -143,6 +143,13 @@ export default function ChatInterface() {
           processingTime: result.processingTime,
           completedAt: new Date().toISOString(),
         });
+
+        // Update analytics in client storage
+        clientStorage.updateAnalytics(
+          result.classification.selectedModel,
+          result.processingTime || 0,
+          true
+        );
         
         console.log('✅ Message updated successfully:', {
           id: updatedMessage?.id,
@@ -166,6 +173,9 @@ export default function ChatInterface() {
           processingTime: 0,
           completedAt: new Date().toISOString(),
         });
+        
+        // Track failed request in analytics
+        clientStorage.updateAnalytics('error', 0, false);
         
         console.log('❌ Error message updated:', errorMessage);
         
