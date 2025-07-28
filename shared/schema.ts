@@ -1,56 +1,119 @@
-// Database schema definitions for Luminadoc using Drizzle ORM
-import { pgTable, serial, text, timestamp, integer, jsonb, real } from 'drizzle-orm/pg-core';
-import { createInsertSchema } from 'drizzle-zod';
+// Database schema definitions for Luminadoc using Supabase
 import { z } from 'zod';
 
-// Users table
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  email: text('email').unique().notNull(),
-  supabaseId: text('supabase_id').unique().notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+// Supabase database types matching the SQL schema
+export interface Profile {
+  id: string; // UUID
+  email: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  settings?: any;
+  created_at: string;
+  updated_at: string;
+}
 
-// AI processing requests table
-export const requests = pgTable('requests', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  content: text('content').notNull(),
-  model: text('model').notNull(), // 'gemini', 'openai', 'claude', etc.
-  response: text('response'),
-  status: text('status').notNull().default('pending'), // 'pending', 'processing', 'completed', 'failed'
-  processingTime: real('processing_time'), // in seconds
-  metadata: jsonb('metadata'), // Additional data like usage stats, etc.
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export interface Conversation {
+  id: string; // UUID
+  user_id: string; // UUID
+  title: string;
+  model: string;
+  is_pinned: boolean;
+  metadata?: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Message {
+  id: string; // UUID
+  conversation_id: string; // UUID
+  user_id: string; // UUID
+  content: string;
+  response?: string | null;
+  model: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  processing_time?: number | null;
+  token_usage?: any;
+  metadata?: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Analytics {
+  id: string; // UUID
+  user_id: string; // UUID
+  event_type: string;
+  model?: string | null;
+  processing_time?: number | null;
+  token_count?: number | null;
+  metadata?: any;
+  created_at: string;
+}
 
 // Zod schemas for validation
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const profileSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  full_name: z.string().optional().nullable(),
+  avatar_url: z.string().url().optional().nullable(),
+  settings: z.any().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 
-export const insertRequestSchema = createInsertSchema(requests).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const conversationSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  title: z.string(),
+  model: z.enum(['gemini', 'openai', 'claude', 'grok']),
+  is_pinned: z.boolean().default(false),
+  metadata: z.any().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 
-// TypeScript types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export const messageSchema = z.object({
+  id: z.string().uuid(),
+  conversation_id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  content: z.string(),
+  response: z.string().optional().nullable(),
+  model: z.enum(['gemini', 'openai', 'claude', 'grok']),
+  status: z.enum(['pending', 'processing', 'completed', 'failed']).default('completed'),
+  processing_time: z.number().optional().nullable(),
+  token_usage: z.any().optional(),
+  metadata: z.any().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
 
-export type Request = typeof requests.$inferSelect;
-export type InsertRequest = z.infer<typeof insertRequestSchema>;
-export type SelectRequest = typeof requests.$inferSelect;
+// Insert schemas (omit generated fields)
+export const insertProfileSchema = profileSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
-// Extended request type for API responses
-export interface RequestWithUser extends Request {
-  user?: User;
-}
+export const insertConversationSchema = conversationSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertMessageSchema = messageSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+// Export types
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+
+// Legacy compatibility for existing code
+export type User = Profile;
+export type Request = Message;
+export type SelectRequest = Message;
 
 // Analytics types
 export interface AnalyticsStats {
