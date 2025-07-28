@@ -12,6 +12,7 @@ import {
   Target,
   Users
 } from "lucide-react";
+import StorageMonitor from './StorageMonitor';
 
 interface AnalyticsData {
   totalRequests: number;
@@ -218,6 +219,11 @@ ${analytics.processingTimes.map(p =>
               <Users className="h-8 w-8 text-orange-500" />
             </div>
           </Card>
+        </div>
+
+        {/* Storage & Sync Monitor */}
+        <div className="mb-8">
+          <StorageMonitor />
         </div>
 
         {/* Model Usage */}
