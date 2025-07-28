@@ -97,22 +97,13 @@ export default function ChatInterface() {
 
 
 
-  // Send message mutation with pure client storage
+  // Send message mutation using API endpoint
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       setIsTyping(true);
       
-      // Import client storage and AI services
+      // Import client storage for immediate UI update
       const { clientStorage } = await import('@/lib/clientStorage');
-      const { AIClassifier } = await import('@/lib/services/aiClassifier');
-      const { processWithChatGPT } = await import('@/lib/services/openaiService');
-      const { processWithClaude } = await import('@/lib/services/claudeService');
-      const { processWithGemini } = await import('@/lib/services/geminiService');
-      const { processWithGrok } = await import('@/lib/services/grokService');
-      
-      // Fast keyword-based classification for speed
-      const classifier = new AIClassifier();
-      const classification = await classifier.classifyRequest(content);
       
       // Add message to local storage immediately for instant display
       const message = clientStorage.addMessage({
@@ -120,54 +111,51 @@ export default function ChatInterface() {
         type: 'prompt',
         prompt: content,
         content: content,
-        category: 'general', // Simplified category
-        selectedModel: classification.selectedModel,
+        category: 'general',
+        selectedModel: 'chatgpt', // Will be updated after classification
         status: 'processing',
-        confidence: classification.confidence,
-        reasoning: classification.reasoning,
+        confidence: 0,
+        reasoning: 'Processing...',
       });
       
-      // Process with AI in background
-      const startTime = Date.now();
-      
       try {
-        let response: string;
-        
-        // Use fast AI processing with reduced token limits for speed
-        switch (classification.selectedModel) {
-          case 'claude':
-            response = await processWithClaude(content);
-            break;
-          case 'chatgpt':
-            response = await processWithChatGPT(content);
-            break;
-          case 'gemini':
-            response = await processWithGemini(content);
-            break;
-          case 'grok':
-            response = await processWithGrok(content);
-            break;
-          default:
-            response = await processWithChatGPT(content);
+        // Call API endpoint for processing
+        const response = await fetch('/api/requests', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content, message: content }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const result = await response.json();
         
-        const processingTime = Date.now() - startTime;
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to process message');
+        }
         
         // Update message in local storage with response
         clientStorage.updateMessage(message.id, {
           status: 'completed',
-          response: response,
-          processingTime: processingTime,
+          response: result.response,
+          selectedModel: result.classification.selectedModel,
+          confidence: result.classification.confidence,
+          reasoning: result.classification.reasoning,
+          processingTime: result.processingTime,
           completedAt: new Date().toISOString(),
         });
         
-        return { success: true, response, classification, processingTime, requestId: message.id };
+        return result;
       } catch (error) {
         // Update message with error status
         clientStorage.updateMessage(message.id, {
           status: 'failed',
           response: `Error: ${error instanceof Error ? error.message : 'AI service temporarily unavailable'}`,
-          processingTime: Date.now() - startTime,
+          processingTime: 0,
           completedAt: new Date().toISOString(),
         });
         
