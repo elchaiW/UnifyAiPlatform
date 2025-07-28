@@ -18,7 +18,8 @@ export async function processWithChatGPT(content: string): Promise<string> {
         content: content,
       },
     ],
-    max_tokens: 4000,
+    max_tokens: 1500, // Reduced for faster responses
+    temperature: 0.7,
   });
 
   const message = response.choices[0]?.message?.content;

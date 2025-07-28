@@ -51,6 +51,7 @@ const getModelImage = (model: string) => {
 export default function ChatInterface() {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -100,21 +101,19 @@ export default function ChatInterface() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
+      setIsTyping(true);
       const response = await apiRequest('POST', '/api/requests', { content, type: 'prompt' });
       return response.json();
     },
     onSuccess: (data) => {
       console.log('Message sent successfully:', data);
+      setIsTyping(false);
       // Force immediate refetch of messages
       queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
       queryClient.refetchQueries({ queryKey: ["/api/requests/history"] });
-      
-      toast({
-        title: "Message sent",
-        description: "Your message is being processed...",
-      });
     },
     onError: (error) => {
+      setIsTyping(false);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -461,8 +460,26 @@ Classification Details:
           </div>
 
           {/* Loading State with ChatGPT-style typing animation */}
-          {(sendMessageMutation.isPending || uploadFileMutation.isPending) && (
-            <TypingAnimation text="Generating response..." />
+          {(sendMessageMutation.isPending || uploadFileMutation.isPending || isTyping) && (
+            <div className="flex items-start space-x-3 mb-6">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gray-500">
+                <div className="w-full h-full bg-gray-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                  AI
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="bg-gray-100 dark:bg-[#1E1E1E] rounded-lg p-4">
+                  <div className="flex items-center space-x-1">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                    </div>
+                    <span className="text-sm text-gray-500 ml-2">AI is thinking...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Scroll anchor for auto-scroll */}

@@ -30,27 +30,7 @@ export class AIClassifier {
   async classifyRequest(prompt: string, fileContent?: string): Promise<ClassificationResult> {
     const content = fileContent ? `${prompt}\n\nFile content: ${fileContent}` : prompt;
 
-    // Try GPT-4o first (primary classifier)
-    if (this.openai) {
-      try {
-        const result = await this.classifyWithGPT4o(content);
-        if (result) return result;
-      } catch (error) {
-        console.log('GPT-4o classification failed, trying Gemini...');
-      }
-    }
-
-    // Fallback to Gemini
-    if (this.gemini) {
-      try {
-        const result = await this.classifyWithGemini(content);
-        if (result) return { ...result, fallbackUsed: 'gemini' };
-      } catch (error) {
-        console.log('Gemini classification failed, using keyword detection...');
-      }
-    }
-
-    // Final fallback to keyword detection
+    // Use fast keyword classification for better performance
     return this.classifyWithKeywords(content);
   }
 
