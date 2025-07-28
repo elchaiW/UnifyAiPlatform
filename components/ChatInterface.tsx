@@ -104,10 +104,10 @@ export default function ChatInterface() {
         prompt: content,
         content: content,
         category: 'general',
-        selectedModel: 'chatgpt', // Will be updated after classification
+        selectedModel: 'AI', // Will be updated after classification
         status: 'processing',
         confidence: 0,
-        reasoning: 'Processing...',
+        reasoning: '',
       });
       
       console.log('📝 User message added to storage:', message);
@@ -465,8 +465,8 @@ Classification Details:
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    {/* Enhanced Classification Info */}
-                    {msg.confidence && msg.reasoning && (
+                    {/* Enhanced Classification Info - Only show when completed */}
+                    {msg.status === 'completed' && msg.confidence > 0 && msg.reasoning && (
                       <div className="mb-3 p-3 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg border">
                         <div className="flex items-center space-x-2 mb-2">
                           <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
