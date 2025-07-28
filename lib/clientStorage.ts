@@ -1,4 +1,4 @@
-// Client-side storage for fast message handling
+// Enhanced client-side storage for complete data persistence
 interface Message {
   id: number;
   userId: number;
@@ -18,8 +18,25 @@ interface Message {
   updatedAt: string;
 }
 
+interface AppSettings {
+  theme: string;
+  language: string;
+  lastUsed: string;
+  version: string;
+}
+
+interface Analytics {
+  totalRequests: number;
+  modelUsage: Record<string, number>;
+  averageResponseTime: number;
+  successRate: number;
+  lastUpdated: string;
+}
+
 class ClientStorage {
   private storageKey = 'luminadoc_messages';
+  private settingsKey = 'luminadoc_settings';
+  private analyticsKey = 'luminadoc_analytics';
   private messageId = 1;
 
   constructor() {
@@ -86,10 +103,162 @@ class ClientStorage {
     console.log('✓ All chat history cleared from client storage');
   }
 
+  // Enhanced analytics tracking
+  updateAnalytics(modelUsed: string, responseTime: number, success: boolean): void {
+    try {
+      const analytics = this.getAnalytics();
+      analytics.totalRequests++;
+      analytics.modelUsage[modelUsed] = (analytics.modelUsage[modelUsed] || 0) + 1;
+      
+      // Update average response time
+      const currentAvg = analytics.averageResponseTime || 0;
+      const totalReqs = analytics.totalRequests;
+      analytics.averageResponseTime = ((currentAvg * (totalReqs - 1)) + responseTime) / totalReqs;
+      
+      // Update success rate
+      const currentSuccessCount = Math.round((analytics.successRate || 0) * (totalReqs - 1) / 100);
+      const newSuccessCount = currentSuccessCount + (success ? 1 : 0);
+      analytics.successRate = (newSuccessCount / totalReqs) * 100;
+      
+      analytics.lastUpdated = new Date().toISOString();
+      
+      localStorage.setItem(this.analyticsKey, JSON.stringify(analytics));
+      console.log('✓ Analytics updated:', analytics);
+    } catch (error) {
+      console.error('Failed to update analytics:', error);
+    }
+  }
+
+  getAnalytics(): Analytics {
+    try {
+      const stored = localStorage.getItem(this.analyticsKey);
+      return stored ? JSON.parse(stored) : {
+        totalRequests: 0,
+        modelUsage: {},
+        averageResponseTime: 0,
+        successRate: 100,
+        lastUpdated: new Date().toISOString()
+      };
+    } catch {
+      return {
+        totalRequests: 0,
+        modelUsage: {},
+        averageResponseTime: 0,
+        successRate: 100,
+        lastUpdated: new Date().toISOString()
+      };
+    }
+  }
+
+  // App settings management
+  getSettings(): AppSettings {
+    try {
+      const stored = localStorage.getItem(this.settingsKey);
+      return stored ? JSON.parse(stored) : {
+        theme: 'dark',
+        language: 'en',
+        lastUsed: new Date().toISOString(),
+        version: '1.0.0'
+      };
+    } catch {
+      return {
+        theme: 'dark',
+        language: 'en',
+        lastUsed: new Date().toISOString(),
+        version: '1.0.0'
+      };
+    }
+  }
+
+  updateSettings(settings: Partial<AppSettings>): void {
+    try {
+      const currentSettings = this.getSettings();
+      const updatedSettings = {
+        ...currentSettings,
+        ...settings,
+        lastUsed: new Date().toISOString()
+      };
+      localStorage.setItem(this.settingsKey, JSON.stringify(updatedSettings));
+      console.log('✓ Settings updated:', updatedSettings);
+    } catch (error) {
+      console.error('Failed to update settings:', error);
+    }
+  }
+
+  // Export all data for backup
+  exportAllData(): string {
+    try {
+      const data = {
+        messages: this.getMessages(),
+        analytics: this.getAnalytics(),
+        settings: this.getSettings(),
+        exportedAt: new Date().toISOString(),
+        version: '1.0.0'
+      };
+      return JSON.stringify(data, null, 2);
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      return '{}';
+    }
+  }
+
+  // Import data from backup
+  importAllData(jsonData: string): boolean {
+    try {
+      const data = JSON.parse(jsonData);
+      
+      if (data.messages) {
+        localStorage.setItem(this.storageKey, JSON.stringify(data.messages));
+      }
+      if (data.analytics) {
+        localStorage.setItem(this.analyticsKey, JSON.stringify(data.analytics));
+      }
+      if (data.settings) {
+        localStorage.setItem(this.settingsKey, JSON.stringify(data.settings));
+      }
+      
+      console.log('✓ All data imported successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      return false;
+    }
+  }
+
+  // Get storage usage info
+  getStorageInfo(): { used: number; available: number; percentage: number } {
+    try {
+      let used = 0;
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          used += localStorage.getItem(key)?.length || 0;
+        }
+      }
+      
+      // localStorage typically has 5-10MB limit
+      const available = 10 * 1024 * 1024; // 10MB estimate
+      const percentage = (used / available) * 100;
+      
+      return { used, available, percentage };
+    } catch (error) {
+      console.error('Failed to get storage info:', error);
+      return { used: 0, available: 0, percentage: 0 };
+    }
+  }
+
   // Clear all data on initialization for fresh start
   clearAllHistory(): void {
     this.clearAll();
     console.log('✓ Fresh start - all previous data cleared');
+  }
+
+  // Complete data wipe
+  clearAllData(): void {
+    localStorage.removeItem(this.storageKey);
+    localStorage.removeItem(this.settingsKey);
+    localStorage.removeItem(this.analyticsKey);
+    this.messageId = 1;
+    console.log('✓ All application data cleared from client storage');
   }
 }
 
