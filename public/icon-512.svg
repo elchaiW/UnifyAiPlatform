@@ -6,6 +6,10 @@
 <stop offset="1" stop-color="#AE7CFE"/>
 </linearGradient>
 </defs>
-<text x="256" y="290" text-anchor="middle" fill="white" font-family="Inter, system-ui" font-size="128" font-weight="bold">L</text>
-<circle cx="256" cy="340" r="12" fill="white" opacity="0.8"/>
+<!-- Beautiful sparkle/star icon scaled for 512px -->
+<g transform="translate(256, 256)">
+  <path d="M0 -64 L16 -16 L64 0 L16 16 L0 64 L-16 16 L-64 0 L-16 -16 Z" fill="white" opacity="0.9"/>
+  <circle cx="0" cy="0" r="12" fill="white"/>
+  <circle cx="0" cy="0" r="24" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
+</g>
 </svg>

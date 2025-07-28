@@ -6,6 +6,10 @@
 <stop offset="1" stop-color="#AE7CFE"/>
 </linearGradient>
 </defs>
-<text x="90" y="105" text-anchor="middle" fill="white" font-family="Inter, system-ui" font-size="45" font-weight="bold">L</text>
-<circle cx="90" cy="125" r="4" fill="white" opacity="0.8"/>
+<!-- Beautiful sparkle/star icon for Apple devices -->
+<g transform="translate(90, 90)">
+  <path d="M0 -54 L14 -14 L54 0 L14 14 L0 54 L-14 14 L-54 0 L-14 -14 Z" fill="white" opacity="0.9"/>
+  <circle cx="0" cy="0" r="10" fill="white"/>
+  <circle cx="0" cy="0" r="20" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
+</g>
 </svg>
