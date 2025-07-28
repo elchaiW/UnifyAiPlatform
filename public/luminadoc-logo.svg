@@ -1,9 +1,0 @@
-<svg width="120" height="32" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#8B5CF6"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
-    </linearGradient>
-  </defs>
-  <text x="10" y="22" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="url(#logoGradient)">LUMINADOC</text>
-</svg>

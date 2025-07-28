@@ -84,7 +84,32 @@ class ClientStorage {
     messages.push(newMessage);
     localStorage.setItem(this.storageKey, JSON.stringify(messages));
     
+    // Check storage capacity and trigger sync if needed
+    this.checkAndHandleStorageCapacity();
+    
     return newMessage;
+  }
+
+  private async checkAndHandleStorageCapacity(): Promise<void> {
+    const capacity = this.checkStorageCapacity();
+    
+    if (capacity.isCritical) {
+      console.log('🚨 Storage critically full, triggering emergency cleanup...');
+      try {
+        const { syncManager } = await import('./syncManager');
+        await syncManager.emergencyCleanup();
+      } catch (error) {
+        console.error('Failed to trigger emergency cleanup:', error);
+      }
+    } else if (capacity.shouldSync) {
+      console.log('📦 Storage getting full, triggering background sync...');
+      try {
+        const { syncManager } = await import('./syncManager');
+        await syncManager.performAutoSync();
+      } catch (error) {
+        console.error('Failed to trigger auto sync:', error);
+      }
+    }
   }
 
   updateMessage(id: number, updates: Partial<Message>): Message | null {
@@ -245,7 +270,7 @@ class ClientStorage {
   }
 
   // Get storage usage info
-  getStorageInfo(): { used: number; available: number; percentage: number } {
+  getStorageInfo(): { used: number; available: number; percentage: number; needsSync: boolean } {
     try {
       let used = 0;
       for (let key in localStorage) {
@@ -257,12 +282,30 @@ class ClientStorage {
       // localStorage typically has 5-10MB limit
       const available = 10 * 1024 * 1024; // 10MB estimate
       const percentage = (used / available) * 100;
+      const needsSync = percentage > 70;
       
-      return { used, available, percentage };
+      return { used, available, percentage, needsSync };
     } catch (error) {
       console.error('Failed to get storage info:', error);
-      return { used: 0, available: 0, percentage: 0 };
+      return { used: 0, available: 0, percentage: 0, needsSync: false };
     }
+  }
+
+  // Check if storage is getting full and trigger sync
+  checkStorageCapacity(): { 
+    isNearFull: boolean; 
+    isCritical: boolean; 
+    shouldSync: boolean; 
+    info: { used: number; available: number; percentage: number; needsSync: boolean } 
+  } {
+    const info = this.getStorageInfo();
+    
+    return {
+      isNearFull: info.percentage > 70,
+      isCritical: info.percentage > 90,
+      shouldSync: info.percentage > 60,
+      info
+    };
   }
 
   // Clear all data on initialization for fresh start

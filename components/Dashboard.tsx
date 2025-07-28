@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import ChatInterfaceSupabase from "./ChatInterfaceSupabase";
+import ChatInterface from "./ChatInterface";
 import Sidebar from "./Sidebar";
 import AnalyticsView from "./AnalyticsView";
-import HistoryTabSupabase from "./HistoryTabSupabase";
+import HistoryView from "./HistoryView";
 import PWAInstallPrompt from "./PWAInstallPrompt";
 import PWAStatus from "./PWAStatus";
 import OfflineIndicator from "./OfflineIndicator";
@@ -51,17 +51,17 @@ export default function Dashboard() {
     switch (activeView) {
       case 'chat':
         return (
-          <ChatInterfaceSupabase 
+          <ChatInterface 
             key={currentConversationId || 'new'}
           />
         );
       case 'analytics':
         return <AnalyticsView />;
       case 'history':
-        return <HistoryTabSupabase />;
+        return <HistoryView onLoadConversation={handleLoadConversation} />;
       default:
         return (
-          <ChatInterfaceSupabase 
+          <ChatInterface 
             key={currentConversationId || 'new'}
           />
         );
