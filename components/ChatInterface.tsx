@@ -26,16 +26,20 @@ import { VoiceInput } from './VoiceInput';
 interface Message {
   id: number;
   userId: number;
+  type: string;
   prompt: string;
+  content: string;
+  fileName?: string;
+  category: string;
   selectedModel: string;
   status: string;
   confidence: number;
-  reasoning: string;
-  createdAt: string;
-  updatedAt: string;
+  reasoning?: string;
   response?: string;
   processingTime?: number;
-  fileName?: string;
+  createdAt: string;
+  completedAt?: string;
+  updatedAt: string;
 }
 
 const getModelImage = (model: string) => {
@@ -58,29 +62,16 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages with explicit queryFn
+  // Fetch messages from client storage
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
-    queryKey: ["/api/requests/history"],
+    queryKey: ["client-messages"],
     queryFn: async () => {
-      const supabase = createSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const headers: Record<string, string> = {};
-      if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
-
-      const response = await fetch("/api/requests/history", {
-        headers,
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getMessages();
     },
-    refetchInterval: 2000, // Faster refresh
-    staleTime: 0, // Always consider data stale
-    gcTime: 0, // Don't cache
+    refetchInterval: 1000, // Fast refresh for real-time updates
+    staleTime: 0,
+    gcTime: 0,
   });
 
   // Debug: Log messages to console
@@ -102,15 +93,82 @@ export default function ChatInterface() {
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       setIsTyping(true);
-      const response = await apiRequest('POST', '/api/requests', { content, type: 'prompt' });
-      return response.json();
+      
+      // Import client storage and AI services
+      const { clientStorage } = await import('@/lib/clientStorage');
+      const { AIClassifier } = await import('@/lib/services/aiClassifier');
+      const { processWithChatGPT } = await import('@/lib/services/openaiService');
+      const { processWithClaude } = await import('@/lib/services/claudeService');
+      const { processWithGemini } = await import('@/lib/services/geminiService');
+      const { processWithGrok } = await import('@/lib/services/grokService');
+      
+      // Classify request
+      const classifier = new AIClassifier();
+      const classification = await classifier.classifyRequest(content);
+      
+      // Add message to storage immediately
+      const message = clientStorage.addMessage({
+        userId: 1,
+        type: 'prompt',
+        prompt: content,
+        content: content,
+        category: 'general',
+        selectedModel: classification.selectedModel,
+        status: 'processing',
+        confidence: classification.confidence,
+        reasoning: classification.reasoning,
+      });
+      
+      // Process with appropriate AI model
+      let response: string;
+      const startTime = Date.now();
+      
+      try {
+        switch (classification.selectedModel) {
+          case 'claude':
+            response = await processWithClaude(content);
+            break;
+          case 'chatgpt':
+            response = await processWithChatGPT(content);
+            break;
+          case 'gemini':
+            response = await processWithGemini(content);
+            break;
+          case 'grok':
+            response = await processWithGrok(content);
+            break;
+          default:
+            response = await processWithChatGPT(content);
+        }
+        
+        const processingTime = Date.now() - startTime;
+        
+        // Update message with response
+        clientStorage.updateMessage(message.id, {
+          status: 'completed',
+          response: response,
+          processingTime: processingTime,
+          completedAt: new Date().toISOString(),
+        });
+        
+        return { success: true, response, classification, processingTime, requestId: message.id };
+      } catch (error) {
+        // Update message with error
+        clientStorage.updateMessage(message.id, {
+          status: 'failed',
+          response: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          processingTime: Date.now() - startTime,
+          completedAt: new Date().toISOString(),
+        });
+        
+        throw error;
+      }
     },
     onSuccess: (data) => {
       console.log('Message sent successfully:', data);
       setIsTyping(false);
-      // Force immediate refetch of messages
-      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      queryClient.refetchQueries({ queryKey: ["/api/requests/history"] });
+      // Invalidate client storage queries
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
     },
     onError: (error) => {
       setIsTyping(false);
@@ -122,21 +180,18 @@ export default function ChatInterface() {
     },
   });
 
-  // Upload file mutation
+  // Upload file mutation - disabled for client storage mode
   const uploadFileMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await apiRequest('POST', '/api/requests/document', formData);
-      return response.json();
+      throw new Error("File upload temporarily disabled - using client storage mode");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
-      // File already cleared in handleSubmit for immediate feedback
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to upload file. Please try again.",
-        variant: "destructive",
+        title: "Info",
+        description: "File upload is temporarily disabled for better performance",
       });
     },
   });
@@ -144,10 +199,11 @@ export default function ChatInterface() {
   // Delete message mutation
   const deleteRequestMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/requests/${id}`);
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.deleteMessage(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
       toast({
         title: "Success",
         description: "Message deleted successfully.",
@@ -165,10 +221,11 @@ export default function ChatInterface() {
   // Clear all history mutation
   const clearAllMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('DELETE', '/api/requests/history/clear');
+      const { clientStorage } = await import('@/lib/clientStorage');
+      clientStorage.clearAll();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/requests/history"] });
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
       toast({
         title: "Success",
         description: "All chat history cleared successfully.",
