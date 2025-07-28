@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/analytics/stats/route": "/api/analytics/stats",
+  "/api/requests/client-only/route": "/api/requests/client-only",
+  "/api/requests/history/clear/route": "/api/requests/history/clear",
+  "/api/requests/[id]/route": "/api/requests/[id]",
+  "/api/requests/history/route": "/api/requests/history",
+  "/api/requests/route": "/api/requests",
+  "/api/transcribe/route": "/api/transcribe",
+  "/auth/page": "/auth",
+  "/page": "/",
+  "/dashboard/page": "/dashboard"
+}

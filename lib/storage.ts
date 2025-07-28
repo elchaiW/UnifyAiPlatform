@@ -5,10 +5,10 @@ export interface IStorage {
   // Request operations
   createRequest(data: Request): Promise<SelectRequest>;
   getRequest(id: string): Promise<SelectRequest | null>;
-  getAllRequests(userId?: number, limit?: number): Promise<SelectRequest[]>;
+  getAllRequests(userId?: string, limit?: number): Promise<SelectRequest[]>;
   updateRequest(id: string, data: Partial<Request>): Promise<SelectRequest | null>;
-  deleteRequest(id: number, userId?: number): Promise<boolean>;
-  deleteAllRequests(userId: number): Promise<boolean>;
+  deleteRequest(id: string, userId?: string): Promise<boolean>;
+  deleteAllRequests(userId: string): Promise<boolean>;
 
   // Analytics operations
   getAnalyticsStats(): Promise<{
@@ -25,16 +25,16 @@ class MemStorage implements IStorage {
   private idCounter = 1;
 
   async createRequest(data: Request): Promise<SelectRequest> {
-    const id = this.idCounter++;
+    const id = `msg_${this.idCounter++}`;
     const request: SelectRequest = {
       ...data,
       id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
     
-    this.requests.set(id.toString(), request);
-    console.log(`📝 Created request ${id} for user ${data.userId}`);
+    this.requests.set(id, request);
+    console.log(`📝 Created request ${id} for user ${data.user_id}`);
     return request;
   }
 
@@ -42,17 +42,17 @@ class MemStorage implements IStorage {
     return this.requests.get(id) || null;
   }
 
-  async getAllRequests(userId?: number, limit?: number): Promise<SelectRequest[]> {
+  async getAllRequests(userId?: string, limit?: number): Promise<SelectRequest[]> {
     const allRequests = Array.from(this.requests.values());
     let filteredRequests = allRequests;
     
     if (userId) {
-      filteredRequests = allRequests.filter(req => req.userId === userId);
+      filteredRequests = allRequests.filter(req => req.user_id === userId);
       console.log(`📱 History: Found ${filteredRequests.length} messages for user ${userId}`);
     }
     
     // Sort by creation date (newest first)
-    filteredRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    filteredRequests.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     
     // Apply limit if specified
     if (limit && limit > 0) {
@@ -69,7 +69,7 @@ class MemStorage implements IStorage {
     const updated = {
       ...existing,
       ...data,
-      updatedAt: new Date(),
+      updated_at: new Date().toISOString(),
     };
     
     this.requests.set(id, updated);
@@ -77,23 +77,23 @@ class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteRequest(id: number, userId?: number): Promise<boolean> {
-    const request = this.requests.get(id.toString());
+  async deleteRequest(id: string, userId?: string): Promise<boolean> {
+    const request = this.requests.get(id);
     if (!request) return false;
     
     // If userId is provided, verify ownership
-    if (userId && request.userId !== userId) {
-      console.log(`🚫 Access denied: User ${userId} cannot delete request ${id} owned by user ${request.userId}`);
+    if (userId && request.user_id !== userId) {
+      console.log(`🚫 Access denied: User ${userId} cannot delete request ${id} owned by user ${request.user_id}`);
       return false;
     }
     
-    return this.requests.delete(id.toString());
+    return this.requests.delete(id);
   }
 
-  async deleteAllRequests(userId: number): Promise<boolean> {
+  async deleteAllRequests(userId: string): Promise<boolean> {
     try {
       const allRequests = Array.from(this.requests.entries());
-      const userRequests = allRequests.filter(([_, req]) => req.userId === userId);
+      const userRequests = allRequests.filter(([_, req]) => req.user_id === userId);
       
       userRequests.forEach(([id]) => {
         this.requests.delete(id);
@@ -113,8 +113,8 @@ class MemStorage implements IStorage {
     
     // Calculate average processing time
     const processingTimes = requests
-      .filter(req => req.processingTime)
-      .map(req => req.processingTime!);
+      .filter(req => req.processing_time)
+      .map(req => req.processing_time!);
     const averageProcessingTime = processingTimes.length > 0 
       ? processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length 
       : 0;
