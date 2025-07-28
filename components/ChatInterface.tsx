@@ -459,8 +459,12 @@ Classification Details:
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
-                        ?
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <img 
+                          src="/attached_assets/Vector_1753691011402.png" 
+                          alt="AI Logo" 
+                          className="w-5 h-5 object-contain filter brightness-0 invert"
+                        />
                       </div>
                     )}
                   </div>
