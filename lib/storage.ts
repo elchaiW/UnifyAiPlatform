@@ -1,13 +1,14 @@
 // In-memory storage implementation for Luminadoc
-import { Request, SelectRequest } from '@/shared/schema';
+import { Request, SelectRequest } from '../shared/schema';
 
 export interface IStorage {
   // Request operations
   createRequest(data: Request): Promise<SelectRequest>;
   getRequest(id: string): Promise<SelectRequest | null>;
-  getAllRequests(userId?: number): Promise<SelectRequest[]>;
+  getAllRequests(userId?: number, limit?: number): Promise<SelectRequest[]>;
   updateRequest(id: string, data: Partial<Request>): Promise<SelectRequest | null>;
-  deleteRequest(id: string): Promise<boolean>;
+  deleteRequest(id: number, userId?: number): Promise<boolean>;
+  deleteAllRequests(userId: number): Promise<boolean>;
 
   // Analytics operations
   getAnalyticsStats(): Promise<{
@@ -41,14 +42,24 @@ class MemStorage implements IStorage {
     return this.requests.get(id) || null;
   }
 
-  async getAllRequests(userId?: number): Promise<SelectRequest[]> {
+  async getAllRequests(userId?: number, limit?: number): Promise<SelectRequest[]> {
     const allRequests = Array.from(this.requests.values());
+    let filteredRequests = allRequests;
+    
     if (userId) {
-      const filtered = allRequests.filter(req => req.userId === userId);
-      console.log(`📱 History: Found ${filtered.length} messages for user ${userId}`);
-      return filtered;
+      filteredRequests = allRequests.filter(req => req.userId === userId);
+      console.log(`📱 History: Found ${filteredRequests.length} messages for user ${userId}`);
     }
-    return allRequests;
+    
+    // Sort by creation date (newest first)
+    filteredRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    // Apply limit if specified
+    if (limit && limit > 0) {
+      filteredRequests = filteredRequests.slice(0, limit);
+    }
+    
+    return filteredRequests;
   }
 
   async updateRequest(id: string, data: Partial<Request>): Promise<SelectRequest | null> {
@@ -66,8 +77,34 @@ class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteRequest(id: string): Promise<boolean> {
-    return this.requests.delete(id);
+  async deleteRequest(id: number, userId?: number): Promise<boolean> {
+    const request = this.requests.get(id.toString());
+    if (!request) return false;
+    
+    // If userId is provided, verify ownership
+    if (userId && request.userId !== userId) {
+      console.log(`🚫 Access denied: User ${userId} cannot delete request ${id} owned by user ${request.userId}`);
+      return false;
+    }
+    
+    return this.requests.delete(id.toString());
+  }
+
+  async deleteAllRequests(userId: number): Promise<boolean> {
+    try {
+      const allRequests = Array.from(this.requests.entries());
+      const userRequests = allRequests.filter(([_, req]) => req.userId === userId);
+      
+      userRequests.forEach(([id]) => {
+        this.requests.delete(id);
+      });
+      
+      console.log(`🗑️ Deleted ${userRequests.length} requests for user ${userId}`);
+      return true;
+    } catch (error) {
+      console.error('Error deleting all requests:', error);
+      return false;
+    }
   }
 
   async getAnalyticsStats() {
@@ -85,8 +122,8 @@ class MemStorage implements IStorage {
     // Model usage statistics
     const modelUsageStats: Record<string, number> = {};
     requests.forEach(req => {
-      if (req.selectedModel) {
-        modelUsageStats[req.selectedModel] = (modelUsageStats[req.selectedModel] || 0) + 1;
+      if (req.model) {
+        modelUsageStats[req.model] = (modelUsageStats[req.model] || 0) + 1;
       }
     });
 
