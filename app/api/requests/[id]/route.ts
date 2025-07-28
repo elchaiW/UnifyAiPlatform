@@ -14,7 +14,10 @@ export async function DELETE(
 ) {
   try {
     const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const id = parseInt(resolvedParams.id, 10);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });
+    }
 
     // Get authenticated user from Supabase
     const authHeader = request.headers.get('authorization');
@@ -23,7 +26,7 @@ export async function DELETE(
     );
 
     // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = "demo-user-1"; // Demo user
+    let userId = 1; // Demo user
     if (supabaseUser && !authError) {
       const user = await getCurrentUser(supabaseUser);
       if (user) {

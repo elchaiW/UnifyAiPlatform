@@ -28,26 +28,15 @@ export const useAuth = () => {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const supabase = createSupabaseClient()
   const router = useRouter()
-  
-  // Create supabase client only once and memoize it
-  const [supabase] = useState(() => createSupabaseClient())
 
   useEffect(() => {
-    setMounted(true)
-    
     // Get initial session
     const getInitialSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        setUser(session?.user || null)
-      } catch (error) {
-        console.error('Error getting session:', error)
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user || null)
+      setLoading(false)
     }
 
     getInitialSession()
@@ -59,14 +48,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false)
         
         // Redirect to auth page when user signs out
-        if (event === 'SIGNED_OUT' && mounted) {
+        if (event === 'SIGNED_OUT') {
           router.push('/auth')
         }
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth, router, mounted])
+  }, [supabase.auth, router])
 
   const signOut = async () => {
     try {
