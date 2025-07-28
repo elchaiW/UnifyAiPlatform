@@ -14,7 +14,7 @@ export const users = pgTable('users', {
 
 // AI processing requests table
 export const requests = pgTable('requests', {
-  id: serial('id').primaryKey(),
+  id: text('id').primaryKey(),
   userId: integer('user_id').references(() => users.id).notNull(),
   content: text('content').notNull(),
   model: text('model').notNull(), // 'gemini', 'openai', 'claude', etc.

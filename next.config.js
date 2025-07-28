@@ -61,7 +61,9 @@ const nextConfig = withPWA({
     unoptimized: true,
   },
   output: 'standalone', // Required for Docker deployment
-
+  
+  // External packages configuration
+  serverExternalPackages: ['fs'],
 
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Handle client-side imports

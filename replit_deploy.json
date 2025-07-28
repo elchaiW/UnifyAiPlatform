@@ -4,14 +4,15 @@
     "main": "app/page.tsx",
     "buildCommand": "npx next build",
     "installCommand": "npm install",
-    "dev": "npx next dev"
+    "dev": "npx next dev -p 5000"
   },
   "run": {
     "main": ".next/standalone/server.js",
-    "command": "npx next start"
+    "command": "npx next start -p 3000"
   },
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "PORT": "3000"
   },
   "engines": {
     "node": "18.x"
