@@ -137,7 +137,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center space-x-3">
             <img 
-              src="/luminadoc-logo.png" 
+              src="/luminadoc-logo.svg" 
               alt="LUMINADOC" 
               className="h-8 w-auto"
             />
