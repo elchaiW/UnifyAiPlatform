@@ -255,7 +255,7 @@ class SyncManager {
       let syncedCount = 0;
       for (const message of messages) {
         const requestData = {
-          id: Date.now() + Math.random(), // Temporary ID
+          id: (Date.now() + Math.random()).toString(), // Temporary ID
           createdAt: new Date(message.createdAt),
           updatedAt: new Date(message.updatedAt),
           userId: 1, // Demo user

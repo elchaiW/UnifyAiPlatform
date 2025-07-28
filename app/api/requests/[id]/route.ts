@@ -34,7 +34,7 @@ export async function DELETE(
       }
     }
 
-    const success = await dbStorage.deleteRequest(id, userId);
+    const success = await dbStorage.deleteRequest(id.toString(), userId);
     return NextResponse.json({ success });
   } catch (error) {
     console.error('Error deleting request:', error);

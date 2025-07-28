@@ -7,7 +7,7 @@ export interface IStorage {
   getRequest(id: string): Promise<SelectRequest | null>;
   getAllRequests(userId?: number, limit?: number): Promise<SelectRequest[]>;
   updateRequest(id: string, data: Partial<Request>): Promise<SelectRequest | null>;
-  deleteRequest(id: number, userId?: number): Promise<boolean>;
+  deleteRequest(id: string, userId?: number): Promise<boolean>;
   deleteAllRequests(userId: number): Promise<boolean>;
 
   // Analytics operations
@@ -28,7 +28,7 @@ class MemStorage implements IStorage {
     const id = this.idCounter++;
     const request: SelectRequest = {
       ...data,
-      id,
+      id: id.toString(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -77,8 +77,8 @@ class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteRequest(id: number, userId?: number): Promise<boolean> {
-    const request = this.requests.get(id.toString());
+  async deleteRequest(id: string, userId?: number): Promise<boolean> {
+    const request = this.requests.get(id);
     if (!request) return false;
     
     // If userId is provided, verify ownership
@@ -87,7 +87,7 @@ class MemStorage implements IStorage {
       return false;
     }
     
-    return this.requests.delete(id.toString());
+    return this.requests.delete(id);
   }
 
   async deleteAllRequests(userId: number): Promise<boolean> {
