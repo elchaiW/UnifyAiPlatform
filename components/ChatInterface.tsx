@@ -62,19 +62,11 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages from client storage with fresh start
+  // Fetch messages from client storage
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
     queryKey: ["client-messages"],
     queryFn: async () => {
       const { clientStorage } = await import('@/lib/clientStorage');
-      
-      // Clear any existing history for fresh start
-      const existingMessages = clientStorage.getMessages();
-      if (existingMessages.length > 0) {
-        console.log('Clearing existing history for fresh start...');
-        clientStorage.clearAllHistory();
-      }
-      
       return clientStorage.getMessages();
     },
     refetchInterval: 500, // Fast refresh for real-time updates
@@ -118,6 +110,9 @@ export default function ChatInterface() {
         reasoning: 'Processing...',
       });
       
+      console.log('📝 User message added to storage:', message);
+      console.log('📊 Total messages in storage after add:', clientStorage.getMessages().length);
+      
       try {
         // Call API endpoint for processing
         const response = await fetch('/api/requests', {
@@ -139,7 +134,7 @@ export default function ChatInterface() {
         }
         
         // Update message in local storage with response
-        clientStorage.updateMessage(message.id, {
+        const updatedMessage = clientStorage.updateMessage(message.id, {
           status: 'completed',
           response: result.response,
           selectedModel: result.classification.selectedModel,
@@ -148,6 +143,9 @@ export default function ChatInterface() {
           processingTime: result.processingTime,
           completedAt: new Date().toISOString(),
         });
+        
+        console.log('✅ Message updated successfully:', updatedMessage);
+        console.log('📝 Current messages in storage:', clientStorage.getMessages().length);
         
         return result;
       } catch (error) {
