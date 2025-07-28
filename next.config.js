@@ -61,6 +61,9 @@ const nextConfig = withPWA({
     unoptimized: true,
   },
   output: 'standalone', // Required for Docker deployment
+  experimental: {
+    allowedDevOrigins: ['*.replit.dev', '*.picard.replit.dev']
+  },
 
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Handle client-side imports
