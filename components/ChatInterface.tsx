@@ -74,17 +74,38 @@ export default function ChatInterface() {
     gcTime: 0,
   });
 
-  // Debug: Log messages to console
+  // Debug: Log messages to console and check localStorage directly
   useEffect(() => {
     console.log('ChatInterface - Messages updated:', messages);
     console.log('ChatInterface - Message count:', messages.length);
     console.log('ChatInterface - Latest message:', messages[messages.length - 1]);
     if (error) console.error('Query error:', error);
     
+    // Direct localStorage check
+    const storedMessages = localStorage.getItem('luminadoc_messages');
+    console.log('Direct localStorage check:', storedMessages ? JSON.parse(storedMessages).length : 0, 'messages');
+    
     // Log specific details about message responses
     messages.forEach((msg, index) => {
       console.log(`Message ${index + 1}: Status=${msg.status}, HasResponse=${!!msg.response}, ResponseLength=${msg.response?.length || 0}`);
     });
+    
+    // Force a direct test
+    if (messages.length === 0) {
+      console.log('🔍 No messages found, checking localStorage directly...');
+      const directCheck = localStorage.getItem('luminadoc_messages');
+      if (directCheck) {
+        console.log('📦 Raw localStorage data:', directCheck);
+        try {
+          const parsed = JSON.parse(directCheck);
+          console.log('📋 Parsed messages:', parsed.length, 'items');
+        } catch (e) {
+          console.error('❌ Failed to parse localStorage:', e);
+        }
+      } else {
+        console.log('🆕 No localStorage data found - this is a fresh start');
+      }
+    }
   }, [messages, error]);
 
 
@@ -340,6 +361,18 @@ Classification Details:
       {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
       <div className="flex-1 overflow-y-auto pt-4 pb-32 lg:pb-24 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
+          {/* Debug Info - Temporary */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="px-6 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-xs">
+                <p>Debug: Messages loaded: {messages.length}</p>
+                <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+                <p>Error: {error ? 'Yes' : 'No'}</p>
+                <p>Last update: {new Date().toLocaleTimeString()}</p>
+              </div>
+            </div>
+          )}
+
           {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
