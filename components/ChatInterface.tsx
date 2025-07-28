@@ -62,14 +62,22 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages from client storage
+  // Fetch messages from client storage with fresh start
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
     queryKey: ["client-messages"],
     queryFn: async () => {
       const { clientStorage } = await import('@/lib/clientStorage');
+      
+      // Clear any existing history for fresh start
+      const existingMessages = clientStorage.getMessages();
+      if (existingMessages.length > 0) {
+        console.log('Clearing existing history for fresh start...');
+        clientStorage.clearAllHistory();
+      }
+      
       return clientStorage.getMessages();
     },
-    refetchInterval: 1000, // Fast refresh for real-time updates
+    refetchInterval: 500, // Fast refresh for real-time updates
     staleTime: 0,
     gcTime: 0,
   });
@@ -89,7 +97,7 @@ export default function ChatInterface() {
 
 
 
-  // Send message mutation
+  // Send message mutation with pure client storage
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       setIsTyping(true);
@@ -102,28 +110,30 @@ export default function ChatInterface() {
       const { processWithGemini } = await import('@/lib/services/geminiService');
       const { processWithGrok } = await import('@/lib/services/grokService');
       
-      // Classify request
+      // Fast keyword-based classification for speed
       const classifier = new AIClassifier();
       const classification = await classifier.classifyRequest(content);
       
-      // Add message to storage immediately
+      // Add message to local storage immediately for instant display
       const message = clientStorage.addMessage({
         userId: 1,
         type: 'prompt',
         prompt: content,
         content: content,
-        category: 'general',
+        category: classification.category || 'general',
         selectedModel: classification.selectedModel,
         status: 'processing',
         confidence: classification.confidence,
         reasoning: classification.reasoning,
       });
       
-      // Process with appropriate AI model
-      let response: string;
+      // Process with AI in background
       const startTime = Date.now();
       
       try {
+        let response: string;
+        
+        // Use fast AI processing with reduced token limits for speed
         switch (classification.selectedModel) {
           case 'claude':
             response = await processWithClaude(content);
@@ -143,7 +153,7 @@ export default function ChatInterface() {
         
         const processingTime = Date.now() - startTime;
         
-        // Update message with response
+        // Update message in local storage with response
         clientStorage.updateMessage(message.id, {
           status: 'completed',
           response: response,
@@ -153,10 +163,10 @@ export default function ChatInterface() {
         
         return { success: true, response, classification, processingTime, requestId: message.id };
       } catch (error) {
-        // Update message with error
+        // Update message with error status
         clientStorage.updateMessage(message.id, {
           status: 'failed',
-          response: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          response: `Error: ${error instanceof Error ? error.message : 'AI service temporarily unavailable'}`,
           processingTime: Date.now() - startTime,
           completedAt: new Date().toISOString(),
         });

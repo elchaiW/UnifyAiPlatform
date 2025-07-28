@@ -83,6 +83,13 @@ class ClientStorage {
   clearAll(): void {
     localStorage.removeItem(this.storageKey);
     this.messageId = 1;
+    console.log('✓ All chat history cleared from client storage');
+  }
+
+  // Clear all data on initialization for fresh start
+  clearAllHistory(): void {
+    this.clearAll();
+    console.log('✓ Fresh start - all previous data cleared');
   }
 }
 

@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbStorage } from '@/lib/database';
-import { getCurrentUser } from '@/lib/auth';
-import { createClient } from '@supabase/supabase-js';
 import { AIClassifier } from '@/lib/services/aiClassifier';
 import { processWithClaude } from '@/lib/services/claudeService';
 import { processWithChatGPT } from '@/lib/services/openaiService';
 import { processWithGemini } from '@/lib/services/geminiService';
 import { processWithGrok } from '@/lib/services/grokService';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// CLIENT-ONLY MODE: No database integration
+// All data stored in browser localStorage for instant performance
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,44 +18,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    // Get authenticated user from Supabase
-    const authHeader = request.headers.get('authorization');
-    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') || ''
-    );
-
-    // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = 1; // Demo user
-    if (supabaseUser && !authError) {
-      const user = await getCurrentUser(supabaseUser);
-      if (user) {
-        userId = user.id;
-      }
-    }
-
     console.log(`📝 Processing request: "${messageContent.substring(0, 50)}..."`);
     
-    // Classify the request to determine the best AI model
+    // Fast keyword-based classification for instant routing
     const classifier = new AIClassifier();
     const classification = await classifier.classifyRequest(messageContent);
     console.log(`🤖 Classification result:`, classification);
     
-    // Create request record
-    const requestRecord = await dbStorage.createRequest({
-      userId: userId,
-      type: 'prompt',
-      prompt: messageContent,
-      content: messageContent,
-      category: 'general',
-      selectedModel: classification.selectedModel,
-      status: 'processing',
-      confidence: classification.confidence,
-      reasoning: classification.reasoning
-    });
-    
-    let response: string;
-    let processingTimeMs: number;
     const startTime = Date.now();
+    let response: string;
     
     try {
       // Route to appropriate AI model based on classification
@@ -86,83 +52,49 @@ export async function POST(request: NextRequest) {
           response = await processWithChatGPT(messageContent);
       }
       
-      processingTimeMs = Date.now() - startTime;
-      
-      // Update request with response
-      await dbStorage.updateRequest(requestRecord.id, {
-        status: 'completed',
-        response: response,
-        processingTime: processingTimeMs,
-        completedAt: new Date()
-      });
+      const processingTime = Date.now() - startTime;
       
       // Return the response with classification details
       return NextResponse.json({
         success: true,
         response,
         classification,
-        processingTime: processingTimeMs,
-        requestId: requestRecord.id,
-        model: classification.selectedModel
+        processingTime,
+        model: classification.selectedModel,
+        mode: 'client-storage'
       });
       
     } catch (error) {
       console.error(`❌ Processing failed:`, error);
-      processingTimeMs = Date.now() - startTime;
+      const processingTime = Date.now() - startTime;
       
       const errorMessage = error instanceof Error ? error.message : 'Unknown processing error';
-      
-      // Update request with error
-      await dbStorage.updateRequest(requestRecord.id, {
-        status: 'failed',
-        response: `Error: ${errorMessage}`,
-        processingTime: processingTimeMs,
-        completedAt: new Date()
-      });
       
       return NextResponse.json({
         success: false,
         error: errorMessage,
         classification,
-        processingTime: processingTimeMs,
-        requestId: requestRecord.id
+        processingTime,
+        mode: 'client-storage'
       }, { status: 500 });
     }
     
   } catch (error) {
     console.error('Request processing error:', error);
     return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      mode: 'client-storage'
     }, { status: 500 });
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    // Get authenticated user from Supabase
-    const authHeader = request.headers.get('authorization');
-    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') || ''
-    );
-
-    // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = 1; // Demo user
-    if (supabaseUser && !authError) {
-      const user = await getCurrentUser(supabaseUser);
-      if (user) {
-        userId = user.id;
-      }
-    }
-    
-    const url = new URL(request.url);
-    const limit = url.searchParams.get('limit');
-    const limitNum = limit ? parseInt(limit, 10) : 50;
-
-    const requests = await dbStorage.getAllRequests(userId, limitNum);
-    
-    return NextResponse.json(requests);
-  } catch (error) {
-    console.error('Error fetching requests:', error);
-    return NextResponse.json({ error: 'Failed to fetch requests' }, { status: 500 });
-  }
+// Health check endpoint
+export async function GET() {
+  return NextResponse.json({
+    status: 'healthy',
+    mode: 'client-storage',
+    database: 'disabled',
+    timestamp: new Date().toISOString(),
+    message: 'API running in client-only mode for maximum performance'
+  });
 }
