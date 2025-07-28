@@ -1,27 +1,84 @@
 {
   "name": "LUMINADOC - Multi-AI Assistant",
   "short_name": "LUMINADOC",
-  "description": "Intelligent AI routing platform for document processing and multi-model conversations",
+  "description": "Intelligent AI routing platform for document processing and multi-model conversations with Claude, ChatGPT, Gemini, and Grok",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#111827",
-  "theme_color": "#1f2937",
-  "orientation": "portrait",
-  "categories": ["productivity", "business", "utilities"],
+  "theme_color": "#3EC5FE",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "business", "utilities", "ai", "assistant"],
   "lang": "en-US",
   "dir": "ltr",
   "icons": [
     {
-      "src": "/attached_assets/Group 1171274849 (1)_1753432882218.png",
+      "src": "/icon-192.svg",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "/attached_assets/Group 1171274849 (1)_1753432882218.png",
+      "src": "/icon-512.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-desktop.png", 
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "short_name": "Chat",
+      "description": "Start a new AI conversation",
+      "url": "/?shortcut=chat",
+      "icons": [
+        {
+          "src": "/icon-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "short_name": "Stats",
+      "description": "View AI usage analytics",
+      "url": "/?shortcut=analytics",
+      "icons": [
+        {
+          "src": "/icon-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
 }
