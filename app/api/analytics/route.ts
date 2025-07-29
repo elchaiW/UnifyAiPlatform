@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { conversationStorage } from '@/lib/conversationStorage';
 import { createSupabaseClient } from '@/lib/supabase';
 
-export async function DELETE(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const supabase = createSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -12,11 +12,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     const userId = session.user.id;
-
-    const success = await conversationStorage.deleteAllMessages(userId);
-    return NextResponse.json({ success });
+    
+    // Get analytics stats for the user
+    const stats = await conversationStorage.getAnalyticsStats(userId);
+    
+    return NextResponse.json(stats);
   } catch (error) {
-    console.error('Error clearing all history:', error);
-    return NextResponse.json({ error: 'Failed to clear all history' }, { status: 500 });
+    console.error('Error fetching analytics:', error);
+    return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }
 }
