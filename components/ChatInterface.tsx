@@ -1,6 +1,7 @@
-// components/ChatInterface.tsx - Complete Supabase-only implementation
 import { useState, useRef, useEffect } from "react";
-import { createClient } from '@supabase/supabase-js';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { createSupabaseClient } from "@/lib/supabase";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
@@ -22,62 +23,23 @@ import { useToast } from "../hooks/use-toast";
 import TypingAnimation from './TypingAnimation';
 import { VoiceInput } from './VoiceInput';
 
-// Database types
-interface Profile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Conversation {
-  id: string;
-  user_id: string;
-  title: string;
-  model: string;
-  is_pinned: boolean;
-  metadata: any;
-  created_at: string;
-  updated_at: string;
-}
-
 interface Message {
-  id: string;
-  conversation_id: string;
-  user_id: string;
+  id: number;
+  userId: number;
+  type: string;
+  prompt: string;
   content: string;
-  response: string | null;
-  model: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  processing_time: number | null;
-  token_usage: any;
-  metadata: any;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Database {
-  public: {
-    Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: Omit<Profile, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>;
-      };
-      conversations: {
-        Row: Conversation;
-        Insert: Omit<Conversation, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Conversation, 'id' | 'created_at' | 'updated_at'>>;
-      };
-      messages: {
-        Row: Message;
-        Insert: Omit<Message, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Message, 'id' | 'created_at' | 'updated_at'>>;
-      };
-    };
-  };
+  fileName?: string;
+  category: string;
+  selectedModel: string;
+  status: string;
+  confidence: number;
+  reasoning?: string;
+  response?: string;
+  processingTime?: number;
+  createdAt: string;
+  completedAt?: string;
+  updatedAt: string;
 }
 
 const getModelImage = (model: string) => {
@@ -91,466 +53,254 @@ const getModelImage = (model: string) => {
 };
 
 export default function ChatInterface() {
-  // State management
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<Profile | null>(null);
-  
-  // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Initialize Supabase client
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  // Fetch messages from client storage
+  const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
+    queryKey: ["client-messages"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getMessages();
+    },
+    refetchInterval: 500, // Fast refresh for real-time updates
+    staleTime: 0,
+    gcTime: 0,
+  });
 
-  // Load user and initialize conversation on mount
+  // Debug: Log messages to console and check localStorage directly
   useEffect(() => {
-    initializeUser();
-  }, []);
-
-  // Load messages when conversation changes
-  useEffect(() => {
-    if (currentConversation) {
-      loadMessages();
-      setupRealtimeSubscription();
+    console.log('ChatInterface - Messages updated:', messages);
+    console.log('ChatInterface - Message count:', messages.length);
+    console.log('ChatInterface - Latest message:', messages[messages.length - 1]);
+    if (error) console.error('Query error:', error);
+    
+    // Direct localStorage check
+    const storedMessages = localStorage.getItem('luminadoc_messages');
+    console.log('Direct localStorage check:', storedMessages ? JSON.parse(storedMessages).length : 0, 'messages');
+    
+    // Log specific details about message responses
+    messages.forEach((msg, index) => {
+      console.log(`Message ${index + 1}: Status=${msg.status}, HasResponse=${!!msg.response}, ResponseLength=${msg.response?.length || 0}`);
+    });
+    
+    // Force a direct test
+    if (messages.length === 0) {
+      console.log('🔍 No messages found, checking localStorage directly...');
+      const directCheck = localStorage.getItem('luminadoc_messages');
+      if (directCheck) {
+        console.log('📦 Raw localStorage data:', directCheck);
+        try {
+          const parsed = JSON.parse(directCheck);
+          console.log('📋 Parsed messages:', parsed.length, 'items');
+        } catch (e) {
+          console.error('❌ Failed to parse localStorage:', e);
+        }
+      } else {
+        console.log('🆕 No localStorage data found - this is a fresh start');
+      }
     }
-  }, [currentConversation]);
+  }, [messages, error]);
 
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
-  // Initialize or get current user
-  const initializeUser = async () => {
-    try {
-      // Get current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  // Send message mutation using API endpoint
+  const sendMessageMutation = useMutation({
+    mutationFn: async (content: string) => {
+      setIsTyping(true);
       
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        // Create demo user for development
-        await createDemoUser();
-        return;
-      }
-
-      if (session?.user) {
-        // Get or create user profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profileError && profileError.code === 'PGRST116') {
-          // Profile doesn't exist, create it
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: session.user.id,
-              email: session.user.email!,
-              full_name: session.user.user_metadata?.full_name || null,
-              avatar_url: session.user.user_metadata?.avatar_url || null
-            })
-            .select()
-            .single();
-
-          if (createError) {
-            console.error('Error creating profile:', createError);
-            return;
-          }
-          setUser(newProfile);
-        } else if (profile) {
-          setUser(profile);
-        }
-
-        // Get or create default conversation
-        await getOrCreateDefaultConversation(session.user.id);
-      } else {
-        // No session, create demo user
-        await createDemoUser();
-      }
-    } catch (error) {
-      console.error('Error initializing user:', error);
-      await createDemoUser();
-    }
-  };
-
-  // Create demo user for development
-  const createDemoUser = async () => {
-    const demoUser: Profile = {
-      id: 'demo-user-id',
-      email: 'demo@luminadoc.com',
-      full_name: 'Demo User',
-      avatar_url: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    
-    setUser(demoUser);
-    await getOrCreateDefaultConversation(demoUser.id);
-  };
-
-  // Get or create default conversation
-  const getOrCreateDefaultConversation = async (userId: string) => {
-    try {
-      // Try to get existing conversation
-      const { data: conversations, error: fetchError } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('user_id', userId)
-        .order('updated_at', { ascending: false })
-        .limit(1);
-
-      if (fetchError) {
-        console.error('Error fetching conversations:', fetchError);
-        return;
-      }
-
-      if (conversations && conversations.length > 0) {
-        setCurrentConversation(conversations[0]);
-      } else {
-        // Create new conversation
-        const { data: newConversation, error: createError } = await supabase
-          .from('conversations')
-          .insert({
-            user_id: userId,
-            title: 'New Chat',
-            model: 'claude',
-            is_pinned: false,
-            metadata: {}
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating conversation:', createError);
-          return;
-        }
-        setCurrentConversation(newConversation);
-      }
-    } catch (error) {
-      console.error('Error getting/creating conversation:', error);
-    }
-  };
-
-  // Load messages for current conversation
-  const loadMessages = async () => {
-    if (!currentConversation) return;
-
-    setIsLoading(true);
-    try {
-      const { data: messagesData, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', currentConversation.id)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error loading messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
+      // Import client storage for immediate UI update
+      const { clientStorage } = await import('@/lib/clientStorage');
+      
+      // Add message to local storage immediately for instant display
+      const message = clientStorage.addMessage({
+        userId: 1,
+        type: 'prompt',
+        prompt: content,
+        content: content,
+        category: 'general',
+        selectedModel: 'AI', // Will be updated after classification
+        status: 'processing',
+        confidence: 0,
+        reasoning: '',
+      });
+      
+      console.log('📝 User message added to storage:', message);
+      console.log('📊 Total messages in storage after add:', clientStorage.getMessages().length);
+      
+      try {
+        // Call API endpoint for processing
+        const response = await fetch('/api/requests', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content, message: content }),
         });
-        return;
-      }
 
-      setMessages(messagesData || []);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Setup realtime subscription for messages
-  const setupRealtimeSubscription = () => {
-    if (!currentConversation) return;
-
-    const subscription = supabase
-      .channel(`messages:${currentConversation.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${currentConversation.id}`,
-        },
-        (payload) => {
-          console.log('Realtime message update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            setMessages(prev => [...prev, payload.new as Message]);
-          } else if (payload.eventType === 'UPDATE') {
-            setMessages(prev => 
-              prev.map(msg => 
-                msg.id === payload.new.id ? payload.new as Message : msg
-              )
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setMessages(prev => 
-              prev.filter(msg => msg.id !== payload.old.id)
-            );
-          }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      )
-      .subscribe();
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  };
-
-  // Send message function
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!message.trim() || !currentConversation || !user) return;
-
-    const userMessage = message.trim();
-    setMessage("");
-    setIsTyping(true);
-    
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '40px';
-    }
-
-    try {
-      // Create user message in database
-      const { data: userMessageData, error: userMessageError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: currentConversation.id,
-          user_id: user.id,
-          content: userMessage,
-          response: null,
-          model: 'user',
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to process message');
+        }
+        
+        // Update message in local storage with response
+        const updatedMessage = clientStorage.updateMessage(message.id, {
           status: 'completed',
-          processing_time: null,
-          token_usage: {},
-          metadata: { type: 'user_message' }
-        })
-        .select()
-        .single();
+          response: result.response,
+          selectedModel: result.classification.selectedModel,
+          confidence: result.classification.confidence,
+          reasoning: result.classification.reasoning,
+          processingTime: result.processingTime,
+          completedAt: new Date().toISOString(),
+        });
 
-      if (userMessageError) {
-        throw userMessageError;
-      }
-
-      // Create AI response message (initially processing)
-      const { data: aiMessageData, error: aiMessageError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: currentConversation.id,
-          user_id: user.id,
-          content: userMessage,
-          response: null,
-          model: currentConversation.model,
-          status: 'processing',
-          processing_time: null,
-          token_usage: {},
-          metadata: { type: 'ai_response', processing: true }
-        })
-        .select()
-        .single();
-
-      if (aiMessageError) {
-        throw aiMessageError;
-      }
-
-      // Call your AI API to get response
-      await processAIResponse(aiMessageData.id, userMessage);
-
-      // Update conversation title if it's the first message
-      if (messages.length === 0) {
-        const title = userMessage.length > 50 
-          ? userMessage.substring(0, 50) + '...' 
-          : userMessage;
+        // Update analytics in client storage
+        clientStorage.updateAnalytics(
+          result.classification.selectedModel,
+          result.processingTime || 0,
+          true
+        );
         
-        await supabase
-          .from('conversations')
-          .update({ 
-            title, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('id', currentConversation.id);
+        console.log('✅ Message updated successfully:', {
+          id: updatedMessage?.id,
+          response: updatedMessage?.response?.substring(0, 100) + '...',
+          status: updatedMessage?.status
+        });
+        console.log('📝 Current messages in storage:', clientStorage.getMessages().length);
+        console.log('📄 All messages:', clientStorage.getMessages().map(m => ({
+          id: m.id, 
+          status: m.status, 
+          responseLength: m.response?.length || 0,
+          response: m.response?.substring(0, 50) + '...'
+        })));
         
-        setCurrentConversation(prev => prev ? { ...prev, title } : null);
+        return result;
+      } catch (error) {
+        // Update message with error status
+        const errorMessage = clientStorage.updateMessage(message.id, {
+          status: 'failed',
+          response: `Error: ${error instanceof Error ? error.message : 'AI service temporarily unavailable'}`,
+          processingTime: 0,
+          completedAt: new Date().toISOString(),
+        });
+        
+        // Track failed request in analytics
+        clientStorage.updateAnalytics('error', 0, false);
+        
+        console.log('❌ Error message updated:', errorMessage);
+        
+        throw error;
       }
-
-    } catch (error) {
-      console.error('Error sending message:', error);
+    },
+    onSuccess: (data) => {
+      console.log('Message sent successfully:', data);
+      setIsTyping(false);
+      // Force refresh client storage queries
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
+      // Also force refetch to ensure immediate UI update
+      refetch();
+    },
+    onError: (error) => {
+      setIsTyping(false);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsTyping(false);
-    }
-  };
+    },
+  });
 
-  // Process AI response
-  const processAIResponse = async (messageId: string, userMessage: string) => {
-    const startTime = Date.now();
-    
-    try {
-      // Call your existing AI API
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          model: currentConversation?.model || 'claude',
-          conversation_id: currentConversation?.id
-        }),
+  // Upload file mutation - disabled for client storage mode
+  const uploadFileMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      throw new Error("File upload temporarily disabled - using client storage mode");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Info",
+        description: "File upload is temporarily disabled for better performance",
       });
+    },
+  });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const processingTime = (Date.now() - startTime) / 1000;
-
-      // Update message with response
-      await supabase
-        .from('messages')
-        .update({
-          response: data.response || data.content,
-          status: 'completed',
-          processing_time: processingTime,
-          token_usage: data.usage || {},
-          metadata: { 
-            ...data.metadata,
-            type: 'ai_response',
-            processing: false 
-          }
-        })
-        .eq('id', messageId);
-
-      // Track analytics
-      await supabase
-        .from('analytics')
-        .insert({
-          user_id: user!.id,
-          event_type: 'message_sent',
-          model: currentConversation?.model,
-          processing_time: processingTime,
-          token_count: data.usage?.total_tokens || 0,
-          metadata: {
-            success: true,
-            response_length: data.response?.length || 0
-          }
-        });
-
-    } catch (error) {
-      console.error('Error processing AI response:', error);
-      
-      // Update message with error
-      await supabase
-        .from('messages')
-        .update({
-          status: 'failed',
-          metadata: { 
-            type: 'ai_response',
-            error: error instanceof Error ? error.message : 'Unknown error',
-            processing: false 
-          }
-        })
-        .eq('id', messageId);
-
-      // Track failed analytics
-      await supabase
-        .from('analytics')
-        .insert({
-          user_id: user!.id,
-          event_type: 'message_failed',
-          model: currentConversation?.model,
-          processing_time: (Date.now() - Date.now()) / 1000,
-          metadata: {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          }
-        });
-    }
-  };
-
-  // Delete message
-  const deleteMessage = async (messageId: string) => {
-    try {
-      const { error } = await supabase
-        .from('messages')
-        .delete()
-        .eq('id', messageId)
-        .eq('user_id', user!.id); // Ensure user can only delete their own messages
-
-      if (error) {
-        throw error;
-      }
-
+  // Delete message mutation
+  const deleteRequestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.deleteMessage(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
       toast({
         title: "Success",
         description: "Message deleted successfully.",
       });
-    } catch (error) {
-      console.error('Error deleting message:', error);
+    },
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to delete message.",
+        description: "Failed to delete message. Please try again.",
         variant: "destructive",
       });
-    }
-  };
+    },
+  });
 
-  // Clear all messages in conversation
-  const clearAllMessages = async () => {
-    if (!currentConversation || !user) return;
-
-    try {
-      const { error } = await supabase
-        .from('messages')
-        .delete()
-        .eq('conversation_id', currentConversation.id)
-        .eq('user_id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
+  // Clear all history mutation
+  const clearAllMutation = useMutation({
+    mutationFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      clientStorage.clearAll();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
       toast({
         title: "Success",
-        description: "All messages cleared successfully.",
+        description: "All chat history cleared successfully.",
       });
-    } catch (error) {
-      console.error('Error clearing messages:', error);
+    },
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to clear messages.",
+        description: "Failed to clear history. Please try again.",
         variant: "destructive",
       });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      uploadFileMutation.mutate(formData);
+      setSelectedFile(null); // Clear immediately
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } else if (message.trim()) {
+      const messageToSend = message;
+      setMessage(""); // Clear immediately
+      if (textareaRef.current) textareaRef.current.style.height = '40px';
+      sendMessageMutation.mutate(messageToSend);
     }
   };
 
-  // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast({
           title: "File too large",
           description: "Please select a file smaller than 10MB.",
@@ -562,336 +312,433 @@ export default function ChatInterface() {
     }
   };
 
-  // Handle file upload
-  const handleFileUpload = async () => {
-    if (!selectedFile || !currentConversation || !user) return;
-
-    try {
-      // Upload file to Supabase Storage
-      const fileName = `${Date.now()}_${selectedFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('chat-files')
-        .upload(fileName, selectedFile);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('chat-files')
-        .getPublicUrl(fileName);
-
-      // Create message with file
-      const { error: messageError } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: currentConversation.id,
-          user_id: user.id,
-          content: `Uploaded file: ${selectedFile.name}`,
-          response: null,
-          model: 'file',
-          status: 'completed',
-          metadata: {
-            type: 'file_upload',
-            file_name: selectedFile.name,
-            file_url: publicUrl,
-            file_size: selectedFile.size,
-            file_type: selectedFile.type
-          }
-        });
-
-      if (messageError) {
-        throw messageError;
-      }
-
-      setSelectedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      toast({
-        title: "Success",
-        description: "File uploaded successfully.",
-      });
-
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload file.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Auto-resize textarea
-  const handleTextareaResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+    
+    // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = '40px';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-    setMessage(textarea.value);
+    const scrollHeight = Math.min(textarea.scrollHeight, 120);
+    textarea.style.height = scrollHeight + 'px';
   };
 
-  // Scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const downloadResponse = (msg: Message) => {
+    if (!msg.response) return;
+    
+    const content = `AI Response from ${msg.selectedModel}
+Generated: ${new Date(msg.createdAt).toLocaleString()}
 
-  // Handle Enter key
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e as any);
-    }
-  };
+Request: ${msg.prompt}
+${msg.fileName ? `File: ${msg.fileName}` : ''}
 
-  // Export conversation
-  const exportConversation = () => {
-    if (!messages.length) return;
+Response:
+${msg.response}
 
-    const conversationData = {
-      title: currentConversation?.title || 'Chat Export',
-      messages: messages.map(msg => ({
-        timestamp: msg.created_at,
-        type: msg.metadata?.type || 'message',
-        content: msg.content,
-        response: msg.response,
-        model: msg.model
-      })),
-      exported_at: new Date().toISOString()
-    };
+Classification Details:
+- Model: ${msg.selectedModel}
+- Confidence: ${Math.round(msg.confidence)}%
+- Reasoning: ${msg.reasoning}
+`;
 
-    const blob = new Blob([JSON.stringify(conversationData, null, 2)], {
-      type: 'application/json'
-    });
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `chat-export-${Date.now()}.json`;
+    a.download = `${msg.selectedModel}_response_${msg.id}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Loading conversation...</span>
-      </div>
-    );
-  }
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center space-x-2">
-          <h2 className="text-lg font-semibold truncate">
-            {currentConversation?.title || 'New Chat'}
-          </h2>
-          <Badge variant="outline" className="text-xs">
-            {currentConversation?.model || 'claude'}
-          </Badge>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportConversation}
-            disabled={messages.length === 0}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearAllMessages}
-            disabled={messages.length === 0}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((msg, index) => (
-            <div key={msg.id} className="group">
-              {msg.metadata?.type === 'user_message' ? (
-                // User Message
-                <div className="flex items-start space-x-3 justify-end">
-                  <div className="flex-1 max-w-[80%]">
-                    <div className="bg-blue-600 text-white rounded-lg p-3 ml-auto">
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
-                    </div>
-                    <div className="flex items-center justify-end mt-1 text-xs text-muted-foreground">
-                      <span>{formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}</span>
-                    </div>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                    <User className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-              ) : (
-                // AI Response
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                    {getModelImage(msg.model) ? (
-                      <img
-                        src={getModelImage(msg.model)!}
-                        alt={msg.model}
-                        className="w-6 h-6 rounded-full"
-                      />
-                    ) : (
-                      <Bot className="h-4 w-4" />
-                    )}
-                  </div>
-                  <div className="flex-1 max-w-[80%]">
-                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                      {msg.status === 'processing' ? (
-                        <div className="flex items-center space-x-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <TypingAnimation />
-                        </div>
-                      ) : msg.status === 'failed' ? (
-                        <div className="text-red-500">
-                          <p>❌ Failed to process message</p>
-                          <p className="text-xs mt-1">{msg.metadata?.error}</p>
-                        </div>
-                      ) : (
-                        <p className="whitespace-pre-wrap">{msg.response || 'No response'}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between mt-1 text-xs text-muted-foreground">
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="text-xs">
-                          {msg.model}
-                        </Badge>
-                        {msg.processing_time && (
-                          <span>{msg.processing_time.toFixed(1)}s</span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteMessage(msg.id)}
-                          className="h-6 w-6 p-0"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                <TypingAnimation />
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#2A2A2A] relative">
+      {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
+      <div className="flex-1 overflow-y-auto pt-4 pb-32 lg:pb-24 lg:pt-8 mobile-messages-top">
+        <div className="max-w-3xl mx-auto">
+          {/* Debug Info - Temporary */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="px-6 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-xs">
+                <p>Debug: Messages loaded: {messages.length}</p>
+                <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+                <p>Error: {error ? 'Yes' : 'No'}</p>
+                <p>Last update: {new Date().toLocaleTimeString()}</p>
               </div>
             </div>
           )}
-          
+
+          {/* Welcome Message - ChatGPT style */}
+          {messages.length === 0 && !isLoading && (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+              <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
+                Ask anything
+              </h2>
+              <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-8 lg:mb-12 text-center max-w-lg">
+                Your intelligent AI assistant that automatically routes to the best model
+              </p>
+              
+              {/* Perplexity-style suggestion cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/claude_1753267938951.webp" 
+                        alt="Claude" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Claude</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Legal & Analysis</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/Chatgpt_1753267928029.webp" 
+                        alt="ChatGPT" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">ChatGPT</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/gemini_1753267772227.png" 
+                        alt="Gemini" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Gemini</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/grok_1753267912240.png" 
+                        alt="Grok" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Grok</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Clear All History Button - Show when there are messages */}
+          {messages.length > 0 && (
+            <div className="flex justify-end mb-4 px-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete all chat history?")) {
+                    clearAllMutation.mutate();
+                  }
+                }}
+                className="flex items-center space-x-1 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-400/30"
+                disabled={clearAllMutation.isPending}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Clear All</span>
+                {clearAllMutation.isPending && <Loader2 className="h-3 w-3 animate-spin ml-1" />}
+              </Button>
+            </div>
+          )}
+
+          {/* Perplexity-style Messages */}
+          <div className="px-6 space-y-8 pb-6 pt-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className="space-y-4">
+                {/* User Message - ChatGPT style */}
+                <div className="flex justify-end">
+                  <div className="max-w-[80%]">
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-3">
+                      {msg.fileName && (
+                        <div className="flex items-center space-x-2 mb-2 text-gray-600 dark:text-gray-400">
+                          <FileText className="h-4 w-4" />
+                          <span className="text-sm">{msg.fileName}</span>
+                        </div>
+                      )}
+                      <p className="text-gray-900 dark:text-white text-sm lg:text-base">{msg.prompt}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Response - with custom model images */}
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                    {getModelImage(msg.selectedModel || '') ? (
+                      <img 
+                        src={getModelImage(msg.selectedModel || '') || ''} 
+                        alt={msg.selectedModel || 'AI Model'} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <img 
+                          src="/attached_assets/Vector_1753691011402.png" 
+                          alt="AI Logo" 
+                          className="w-5 h-5 object-contain filter brightness-0 invert"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {/* Enhanced Classification Info - Only show when completed */}
+                    {msg.status === 'completed' && msg.confidence > 0 && msg.reasoning && (
+                      <div className="mb-3 p-3 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg border">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            {msg.selectedModel}
+                          </Badge>
+                          <Badge variant="outline">
+                            {Math.round(msg.confidence)}% confidence
+                          </Badge>
+                        </div>
+                        
+                        <details className="text-xs text-gray-600 dark:text-gray-400">
+                          <summary className="cursor-pointer hover:text-gray-900 dark:hover:text-white">
+                            Analysis reasoning
+                          </summary>
+                          <p className="mt-2 text-xs">{msg.reasoning}</p>
+                        </details>
+                      </div>
+                    )}
+
+                    {/* AI Response Content */}
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      {msg.status === 'processing' ? (
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center space-x-3">
+                            {/* Beautiful animated gradient orb */}
+                            <div className="relative">
+                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full animate-pulse"></div>
+                              <div className="absolute inset-0 w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-ping opacity-75"></div>
+                            </div>
+                            
+                            {/* Processing text with typing effect */}
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                  {msg.selectedModel || 'AI'} is analyzing your request
+                                </span>
+                                <div className="flex space-x-1">
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                </div>
+                              </div>
+                              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                This may take a few seconds...
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : msg.status === 'failed' ? (
+                        <p className="text-red-600 dark:text-red-400 text-sm lg:text-base">
+                          {msg.response || 'Failed to process request'}
+                        </p>
+                      ) : (
+                        <p className="text-gray-900 dark:text-white text-sm lg:text-base whitespace-pre-wrap">
+                          {msg.response || 'No response available'}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Response Actions */}
+                    <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 flex-1">
+                        {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
+                      </p>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => downloadResponse(msg)}
+                        className="h-8 px-2"
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to delete this message?")) {
+                            deleteRequestMutation.mutate(msg.id);
+                          }
+                        }}
+                        className="h-8 px-2 text-red-600 hover:text-red-700"
+                        disabled={deleteRequestMutation.isPending}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+
+
+          {/* Scroll anchor for auto-scroll */}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t">
-        {selectedFile && (
-          <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  {selectedFile.name}
-                </span>
-                <Badge variant="secondary" className="text-xs">
-                  {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
-                </Badge>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleFileUpload}
-                  disabled={isTyping}
+      {/* Modern AI Chat Input Area - Dark Theme - Fixed Position */}
+      <div className="fixed bottom-4 left-0 right-0 lg:left-80 bg-[#2A2A2A] px-4 py-4 safe-area-pb z-20 chat-input-fixed">
+        <div className="max-w-4xl mx-auto">
+          {selectedFile && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between bg-[#1E1E1E] rounded-lg p-3 border border-gray-700">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-gray-300">{selectedFile.name}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedFile(null)}
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
                 >
-                  Upload
+                  <X className="h-3 w-3" />
                 </Button>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="relative bg-[#1E1E1E] rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
+              <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
+                {/* Mobile Hamburger Menu Button */}
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSelectedFile(null);
-                    if (fileInputRef.current) fileInputRef.current.value = '';
+                    const event = new CustomEvent('toggleMobileSidebar');
+                    window.dispatchEvent(event);
                   }}
+                  className="lg:hidden h-7 w-7 p-0 mr-2 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
-                  <X className="h-4 w-4" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                 </Button>
+                
+                {/* File Upload Button - Desktop Only - Centered Plus */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="hidden lg:flex h-9 w-9 p-0 mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none items-center justify-center"
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </Button>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept=".txt,.docx,.pdf"
+                  className="hidden"
+                />
+
+                {/* Text Input */}
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={handleInputChange}
+                    placeholder="Ask a question or share a document"
+                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-sm lg:text-base leading-relaxed min-h-[24px] lg:min-h-[28px] max-h-32 py-2 lg:py-3"
+                    style={{ fontSize: '16px' }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
+                    rows={1}
+                  />
+                </div>
+
+                {/* Right Side Controls */}
+                <div className="flex items-center space-x-1 lg:space-x-2 ml-2 lg:ml-3">
+                  {/* Voice Input Component */}
+                  <VoiceInput 
+                    onTranscription={(text) => {
+                      setMessage(text);
+                      setTimeout(() => textareaRef.current?.focus(), 100);
+                    }}
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                  />
+
+                  {/* File Upload Button - Mobile Only */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="lg:hidden h-7 w-7 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700"
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                  >
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                  </Button>
+
+                  {/* Send Button */}
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    className="h-7 w-7 lg:h-9 lg:w-9 p-0 rounded-full bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400 border-none"
+                  >
+                    {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
+                      <Loader2 className="h-3 w-3 lg:h-4 lg:w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-3 w-3 lg:h-4 lg:w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex items-end space-x-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              value={message}
-              onChange={handleTextareaResize}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message here..."
-              className="w-full p-3 pr-12 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
-              style={{ minHeight: '40px', maxHeight: '120px' }}
-              disabled={isTyping}
-            />
-            <div className="absolute right-2 top-2">
-              <VoiceInput onTranscription={setMessage} disabled={isTyping} />
-            </div>
-          </div>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileSelect}
-            className="hidden"
-            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-          />
-          
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isTyping}
-            className="p-3"
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            type="submit"
-            disabled={(!message.trim() && !selectedFile) || isTyping}
-            className="p-3"
-          >
-            {isTyping ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
