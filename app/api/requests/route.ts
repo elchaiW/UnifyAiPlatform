@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { conversationStorage } from '@/lib/conversationStorage';
 import { AIClassifier } from '@/lib/services/aiClassifier';
 import { processWithClaude } from '@/lib/services/claudeService';
 import { processWithChatGPT } from '@/lib/services/openaiService';
 import { processWithGemini } from '@/lib/services/geminiService';
 import { processWithGrok } from '@/lib/services/grokService';
-
-// CLIENT-ONLY MODE: No database integration
-// All data stored in browser localStorage for instant performance
+import { createSupabaseClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
   try {
-    // Better error handling for JSON parsing
+    // Get authenticated user from Supabase
+    const supabase = createSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    
+    // Parse request body
     let body;
     try {
       body = await request.json();
@@ -19,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
     }
     
-    const { content, message } = body;
+    const { content, message, conversationId } = body;
     const messageContent = content || message;
     
     if (!messageContent || typeof messageContent !== 'string' || messageContent.trim().length === 0) {
@@ -28,12 +39,36 @@ export async function POST(request: NextRequest) {
 
     console.log(`📝 Processing request: "${messageContent.substring(0, 50)}..."`);
     
+    // Ensure profile exists
+    await conversationStorage.ensureProfile(userId, session.user);
+    
+    // Get or create conversation
+    let conversation;
+    if (conversationId) {
+      conversation = { id: conversationId };
+    } else {
+      conversation = await conversationStorage.createOrGetConversation(userId);
+    }
+    
     // Fast keyword-based classification for instant routing
     const classifier = new AIClassifier();
     const classification = await classifier.classifyRequest(messageContent);
     console.log(`🤖 Classification result:`, classification);
     
-    const startTime = Date.now();
+    // Create message record
+    const messageData = {
+      conversation_id: conversation.id,
+      user_id: userId,
+      content: messageContent,
+      model: classification.selectedModel,
+      status: 'processing' as const,
+      metadata: {
+        classification: classification,
+      },
+    };
+
+    const dbMessage = await conversationStorage.createMessage(messageData);
+    
     let response: string;
     
     try {
@@ -67,10 +102,31 @@ export async function POST(request: NextRequest) {
         classification.reasoning = `${classification.reasoning} (fallback to ChatGPT due to service error)`;
       }
       
-      const processingTime = Date.now() - startTime;
+      const processingTime = (Date.now() - startTime) / 1000;
+      
+      // Update message with response
+      const updatedMessage = await conversationStorage.updateMessage(dbMessage.id, {
+        response,
+        status: 'completed',
+        processing_time: processingTime,
+      });
+
+      // Track analytics
+      await conversationStorage.trackEvent({
+        user_id: userId,
+        event_type: 'message_processed',
+        model: classification.selectedModel,
+        processing_time: processingTime,
+        metadata: {
+          classification,
+          success: true,
+        },
+      });
       
       // Return the response with classification details
       return NextResponse.json({
+        id: updatedMessage?.id,
+        conversation_id: conversation.id,
         success: true,
         response,
         classification,
