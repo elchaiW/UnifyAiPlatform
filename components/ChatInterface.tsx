@@ -63,6 +63,14 @@ export default function ChatInterface() {
     queryKey: ['/api/requests/history'],
     enabled: true,
     refetchInterval: 5000,
+    retry: (failureCount, error: any) => {
+      // Don't retry on auth errors
+      if (error?.status === 401) {
+        window.location.href = '/auth';
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
   // File reading utility
@@ -94,6 +102,18 @@ export default function ChatInterface() {
 
       console.log('📡 Sending request to /api/requests...');
       const response = await apiRequest('POST', '/api/requests', requestBody);
+      
+      if (response.status === 401) {
+        // Redirect to auth if not authenticated
+        window.location.href = '/auth';
+        throw new Error('Authentication required');
+      }
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Request failed with status ${response.status}`);
+      }
+      
       return await response.json();
     },
     onSuccess: (data) => {
@@ -115,6 +135,11 @@ export default function ChatInterface() {
     onError: (error) => {
       console.error('❌ Error sending message:', error);
       setIsTyping(false);
+      
+      if (error.message === 'Authentication required') {
+        return; // Don't show toast for auth redirect
+      }
+      
       toast({
         title: "Error sending message",
         description: error instanceof Error ? error.message : "An unexpected error occurred",

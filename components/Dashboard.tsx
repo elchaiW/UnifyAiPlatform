@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
+import { useAuth } from './AuthProvider';
 import ChatInterface from "./ChatInterface";
 import Sidebar from "./Sidebar";
 import AnalyticsView from "./AnalyticsView";
@@ -16,9 +18,39 @@ import { MessageSquare, BarChart3, History, Menu, X } from "lucide-react";
 type View = 'chat' | 'analytics' | 'history';
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const [activeView, setActiveView] = useState<View>('chat');
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth');
+    }
+  }, [user, loading, router]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-center">
+          <img 
+            src="/luminadoc-logo.png" 
+            alt="LUMINADOC" 
+            className="h-16 w-auto mx-auto mb-6"
+          />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if not authenticated
+  if (!user) {
+    return null;
+  }
 
   // Handle PWA shortcuts
   usePWAShortcuts(
