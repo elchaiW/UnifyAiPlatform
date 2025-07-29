@@ -1,66 +1,112 @@
-// Authentication utilities for Luminadoc
-import { User } from '@supabase/supabase-js';
+import { createSupabaseClient, Database } from './supabase';
 
-// Define user type for our application
-export interface AppUser {
-  id: number;
-  email: string;
-  supabaseId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type Profile = Database['public']['Tables']['profiles']['Row'];
 
-// Mock user data for development/demo purposes
-const mockUsers: AppUser[] = [
-  {
-    id: 1,
-    email: 'demo@luminadoc.com',
-    supabaseId: 'demo-user-id',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-];
-
-/**
- * Get current user from Supabase user object
- * In a real implementation, this would query the database
- */
-export async function getCurrentUser(supabaseUser: User): Promise<AppUser | null> {
+// Get current user profile
+export async function getCurrentUserProfile(): Promise<Profile | null> {
+  const supabase = createSupabaseClient();
+  
   try {
-    // For now, return the demo user or create a new one based on Supabase user
-    const existingUser = mockUsers.find(u => u.supabaseId === supabaseUser.id);
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    if (existingUser) {
-      return existingUser;
+    if (sessionError || !session?.user) {
+      return null;
     }
 
-    // Create new user if not exists (in real implementation, this would save to database)
-    const newUser: AppUser = {
-      id: mockUsers.length + 1,
-      email: supabaseUser.email || 'unknown@example.com',
-      supabaseId: supabaseUser.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    
-    mockUsers.push(newUser);
-    return newUser;
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      return null;
+    }
+
+    return profile;
   } catch (error) {
-    console.error('Error getting current user:', error);
+    console.error('Error getting current user profile:', error);
     return null;
   }
 }
 
-/**
- * Get user by ID
- */
-export async function getUserById(id: number): Promise<AppUser | null> {
-  return mockUsers.find(u => u.id === id) || null;
+// Create or update user profile
+export async function upsertUserProfile(
+  userId: string,
+  email: string,
+  updates: Partial<Profile> = {}
+): Promise<Profile | null> {
+  const supabase = createSupabaseClient();
+
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email,
+        ...updates,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error upserting profile:', error);
+      return null;
+    }
+
+    return profile;
+  } catch (error) {
+    console.error('Error in upsertUserProfile:', error);
+    return null;
+  }
 }
 
-/**
- * Get demo user (fallback for unauthenticated requests)
- */
-export function getDemoUser(): AppUser {
-  return mockUsers[0];
+// Sign in with email/password
+export async function signInWithEmail(email: string, password: string) {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  return { data, error };
+}
+
+// Sign up with email/password
+export async function signUpWithEmail(
+  email: string, 
+  password: string, 
+  fullName?: string
+) {
+  const supabase = createSupabaseClient();
+  
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+      },
+    },
+  });
+
+  return { data, error };
+}
+
+// Sign out
+export async function signOut() {
+  const supabase = createSupabaseClient();
+  const { error } = await supabase.auth.signOut();
+  return { error };
+}
+
+// Get current session
+export async function getCurrentSession() {
+  const supabase = createSupabaseClient();
+  const { data: { session }, error } = await supabase.auth.getSession();
+  return { session, error };
 }
