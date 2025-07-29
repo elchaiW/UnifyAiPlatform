@@ -15,6 +15,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth')
+    } else if (!loading && user) {
+      // Ensure we're on the dashboard when authenticated
+      if (window.location.pathname === '/auth') {
+        router.push('/dashboard')
+      }
     }
   }, [user, loading, router])
 
