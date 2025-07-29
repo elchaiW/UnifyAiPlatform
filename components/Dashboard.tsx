@@ -24,12 +24,33 @@ export default function Dashboard() {
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Handle PWA shortcuts - moved before conditional returns
+  const handleNewChat = () => {
+    setCurrentConversationId(null);
+    setActiveView('chat');
+  };
+
+  usePWAShortcuts(
+    () => handleNewChat(),
+    () => setActiveView('analytics')
+  );
+
   // Redirect to auth if not authenticated
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth');
     }
   }, [user, loading, router]);
+  
+  // Listen for mobile sidebar toggle from input area
+  useEffect(() => {
+    const handleToggleSidebar = () => {
+      setIsSidebarOpen(prev => !prev);
+    };
+    
+    window.addEventListener('toggleMobileSidebar', handleToggleSidebar);
+    return () => window.removeEventListener('toggleMobileSidebar', handleToggleSidebar);
+  }, []);
 
   // Show loading while checking auth
   if (loading) {
@@ -51,27 +72,6 @@ export default function Dashboard() {
   if (!user) {
     return null;
   }
-
-  // Handle PWA shortcuts
-  usePWAShortcuts(
-    () => handleNewChat(),
-    () => setActiveView('analytics')
-  );
-  
-  // Listen for mobile sidebar toggle from input area
-  useEffect(() => {
-    const handleToggleSidebar = () => {
-      setIsSidebarOpen(prev => !prev);
-    };
-    
-    window.addEventListener('toggleMobileSidebar', handleToggleSidebar);
-    return () => window.removeEventListener('toggleMobileSidebar', handleToggleSidebar);
-  }, []);
-
-  const handleNewChat = () => {
-    setCurrentConversationId(null);
-    setActiveView('chat');
-  };
 
   const handleLoadConversation = (conversationId: number) => {
     setCurrentConversationId(conversationId);

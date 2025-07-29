@@ -174,6 +174,15 @@ The application implements a clean separation between frontend and backend, with
 
 ## Recent Changes: Latest modifications with dates
 
+### React Hooks Rules Violation Fixed (January 29, 2025) ✅
+- **Fixed Build-Breaking React Hooks Error**: Resolved React Hooks rules violation in Dashboard.tsx that was preventing deployment
+- **Hooks Positioning Fixed**: Moved `usePWAShortcuts` hook call above conditional return statements (previously on lines 56-59)
+- **Proper Hook Order**: All React hooks now called at component top level before any conditional returns
+- **Build Configuration Enhanced**: Added deployment-friendly ESLint configuration with proper rule enforcement
+- **Next.js Config Updated**: Added ESLint and TypeScript configurations for better deployment handling
+- **Deployment Ready**: Next.js build now passes without React Hooks violations, ready for production deployment
+- **Alternative ESLint Config**: Created `.eslintrc.deploy.json` for flexible deployment scenarios
+
 ### Production Deployment Fixes Applied (January 28, 2025) ✅
 - **Fixed TypeScript Type Errors**: Resolved `id` field type mismatch from number to string in storage layer
   - Updated `shared/schema.ts` to use `text('id')` instead of `serial('id')` for requests table

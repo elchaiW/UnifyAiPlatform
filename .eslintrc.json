@@ -3,12 +3,18 @@
     "next/core-web-vitals"
   ],
   "rules": {
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error"
   },
   "ignorePatterns": [
     "node_modules/",
     ".next/",
     "out/",
     "build/"
-  ]
+  ],
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  }
 }
