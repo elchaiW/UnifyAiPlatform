@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { conversationStorage } from '@/lib/conversationStorage';
 import { createSupabaseClient } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,23 +30,20 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
+    
     // Get authenticated user from Supabase
-    const authHeader = request.headers.get('authorization');
-    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') || ''
-    );
-
-    // For now, fallback to demo user if no authentication (backwards compatibility)
-    let userId = 1; // Demo user
-    if (supabaseUser && !authError) {
-      const user = await getCurrentUser(supabaseUser);
-      if (user) {
-        userId = user.id;
-      }
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = session.user.id;
+
     // Clear user-specific chat history
-    await dbStorage.deleteAllRequests(userId);
+    await conversationStorage.deleteAllMessages(userId);
     
     return NextResponse.json({ success: true });
   } catch (error) {
