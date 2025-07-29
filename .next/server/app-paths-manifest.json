@@ -1,17 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/analytics/route": "app/api/analytics/route.js",
-  "/api/analytics/stats/route": "app/api/analytics/stats/route.js",
-  "/api/conversations/route": "app/api/conversations/route.js",
-  "/api/requests/[id]/route": "app/api/requests/[id]/route.js",
-  "/api/requests/client-only/route": "app/api/requests/client-only/route.js",
-  "/api/requests/history/clear/route": "app/api/requests/history/clear/route.js",
-  "/api/requests/route": "app/api/requests/route.js",
-  "/api/requests/history/route": "app/api/requests/history/route.js",
-  "/api/sync/cleanup/route": "app/api/sync/cleanup/route.js",
-  "/api/sync/route": "app/api/sync/route.js",
-  "/api/transcribe/route": "app/api/transcribe/route.js",
-  "/auth/page": "app/auth/page.js",
   "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/auth/page": "app/auth/page.js"
 }
