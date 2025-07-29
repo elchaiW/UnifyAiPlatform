@@ -110,3 +110,31 @@ export async function getCurrentSession() {
   const { data: { session }, error } = await supabase.auth.getSession();
   return { session, error };
 }
+
+// Get current user from Supabase auth user object
+export async function getCurrentUser(supabaseUser: any): Promise<{ id: number } | null> {
+  if (!supabaseUser?.id) {
+    return null;
+  }
+
+  // For now, we'll use a simple mapping approach
+  // In production, you'd want to maintain a users table that maps Supabase IDs to numeric IDs
+  // For demo purposes, we'll use a hash-based approach to generate consistent numeric IDs
+  
+  try {
+    // Create a simple hash from the Supabase user ID to get a consistent numeric ID
+    const hash = supabaseUser.id.split('').reduce((a: number, b: string) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a; // Convert to 32-bit integer
+    }, 0);
+    
+    // Ensure positive ID and avoid 0
+    const numericId = Math.abs(hash) || 1;
+    
+    return { id: numericId };
+  } catch (error) {
+    console.error('Error in getCurrentUser:', error);
+    // Fallback to demo user ID
+    return { id: 1 };
+  }
+}
