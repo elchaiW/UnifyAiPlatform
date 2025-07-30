@@ -1,12 +1,57 @@
 {
-  "name": "UnifyAiPlatform Dev",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:18",
-  "features": {},
-  "forwardPorts": [3000, 5173],
-  "postCreateCommand": "npm install --prefix client && npm install --prefix server",
+  "name": "Luminadoc iOS Development",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:1": {
+      "installZsh": true,
+      "username": "vscode",
+      "userUid": "1000",
+      "userGid": "1000"
+    }
+  },
   "customizations": {
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-eslint",
+        "expo.vscode-expo-tools",
+        "ms-vscode.vscode-react-native"
+      ],
+      "settings": {
+        "typescript.preferences.preferTypeOnlyAutoImports": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
     }
-  }
+  },
+  "postCreateCommand": "bash -c 'npm install -g @expo/cli @react-native-community/cli eas-cli && echo \"Development environment ready!\"'",
+  "forwardPorts": [8081, 19000, 19001, 19002, 19006],
+  "portsAttributes": {
+    "8081": {
+      "label": "React Native Metro",
+      "onAutoForward": "notify"
+    },
+    "19000": {
+      "label": "Expo Dev Server",
+      "onAutoForward": "notify"
+    },
+    "19001": {
+      "label": "Expo Dev Server (Lan)",
+      "onAutoForward": "ignore"
+    },
+    "19002": {
+      "label": "Expo Dev Server (Tunnel)",
+      "onAutoForward": "ignore"
+    },
+    "19006": {
+      "label": "Expo Web Server",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteUser": "vscode"
 }
