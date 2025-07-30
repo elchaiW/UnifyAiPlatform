@@ -24,18 +24,22 @@ import TypingAnimation from './TypingAnimation';
 import { VoiceInput } from './VoiceInput';
 
 interface Message {
-  id: string;
-  conversation_id: string;
-  user_id: string;
+  id: number;
+  userId: number;
+  type: string;
+  prompt: string;
   content: string;
-  response: string | null;
-  model: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  processing_time: number | null;
-  token_usage: any;
-  metadata: any;
-  created_at: string;
-  updated_at: string;
+  fileName?: string;
+  category: string;
+  selectedModel: string;
+  status: string;
+  confidence: number;
+  reasoning?: string;
+  response?: string;
+  processingTime?: number;
+  createdAt: string;
+  completedAt?: string;
+  updatedAt: string;
 }
 
 const getModelImage = (model: string) => {
@@ -58,151 +62,239 @@ export default function ChatInterface() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch messages from Supabase
+  // Fetch messages from client storage
   const { data: messages = [], isLoading, error, refetch } = useQuery<Message[]>({
-    queryKey: ['/api/requests/history'],
-    enabled: true,
-    refetchInterval: 5000,
-    retry: (failureCount, error: any) => {
-      // Don't retry on auth errors
-      if (error?.status === 401) {
-        window.location.href = '/auth';
-        return false;
-      }
-      return failureCount < 3;
+    queryKey: ["client-messages"],
+    queryFn: async () => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.getMessages();
     },
+    refetchInterval: 500, // Fast refresh for real-time updates
+    staleTime: 0,
+    gcTime: 0,
   });
 
-  // File reading utility
-  const readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = reject;
-      reader.readAsText(file);
+  // Debug: Log messages to console and check localStorage directly
+  useEffect(() => {
+    console.log('ChatInterface - Messages updated:', messages);
+    console.log('ChatInterface - Message count:', messages.length);
+    console.log('ChatInterface - Latest message:', messages[messages.length - 1]);
+    if (error) console.error('Query error:', error);
+    
+    // Direct localStorage check
+    const storedMessages = localStorage.getItem('luminadoc_messages');
+    console.log('Direct localStorage check:', storedMessages ? JSON.parse(storedMessages).length : 0, 'messages');
+    
+    // Log specific details about message responses
+    messages.forEach((msg, index) => {
+      console.log(`Message ${index + 1}: Status=${msg.status}, HasResponse=${!!msg.response}, ResponseLength=${msg.response?.length || 0}`);
     });
-  };
+    
+    // Force a direct test
+    if (messages.length === 0) {
+      console.log('🔍 No messages found, checking localStorage directly...');
+      const directCheck = localStorage.getItem('luminadoc_messages');
+      if (directCheck) {
+        console.log('📦 Raw localStorage data:', directCheck);
+        try {
+          const parsed = JSON.parse(directCheck);
+          console.log('📋 Parsed messages:', parsed.length, 'items');
+        } catch (e) {
+          console.error('❌ Failed to parse localStorage:', e);
+        }
+      } else {
+        console.log('🆕 No localStorage data found - this is a fresh start');
+      }
+    }
+  }, [messages, error]);
 
-  const sendMessage = useMutation({
-    mutationKey: ['send-message'],
-    mutationFn: async ({ message, file }: { message: string; file?: File }) => {
-      console.log('🚀 Starting message send process...');
-      
-      let requestBody: any = { message };
-      
-      if (file) {
-        const fileContent = await readFileContent(file);
-        requestBody.file = {
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          content: fileContent
-        };
-      }
 
-      console.log('📡 Sending request to /api/requests...');
-      const response = await apiRequest('POST', '/api/requests', requestBody);
+
+  // Send message mutation using API endpoint
+  const sendMessageMutation = useMutation({
+    mutationFn: async (content: string) => {
+      setIsTyping(true);
       
-      if (response.status === 401) {
-        // Redirect to auth if not authenticated
-        window.location.href = '/auth';
-        throw new Error('Authentication required');
+      // Import client storage for immediate UI update
+      const { clientStorage } = await import('@/lib/clientStorage');
+      
+      // Add message to local storage immediately for instant display
+      const message = clientStorage.addMessage({
+        userId: 1,
+        type: 'prompt',
+        prompt: content,
+        content: content,
+        category: 'general',
+        selectedModel: 'AI', // Will be updated after classification
+        status: 'processing',
+        confidence: 0,
+        reasoning: '',
+      });
+      
+      console.log('📝 User message added to storage:', message);
+      console.log('📊 Total messages in storage after add:', clientStorage.getMessages().length);
+      
+      try {
+        // Call API endpoint for processing
+        const response = await fetch('/api/requests', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content, message: content }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to process message');
+        }
+        
+        // Update message in local storage with response
+        const updatedMessage = clientStorage.updateMessage(message.id, {
+          status: 'completed',
+          response: result.response,
+          selectedModel: result.classification.selectedModel,
+          confidence: result.classification.confidence,
+          reasoning: result.classification.reasoning,
+          processingTime: result.processingTime,
+          completedAt: new Date().toISOString(),
+        });
+
+        // Update analytics in client storage
+        clientStorage.updateAnalytics(
+          result.classification.selectedModel,
+          result.processingTime || 0,
+          true
+        );
+        
+        console.log('✅ Message updated successfully:', {
+          id: updatedMessage?.id,
+          response: updatedMessage?.response?.substring(0, 100) + '...',
+          status: updatedMessage?.status
+        });
+        console.log('📝 Current messages in storage:', clientStorage.getMessages().length);
+        console.log('📄 All messages:', clientStorage.getMessages().map(m => ({
+          id: m.id, 
+          status: m.status, 
+          responseLength: m.response?.length || 0,
+          response: m.response?.substring(0, 50) + '...'
+        })));
+        
+        return result;
+      } catch (error) {
+        // Update message with error status
+        const errorMessage = clientStorage.updateMessage(message.id, {
+          status: 'failed',
+          response: `Error: ${error instanceof Error ? error.message : 'AI service temporarily unavailable'}`,
+          processingTime: 0,
+          completedAt: new Date().toISOString(),
+        });
+        
+        // Track failed request in analytics
+        clientStorage.updateAnalytics('error', 0, false);
+        
+        console.log('❌ Error message updated:', errorMessage);
+        
+        throw error;
       }
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Request failed with status ${response.status}`);
-      }
-      
-      return await response.json();
     },
     onSuccess: (data) => {
-      console.log('✅ Message processed successfully:', data);
-      
-      // Clear form and refresh
-      setMessage("");
-      setSelectedFile(null);
+      console.log('Message sent successfully:', data);
       setIsTyping(false);
-      
-      // Invalidate and refetch messages
-      queryClient.invalidateQueries({ queryKey: ['/api/requests/history'] });
-      
-      toast({
-        title: "Message sent successfully",
-        description: `Processed by ${data.model} in ${data.processing_time?.toFixed(1) || 0}s`,
-      });
+      // Force refresh client storage queries
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
+      // Also force refetch to ensure immediate UI update
+      refetch();
     },
     onError: (error) => {
-      console.error('❌ Error sending message:', error);
       setIsTyping(false);
-      
-      if (error.message === 'Authentication required') {
-        return; // Don't show toast for auth redirect
-      }
-      
       toast({
-        title: "Error sending message",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        title: "Error",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const deleteMessage = useMutation({
-    mutationFn: async (messageId: string) => {
-      const response = await apiRequest('DELETE', `/api/requests/${messageId}`);
-      return await response.json();
+  // Upload file mutation - disabled for client storage mode
+  const uploadFileMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      throw new Error("File upload temporarily disabled - using client storage mode");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/requests/history'] });
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
+    },
+    onError: (error) => {
       toast({
-        title: "Message deleted",
-        description: "The message has been removed from your history.",
+        title: "Info",
+        description: "File upload is temporarily disabled for better performance",
+      });
+    },
+  });
+
+  // Delete message mutation
+  const deleteRequestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { clientStorage } = await import('@/lib/clientStorage');
+      return clientStorage.deleteMessage(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
+      toast({
+        title: "Success",
+        description: "Message deleted successfully.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error deleting message",
-        description: error instanceof Error ? error.message : "Failed to delete message",
+        title: "Error",
+        description: "Failed to delete message. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const clearAllHistory = useMutation({
+  // Clear all history mutation
+  const clearAllMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('DELETE', '/api/requests/history/clear');
-      return await response.json();
+      const { clientStorage } = await import('@/lib/clientStorage');
+      clientStorage.clearAll();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/requests/history'] });
+      queryClient.invalidateQueries({ queryKey: ["client-messages"] });
       toast({
-        title: "History cleared",
-        description: "All messages have been deleted.",
+        title: "Success",
+        description: "All chat history cleared successfully.",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error clearing history",
-        description: error instanceof Error ? error.message : "Failed to clear history",
+        title: "Error",
+        description: "Failed to clear history. Please try again.",
         variant: "destructive",
       });
     },
   });
-
-  const handleSendMessage = async () => {
-    if (!message.trim() && !selectedFile) return;
-
-    setIsTyping(true);
-    sendMessage.mutate({
-      message: message.trim(),
-      file: selectedFile || undefined,
-    });
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSendMessage();
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      uploadFileMutation.mutate(formData);
+      setSelectedFile(null); // Clear immediately
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } else if (message.trim()) {
+      const messageToSend = message;
+      setMessage(""); // Clear immediately
+      if (textareaRef.current) textareaRef.current.style.height = '40px';
+      sendMessageMutation.mutate(messageToSend);
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,40 +325,30 @@ export default function ChatInterface() {
   const downloadResponse = (msg: Message) => {
     if (!msg.response) return;
     
-    const content = `AI Response from ${msg.model}
-Generated: ${new Date(msg.created_at).toLocaleString()}
+    const content = `AI Response from ${msg.selectedModel}
+Generated: ${new Date(msg.createdAt).toLocaleString()}
 
-Request: ${msg.content}
-${msg.metadata?.fileName ? `File: ${msg.metadata.fileName}` : ''}
+Request: ${msg.prompt}
+${msg.fileName ? `File: ${msg.fileName}` : ''}
 
 Response:
 ${msg.response}
 
 Classification Details:
-- Model: ${msg.model}
-- Processing Time: ${msg.processing_time?.toFixed(2)}s
+- Model: ${msg.selectedModel}
+- Confidence: ${Math.round(msg.confidence)}%
+- Reasoning: ${msg.reasoning}
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${msg.model}_response_${msg.id}.txt`;
+    a.download = `${msg.selectedModel}_response_${msg.id}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const handleVoiceTranscription = (transcription: string) => {
-    setMessage(transcription);
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-      // Auto-resize textarea
-      textareaRef.current.style.height = '40px';
-      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 120);
-      textareaRef.current.style.height = scrollHeight + 'px';
-    }
   };
 
   // Auto-scroll to bottom
@@ -276,10 +358,22 @@ Classification Details:
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-[#2A2A2A] relative">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto pt-4 pb-32 lg:pb-24 lg:pt-8">
+      {/* ChatGPT-style Messages Area with Fixed Bottom Space */}
+      <div className="flex-1 overflow-y-auto pt-4 pb-32 lg:pb-24 lg:pt-8 mobile-messages-top">
         <div className="max-w-3xl mx-auto">
-          {/* Welcome Message */}
+          {/* Debug Info - Temporary */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="px-6 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-xs">
+                <p>Debug: Messages loaded: {messages.length}</p>
+                <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+                <p>Error: {error ? 'Yes' : 'No'}</p>
+                <p>Last update: {new Date().toLocaleTimeString()}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Welcome Message - ChatGPT style */}
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
               <h2 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white mb-2 lg:mb-3 text-center">
@@ -288,195 +382,359 @@ Classification Details:
               <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-8 lg:mb-12 text-center max-w-lg">
                 Your intelligent AI assistant that automatically routes to the best model
               </p>
+              
+              {/* Perplexity-style suggestion cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-full max-w-4xl mb-6 lg:mb-8">
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/claude_1753267938951.webp" 
+                        alt="Claude" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Claude</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Legal & Analysis</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/Chatgpt_1753267928029.webp" 
+                        alt="ChatGPT" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">ChatGPT</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">General & Creative</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/gemini_1753267772227.png" 
+                        alt="Gemini" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Gemini</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Marketing & Business</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-[#1E1E1E] rounded-lg p-3 lg:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+                  <div className="flex flex-col items-center text-center space-y-1 lg:space-y-2">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      <img 
+                        src="/attached_assets/grok_1753267912240.png" 
+                        alt="Grok" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-xs lg:text-sm">Grok</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Code & Technical</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Messages */}
-          <div className="px-4 lg:px-6 space-y-6">
-            {messages.map((message) => (
-              <div key={message.id} className="group/message mb-6">
-                <div className="flex items-start gap-3">
-                  {/* User icon and message */}
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">You</p>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-                      </span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {message.content}
-                      {message.metadata?.fileName && (
-                        <div className="mt-2 flex items-center gap-2 text-xs">
-                          <FileText className="w-3 h-3" />
-                          <span>{message.metadata.fileName}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* AI Response */}
-                {message.response && (
-                  <div className="mt-4 flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                      {getModelImage(message.model) ? (
-                        <img 
-                          src={getModelImage(message.model)!} 
-                          alt={message.model}
-                          className="w-6 h-6 object-contain"
-                        />
-                      ) : (
-                        <Bot className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {message.model.toUpperCase()}
-                        </Badge>
-                        {message.processing_time && (
-                          <span className="text-xs text-muted-foreground">
-                            {message.processing_time.toFixed(1)}s
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm prose dark:prose-invert max-w-none">
-                        <div className="whitespace-pre-wrap">{message.response}</div>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2 opacity-0 group-hover/message:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => downloadResponse(message)}
-                          className="h-7 px-2 text-xs"
-                        >
-                          <Download className="w-3 h-3 mr-1" />
-                          Download
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteMessage.mutate(message.id)}
-                          className="h-7 px-2 text-xs text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-3 h-3 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Typing Animation */}
-            {isTyping && (
-              <div className="flex items-start gap-3 mb-6">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                  <Bot className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </div>
-                <div className="flex-1">
-                  <TypingAnimation />
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-      </div>
-
-      {/* Fixed Input Area at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-[#2A2A2A] border-t border-gray-200 dark:border-gray-700">
-        <div className="max-w-3xl mx-auto p-4 lg:p-6">
-          {/* File Preview */}
-          {selectedFile && (
-            <div className="mb-3 flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm text-blue-800 dark:text-blue-200 flex-1 truncate">
-                {selectedFile.name}
-              </span>
+          {/* Clear All History Button - Show when there are messages */}
+          {messages.length > 0 && (
+            <div className="flex justify-end mb-4 px-6">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={() => setSelectedFile(null)}
-                className="h-6 w-6 p-0"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete all chat history?")) {
+                    clearAllMutation.mutate();
+                  }
+                }}
+                className="flex items-center space-x-1 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-400/30"
+                disabled={clearAllMutation.isPending}
               >
-                <X className="w-3 h-3" />
+                <Trash2 className="h-4 w-4" />
+                <span>Clear All</span>
+                {clearAllMutation.isPending && <Loader2 className="h-3 w-3 animate-spin ml-1" />}
               </Button>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Input Area */}
-            <div className="flex items-end gap-2">
-              <div className="flex-1 relative">
-                <textarea
-                  ref={textareaRef}
-                  value={message}
-                  onChange={handleInputChange}
-                  placeholder="Fai una domanda..."
-                  className="w-full px-4 py-3 pr-20 bg-gray-100 dark:bg-gray-800 border-0 rounded-2xl resize-none text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  style={{ minHeight: '48px', maxHeight: '120px', fontSize: '16px' }}
-                  rows={1}
-                  disabled={sendMessage.isPending}
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <VoiceInput onTranscription={handleVoiceTranscription} />
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={(!message.trim() && !selectedFile) || sendMessage.isPending}
-                    className="h-8 w-8 p-0 rounded-full"
-                  >
-                    {sendMessage.isPending ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+          {/* Perplexity-style Messages */}
+          <div className="px-6 space-y-8 pb-6 pt-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className="space-y-4">
+                {/* User Message - ChatGPT style */}
+                <div className="flex justify-end">
+                  <div className="max-w-[80%]">
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-3">
+                      {msg.fileName && (
+                        <div className="flex items-center space-x-2 mb-2 text-gray-600 dark:text-gray-400">
+                          <FileText className="h-4 w-4" />
+                          <span className="text-sm">{msg.fileName}</span>
+                        </div>
+                      )}
+                      <p className="text-gray-900 dark:text-white text-sm lg:text-base">{msg.prompt}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Response - with custom model images */}
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                    {getModelImage(msg.selectedModel || '') ? (
+                      <img 
+                        src={getModelImage(msg.selectedModel || '') || ''} 
+                        alt={msg.selectedModel || 'AI Model'} 
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
-                      <Send className="w-4 h-4" />
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <img 
+                          src="/attached_assets/Vector_1753691011402.png" 
+                          alt="AI Logo" 
+                          className="w-5 h-5 object-contain filter brightness-0 invert"
+                        />
+                      </div>
                     )}
-                  </Button>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {/* Enhanced Classification Info - Only show when completed */}
+                    {msg.status === 'completed' && msg.confidence > 0 && msg.reasoning && (
+                      <div className="mb-3 p-3 bg-gray-50 dark:bg-[#1E1E1E] rounded-lg border">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            {msg.selectedModel}
+                          </Badge>
+                          <Badge variant="outline">
+                            {Math.round(msg.confidence)}% confidence
+                          </Badge>
+                        </div>
+                        
+                        <details className="text-xs text-gray-600 dark:text-gray-400">
+                          <summary className="cursor-pointer hover:text-gray-900 dark:hover:text-white">
+                            Analysis reasoning
+                          </summary>
+                          <p className="mt-2 text-xs">{msg.reasoning}</p>
+                        </details>
+                      </div>
+                    )}
+
+                    {/* AI Response Content */}
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      {msg.status === 'processing' ? (
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center space-x-3">
+                            {/* Beautiful animated gradient orb */}
+                            <div className="relative">
+                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full animate-pulse"></div>
+                              <div className="absolute inset-0 w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-ping opacity-75"></div>
+                            </div>
+                            
+                            {/* Processing text with typing effect */}
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                  {msg.selectedModel || 'AI'} is analyzing your request
+                                </span>
+                                <div className="flex space-x-1">
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                </div>
+                              </div>
+                              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                This may take a few seconds...
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : msg.status === 'failed' ? (
+                        <p className="text-red-600 dark:text-red-400 text-sm lg:text-base">
+                          {msg.response || 'Failed to process request'}
+                        </p>
+                      ) : (
+                        <p className="text-gray-900 dark:text-white text-sm lg:text-base whitespace-pre-wrap">
+                          {msg.response || 'No response available'}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Response Actions */}
+                    <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 flex-1">
+                        {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
+                      </p>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => downloadResponse(msg)}
+                        className="h-8 px-2"
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to delete this message?")) {
+                            deleteRequestMutation.mutate(msg.id);
+                          }
+                        }}
+                        className="h-8 px-2 text-red-600 hover:text-red-700"
+                        disabled={deleteRequestMutation.isPending}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-4">
+
+
+          {/* Scroll anchor for auto-scroll */}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Modern AI Chat Input Area - Dark Theme - Fixed Position */}
+      <div className="fixed bottom-4 left-0 right-0 lg:left-80 bg-[#2A2A2A] px-4 py-4 safe-area-pb z-20 chat-input-fixed">
+        <div className="max-w-4xl mx-auto">
+          {selectedFile && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between bg-[#1E1E1E] rounded-lg p-3 border border-gray-700">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm text-gray-300">{selectedFile.name}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedFile(null)}
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="relative bg-[#1E1E1E] rounded-3xl border border-gray-700 shadow-lg hover:border-gray-600 transition-all duration-200">
+              <div className="flex items-center px-3 lg:px-4 py-2 lg:py-4 min-h-[40px] lg:min-h-[56px]">
+                {/* Mobile Hamburger Menu Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const event = new CustomEvent('toggleMobileSidebar');
+                    window.dispatchEvent(event);
+                  }}
+                  className="lg:hidden h-7 w-7 p-0 mr-2 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none"
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </Button>
+                
+                {/* File Upload Button - Desktop Only - Centered Plus */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-7 px-2 text-xs"
+                  className="hidden lg:flex h-9 w-9 p-0 mr-3 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-none items-center justify-center"
+                  disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                 >
-                  <Paperclip className="w-3 h-3 mr-1" />
-                  Attach
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
                 </Button>
+
                 <input
-                  ref={fileInputRef}
                   type="file"
+                  ref={fileInputRef}
                   onChange={handleFileSelect}
-                  accept=".txt,.md,.doc,.docx,.pdf"
+                  accept=".txt,.docx,.pdf"
                   className="hidden"
                 />
-              </div>
-              <div className="flex items-center gap-2">
-                <span>{messages.length} messages</span>
-                {messages.length > 0 && (
+
+                {/* Text Input */}
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={handleInputChange}
+                    placeholder="Ask a question or share a document"
+                    className="w-full resize-none bg-transparent text-gray-100 placeholder-gray-400 border-none outline-none focus:ring-0 text-sm lg:text-base leading-relaxed min-h-[24px] lg:min-h-[28px] max-h-32 py-2 lg:py-3"
+                    style={{ fontSize: '16px' }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
+                    rows={1}
+                  />
+                </div>
+
+                {/* Right Side Controls */}
+                <div className="flex items-center space-x-1 lg:space-x-2 ml-2 lg:ml-3">
+                  {/* Voice Input Component */}
+                  <VoiceInput 
+                    onTranscription={(text) => {
+                      setMessage(text);
+                      setTimeout(() => textareaRef.current?.focus(), 100);
+                    }}
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
+                  />
+
+                  {/* File Upload Button - Mobile Only */}
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => clearAllHistory.mutate()}
-                    className="h-7 px-2 text-xs text-red-600 hover:text-red-700"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="lg:hidden h-7 w-7 p-0 rounded-full text-gray-400 hover:text-white hover:bg-gray-700"
+                    disabled={sendMessageMutation.isPending || uploadFileMutation.isPending}
                   >
-                    Clear All
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
                   </Button>
-                )}
+
+                  {/* Send Button */}
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={(!message.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
+                    className="h-7 w-7 lg:h-9 lg:w-9 p-0 rounded-full bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-600 disabled:text-gray-400 border-none"
+                  >
+                    {(sendMessageMutation.isPending || uploadFileMutation.isPending) ? (
+                      <Loader2 className="h-3 w-3 lg:h-4 lg:w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-3 w-3 lg:h-4 lg:w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </form>

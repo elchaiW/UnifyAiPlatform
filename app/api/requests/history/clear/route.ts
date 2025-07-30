@@ -1,19 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { conversationStorage } from '@/lib/conversationStorage';
-import { createSupabaseClient } from '@/lib/supabase';
+import { dbStorage } from '@/lib/database';
+import { getCurrentUser } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Get authenticated user from Supabase
+    const authHeader = request.headers.get('authorization');
+    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
+      authHeader?.replace('Bearer ', '') || ''
+    );
+
+    // For now, fallback to demo user if no authentication (backwards compatibility)
+    let userId = 1; // Demo user
+    if (supabaseUser && !authError) {
+      const user = await getCurrentUser(supabaseUser);
+      if (user) {
+        userId = user.id;
+      }
     }
 
-    const userId = session.user.id;
-
-    const success = await conversationStorage.deleteAllMessages(userId);
+    const success = await dbStorage.deleteAllRequests(userId);
     return NextResponse.json({ success });
   } catch (error) {
     console.error('Error clearing all history:', error);
