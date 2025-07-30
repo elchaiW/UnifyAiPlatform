@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { conversationStorage } from '@/lib/conversationStorage';
-import { createSupabaseClient } from '@/lib/supabase';
+import { storage } from '@/lib/storage';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
-    const stats = await conversationStorage.getAnalyticsStats(userId);
+    const stats = await storage.getAnalyticsStats();
     
     return NextResponse.json({
       totalRequests: stats.totalRequests,

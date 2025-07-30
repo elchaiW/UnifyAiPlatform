@@ -62,19 +62,6 @@ const nextConfig = withPWA({
   },
   output: 'standalone', // Required for Docker deployment
   
-  // ESLint configuration for deployment
-  eslint: {
-    // This allows production builds to successfully complete even if ESLint errors exist
-    ignoreDuringBuilds: false,
-    dirs: ['app', 'components', 'lib', 'hooks']
-  },
-  
-  // TypeScript configuration for deployment
-  typescript: {
-    // Dangerously allow production builds to successfully complete even if type errors exist
-    ignoreBuildErrors: false,
-  },
-  
   // External packages configuration
   serverExternalPackages: ['fs'],
 

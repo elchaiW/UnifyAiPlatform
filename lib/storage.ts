@@ -167,4 +167,5 @@ export async function initializeDemoUser() {
   demoUserInitialized = true;
 }
 
-// Note: Demo user initialization removed - using Supabase authentication instead
+// Auto-initialize on import
+initializeDemoUser();

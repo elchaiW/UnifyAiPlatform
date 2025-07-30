@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { conversationStorage } from '@/lib/conversationStorage';
-import { createSupabaseClient } from '@/lib/supabase';
+import { dbStorage } from '@/lib/database';
+import { getCurrentUser } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function DELETE(
   request: NextRequest,
@@ -8,21 +14,30 @@ export async function DELETE(
 ) {
   try {
     const resolvedParams = await params;
-    const messageId = resolvedParams.id;
-
-    const supabase = createSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const id = parseInt(resolvedParams.id, 10);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: 'Invalid request ID' }, { status: 400 });
     }
 
-    const userId = session.user.id;
+    // Get authenticated user from Supabase
+    const authHeader = request.headers.get('authorization');
+    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser(
+      authHeader?.replace('Bearer ', '') || ''
+    );
 
-    const success = await conversationStorage.deleteMessage(messageId, userId);
+    // For now, fallback to demo user if no authentication (backwards compatibility)
+    let userId = 1; // Demo user
+    if (supabaseUser && !authError) {
+      const user = await getCurrentUser(supabaseUser);
+      if (user) {
+        userId = user.id;
+      }
+    }
+
+    const success = await dbStorage.deleteRequest(id.toString(), userId);
     return NextResponse.json({ success });
   } catch (error) {
-    console.error('Error deleting message:', error);
-    return NextResponse.json({ error: 'Failed to delete message' }, { status: 500 });
+    console.error('Error deleting request:', error);
+    return NextResponse.json({ error: 'Failed to delete request' }, { status: 500 });
   }
 }
